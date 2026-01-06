@@ -12,12 +12,12 @@ window.addEventListener('load', () => {
     }
     
     // Inisialisasi Data
-    updateLanguageUI();
-    updateWALinks();
+    if(typeof updateLanguageUI === 'function') updateLanguageUI();
+    if(typeof updateWALinks === 'function') updateWALinks();
     
     // Set tombol bahasa aktif
     const toggleBtn = document.getElementById('langToggle');
-    if(toggleBtn) toggleBtn.setAttribute('data-lang', siteData.currentLang);
+    if(toggleBtn && typeof siteData !== 'undefined') toggleBtn.setAttribute('data-lang', siteData.currentLang);
 
     // Highlight menu aktif
     const currentPath = window.location.pathname.split("/").pop() || 'index.html';
@@ -68,6 +68,7 @@ window.toggleLanguage = function() {
 }
 
 function updateLanguageUI() {
+    if(typeof siteData === 'undefined') return;
     const lang = siteData.currentLang;
     const t = siteData.translations[lang];
     document.querySelectorAll('[data-i18n]').forEach(el => {
@@ -120,7 +121,6 @@ if(menuBtn) {
         
         const logoImg = document.getElementById('headerLogoImg');
         if (logoImg) {
-            // Ganti logo jadi putih/hitam jika perlu, atau tetap sama
             logoImg.style.opacity = navOverlay.classList.contains('open') ? '0.5' : '1';
         }
     });
@@ -183,16 +183,13 @@ window.renderPortfolio = function(cat) {
     if(!grid) return;
     grid.innerHTML = '';
     
-    // Update active filter button
     document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-    // (Logic simple untuk highlight button, bisa dikembangkan lagi)
     
     const items = cat === 'all' ? siteData.portfolio : siteData.portfolio.filter(i => i.category === cat);
     items.forEach(item => {
         const div = document.createElement('div');
         div.className = 'portfolio-item hover-target';
         
-        // Logika Gambar: Gunakan demoUrl jika useLocalImages false
         let imgSrc = appConfig.useLocalImages ? ('img/' + item.fileName) : item.demoUrl;
         
         div.onclick = () => openCaseStudy(item, imgSrc);
@@ -215,7 +212,6 @@ function openCaseStudy(item, imgSrc) {
     const modal = document.getElementById('lightboxModal');
     if(!modal) return;
     
-    // Default data jika case study tidak ada
     const cs = item.caseStudy || { client: "-", problem: "Information not available.", solution: "-", result: "-" };
     
     const contentHtml = `
@@ -286,12 +282,63 @@ window.submitReview = function() {
     document.getElementById('reviewFormContainer').style.display = 'none';
 }
 
-// 9. ORDER & PAYMENT LOGIC (UPDATED WITH GOOGLE FORM)
+// 9. ORDER & PAYMENT LOGIC (UPDATED WITH PDF FEATURE)
 function initOrderPage() {
     const urlParams = new URLSearchParams(window.location.search);
     document.getElementById('orderService').value = urlParams.get('service') || '-';
     document.getElementById('orderPackage').value = urlParams.get('package') || '-';
     document.getElementById('orderPrice').value = urlParams.get('price') || 'TBD';
+}
+
+// FUNGSI BARU: GENERATE PDF
+function generateInvoicePDF(data) {
+    if (!window.jspdf) {
+        console.error("jsPDF library not loaded");
+        return;
+    }
+    
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    
+    // Header
+    doc.setFontSize(22);
+    doc.setFont("helvetica", "bold");
+    doc.text("INVOICE", 105, 20, null, null, "center");
+    
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "normal");
+    doc.text("USAHADULU STUDIO", 105, 28, null, null, "center");
+    doc.text("Professional Visual Solutions", 105, 34, null, null, "center");
+    
+    // Line
+    doc.setLineWidth(0.5);
+    doc.line(20, 40, 190, 40);
+    
+    // Client Details
+    doc.setFontSize(10);
+    doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, 50);
+    doc.text(`Client Name: ${data.name}`, 20, 60);
+    doc.text(`WhatsApp: ${data.phone}`, 20, 66);
+    doc.text(`Email: ${data.email || '-'}`, 20, 72);
+    
+    // Order Details
+    doc.setFont("helvetica", "bold");
+    doc.text("ORDER DETAILS:", 20, 85);
+    
+    doc.setFont("helvetica", "normal");
+    doc.text(`Service: ${data.service}`, 20, 95);
+    doc.text(`Package: ${data.pkg}`, 20, 101);
+    
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.text(`TOTAL PRICE: ${data.price}`, 190, 120, null, null, "right");
+    
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "italic");
+    doc.text("Note: Please proceed to payment via the website to start your project.", 20, 130);
+    
+    // Save PDF
+    doc.save(`Invoice_${data.name.replace(/\s+/g, '_')}.pdf`);
 }
 
 window.submitOrder = function() {
@@ -306,16 +353,21 @@ window.submitOrder = function() {
     if(!name || !phone) { alert("Harap lengkapi Nama dan No WA!"); return; }
 
     const submitBtn = document.querySelector('.submit-order-btn');
-    submitBtn.innerText = "Processing...";
+    submitBtn.innerText = "Generating Invoice...";
     submitBtn.style.opacity = "0.7";
     submitBtn.disabled = true;
 
-    // --- GOOGLE FORM SUBMISSION LOGIC ---
+    // Data Object
+    const orderData = { name, phone, email, service, pkg, price, brief };
+
+    // 1. GENERATE PDF (Fitur yang diminta tetap ada)
+    generateInvoicePDF(orderData);
+
+    // 2. GOOGLE FORM SUBMISSION LOGIC
     if(appConfig.googleForm && appConfig.googleForm.actionUrl.includes("docs.google.com")) {
         const gForm = appConfig.googleForm;
         const formData = new FormData();
         
-        // Mapping Data ke Entry ID Google Form
         if(gForm.inputs.name) formData.append(gForm.inputs.name, name);
         if(gForm.inputs.phone) formData.append(gForm.inputs.phone, phone);
         if(gForm.inputs.email) formData.append(gForm.inputs.email, email);
@@ -324,7 +376,6 @@ window.submitOrder = function() {
         if(gForm.inputs.price) formData.append(gForm.inputs.price, price);
         if(gForm.inputs.brief) formData.append(gForm.inputs.brief, brief);
 
-        // Kirim menggunakan Fetch dengan mode no-cors
         fetch(gForm.actionUrl, {
             method: 'POST',
             mode: 'no-cors',
@@ -333,19 +384,17 @@ window.submitOrder = function() {
             console.log("Data sent to Google Form successfully.");
         }).catch(err => {
             console.error("Failed sending to Google Form:", err);
-            // Lanjut saja meski gagal (mungkin masalah koneksi), user tidak perlu tahu
         });
     }
 
-    // --- PROCEED TO LOCAL PROCESS ---
-    const orderData = { name, phone, service, pkg, price };
+    // 3. PROCEED TO LOCAL PROCESS
     localStorage.setItem('currentOrder', JSON.stringify(orderData));
 
-    // Delay sedikit agar request fetch sempat terkirim sebelum redirect
+    // Delay untuk memastikan download PDF mulai sebelum redirect
     setTimeout(() => {
-        alert("Invoice Created! Redirecting to Payment...");
+        alert("Invoice Downloaded! Redirecting to Payment...");
         window.location.href = "payment.html";
-    }, 1000);
+    }, 2000);
 };
 
 function renderOrderSummary() {
@@ -386,7 +435,7 @@ window.openXenditDemo = function(price) {
                 <span class="x-label">QR CODE</span>
                 <div class="x-option hover-target" onclick="alert('Redirecting to QRIS...')">
                     <div class="x-icon">QRIS</div>
-                    <div class="x-name">QRIS (GoPay, OVO, Dana)</div>
+                    <div class="x-name">QRIS Indonesia (GoPay, OVO, Dana, ShopeePay)</div>
                 </div>
                 
                 <span class="x-label">E-WALLET / GLOBAL</span>

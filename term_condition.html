@@ -62,11 +62,8 @@
         <ul class="menu-list">
             <li class="menu-item"><a href="services.html" class="menu-title hover-target" data-i18n="nav_services">SERVICES</a></li>
             <li class="menu-item"><a href="portfolio.html" class="menu-title hover-target" data-i18n="nav_portfolio">PORTFOLIO</a></li>
-            <li class="menu-item"><a href="payment.html" class="menu-title hover-target" data-i18n="nav_payment">PAYMENT METHODS</a></li>
-            <li class="menu-item"><a href="testimonial.html" class="menu-title hover-target" data-i18n="nav_testimonials">TESTIMONIALS</a></li>
-            <li class="menu-item"><a href="faq.html" class="menu-title hover-target" data-i18n="nav_faq">FAQ / Q&A</a></li>
-            <li class="menu-item"><a href="term_condition.html" class="menu-title hover-target" data-i18n="nav_terms">TERMS & CONDITIONS</a></li>
-            <li class="menu-item"><a href="https://arie96s.github.io/magosstreetwear" target="_blank" class="menu-title hover-target magos-horror">MAGOS STREETWEAR</a></li>
+            <li class="menu-item"><a href="testimonial.html" class="menu-title hover-target" data-i18n="nav_testimonials">CLIENTS & REVIEWS</a></li>
+            <li class="menu-item"><a href="https://arie96s.github.io/magosstreetwear" class="menu-title hover-target" data-i18n="nav_collection">OUR COLLECTION</a></li>
             <li class="menu-item"><a href="about.html" class="menu-title hover-target" data-i18n="nav_about">ABOUT US</a></li>
         </ul>
     </div>
@@ -141,13 +138,12 @@
         const slides = document.querySelectorAll('.hero-slide');
         let currentSlide = 0;
         setInterval(() => {
-            slides[currentSlide].classList.remove('active');
-            currentSlide = (currentSlide + 1) % slides.length;
-            slides[currentSlide].classList.add('active');
+            if(slides.length > 0) {
+                slides[currentSlide].classList.remove('active');
+                currentSlide = (currentSlide + 1) % slides.length;
+                slides[currentSlide].classList.add('active');
+            }
         }, 4000);
     </script>
-
-    <script src="js/data.js"></script>
-    <script src="js/main.js"></script>
 </body>
 </html>
