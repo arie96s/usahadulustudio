@@ -40,6 +40,11 @@ window.addEventListener('load', () => {
         renderPortfolio('all');
         renderFilters();
     }
+    // --- TAMBAHAN UNTUK SHOP ---
+    if (document.getElementById('shopGrid')) {
+        renderShop('all');
+    }
+    
     if (document.getElementById('paymentGatewayContainer')) {
         renderOrderSummary(); 
     }
@@ -63,6 +68,7 @@ window.toggleLanguage = function() {
     updateLanguageUI();
     if(document.getElementById('dynamicServiceList')) renderServices();
     if(document.getElementById('faqContent')) renderFAQ();
+    if(document.getElementById('shopGrid')) renderShop('all'); // Re-render Shop
     if(document.getElementById('paymentGatewayContainer')) renderOrderSummary();
     updateWALinks();
 }
@@ -100,7 +106,6 @@ function bindHoverEvents() {
         target.addEventListener('mouseleave', () => cursor.classList.remove('hovered'));
     });
 }
-// Optimasi performance cursor menggunakan transform
 document.addEventListener('mousemove', (e) => {
     if(cursor) {
         cursor.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0) translate(-50%, -50%)`;
@@ -252,7 +257,70 @@ window.closeLightboxOnly = function() {
     if(modal) modal.classList.remove('show');
 }
 
-// 8. REVIEW SYSTEM
+// 8. SHOP RENDER LOGIC (UPDATED MULTI-LANGUAGE)
+window.renderShop = function(filter) {
+    const grid = document.getElementById('shopGrid');
+    if(!grid) return;
+    
+    grid.innerHTML = ''; 
+
+    // Ambil kamus bahasa saat ini
+    const lang = siteData.currentLang; 
+    const t = siteData.translations[lang]; 
+
+    // Update tombol filter aktif visual
+    document.querySelectorAll('#shopFilter .filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+        // Cek teks tombol (sekarang dinamis, jadi kita cek atribut onclick atau strukturnya)
+        const btnOnClick = btn.getAttribute('onclick');
+        if(btnOnClick.includes(`'${filter}'`) || (filter === 'all' && btnOnClick.includes(`'all'`))) {
+            btn.classList.add('active');
+        }
+    });
+
+    // Ambil data produk
+    const items = filter === 'all' ? siteData.shop : siteData.shop.filter(p => p.category === filter);
+
+    if(items.length === 0) {
+        const emptyMsg = lang === 'id' ? 'Produk belum tersedia untuk kategori ini.' : 'Products not available in this category.';
+        grid.innerHTML = `<p style="color:#666; width:100%; text-align:center;">${emptyMsg}</p>`;
+        return;
+    }
+
+    items.forEach(p => {
+        // Logic Badge Bahasa
+        let badgeText = t.badge_instant; 
+        let badgeStyle = '';
+
+        if(p.badge === 'NEW') {
+            badgeText = t.badge_new; 
+            badgeStyle = 'background: #fff; color: #000;';
+        } else if (p.badge === 'BEST SELLER') {
+            badgeText = t.badge_best;
+            badgeStyle = 'background: #fff; color: #000;';
+        }
+
+        const card = document.createElement('div');
+        card.className = 'product-card hover-target';
+        card.innerHTML = `
+            <div class="instant-badge" style="${badgeStyle}">${badgeText}</div>
+            <img src="${p.img}" alt="${p.title}" class="product-img">
+            <div class="product-info">
+                <span class="product-cat">${p.type}</span>
+                <h3 class="product-title">${p.title}</h3>
+                <div class="product-footer">
+                    <span class="product-price">${p.price}</span>
+                    <a href="${p.link}" target="_blank" class="buy-btn hover-target">${t.btn_buy}</a>
+                </div>
+            </div>
+        `;
+        grid.appendChild(card);
+    });
+    
+    bindHoverEvents();
+}
+
+// 9. REVIEW SYSTEM
 function setupReviewStars() {
     const stars = document.querySelectorAll('.star-icon');
     stars.forEach(star => {
@@ -282,7 +350,7 @@ window.submitReview = function() {
     document.getElementById('reviewFormContainer').style.display = 'none';
 }
 
-// 9. ORDER & PAYMENT LOGIC (UPDATED WITH PDF FEATURE)
+// 10. ORDER & PAYMENT LOGIC
 function initOrderPage() {
     const urlParams = new URLSearchParams(window.location.search);
     document.getElementById('orderService').value = urlParams.get('service') || '-';
@@ -290,7 +358,6 @@ function initOrderPage() {
     document.getElementById('orderPrice').value = urlParams.get('price') || 'TBD';
 }
 
-// FUNGSI BARU: GENERATE PDF
 function generateInvoicePDF(data) {
     if (!window.jspdf) {
         console.error("jsPDF library not loaded");
@@ -300,7 +367,6 @@ function generateInvoicePDF(data) {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
     
-    // Header
     doc.setFontSize(22);
     doc.setFont("helvetica", "bold");
     doc.text("INVOICE", 105, 20, null, null, "center");
@@ -310,18 +376,15 @@ function generateInvoicePDF(data) {
     doc.text("USAHADULU STUDIO", 105, 28, null, null, "center");
     doc.text("Professional Visual Solutions", 105, 34, null, null, "center");
     
-    // Line
     doc.setLineWidth(0.5);
     doc.line(20, 40, 190, 40);
     
-    // Client Details
     doc.setFontSize(10);
     doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, 50);
     doc.text(`Client Name: ${data.name}`, 20, 60);
     doc.text(`WhatsApp: ${data.phone}`, 20, 66);
     doc.text(`Email: ${data.email || '-'}`, 20, 72);
     
-    // Order Details
     doc.setFont("helvetica", "bold");
     doc.text("ORDER DETAILS:", 20, 85);
     
@@ -337,7 +400,6 @@ function generateInvoicePDF(data) {
     doc.setFont("helvetica", "italic");
     doc.text("Note: Please proceed to payment via the website to start your project.", 20, 130);
     
-    // Save PDF
     doc.save(`Invoice_${data.name.replace(/\s+/g, '_')}.pdf`);
 }
 
@@ -357,13 +419,10 @@ window.submitOrder = function() {
     submitBtn.style.opacity = "0.7";
     submitBtn.disabled = true;
 
-    // Data Object
     const orderData = { name, phone, email, service, pkg, price, brief };
 
-    // 1. GENERATE PDF (Fitur yang diminta tetap ada)
     generateInvoicePDF(orderData);
 
-    // 2. GOOGLE FORM SUBMISSION LOGIC
     if(appConfig.googleForm && appConfig.googleForm.actionUrl.includes("docs.google.com")) {
         const gForm = appConfig.googleForm;
         const formData = new FormData();
@@ -387,10 +446,8 @@ window.submitOrder = function() {
         });
     }
 
-    // 3. PROCEED TO LOCAL PROCESS
     localStorage.setItem('currentOrder', JSON.stringify(orderData));
 
-    // Delay untuk memastikan download PDF mulai sebelum redirect
     setTimeout(() => {
         alert("Invoice Downloaded! Redirecting to Payment...");
         window.location.href = "payment.html";
