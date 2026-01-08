@@ -1,4 +1,4 @@
-// js/main.js
+// js/main.js - USAHADULU STUDIO (Final Fix)
 
 // 1. FUNGSI INISIALISASI
 window.addEventListener('load', () => {
@@ -35,16 +35,14 @@ window.addEventListener('load', () => {
     
     // Render Halaman
     if (document.getElementById('dynamicServiceList')) renderServices();
-    if (document.getElementById('faqContent')) renderFAQ();
+    if (document.getElementById('faqContent')) renderFAQ(); // <-- INI YANG MEMBUAT Q&A MUNCUL
     if (document.getElementById('portfolioGrid')) {
         renderPortfolio('all');
         renderFilters();
     }
-    // --- TAMBAHAN UNTUK SHOP ---
     if (document.getElementById('shopGrid')) {
         renderShop('all');
     }
-    
     if (document.getElementById('paymentGatewayContainer')) {
         renderOrderSummary(); 
     }
@@ -67,8 +65,8 @@ window.toggleLanguage = function() {
     
     updateLanguageUI();
     if(document.getElementById('dynamicServiceList')) renderServices();
-    if(document.getElementById('faqContent')) renderFAQ();
-    if(document.getElementById('shopGrid')) renderShop('all'); // Re-render Shop
+    if(document.getElementById('faqContent')) renderFAQ(); // Re-render FAQ saat ganti bahasa
+    if(document.getElementById('shopGrid')) renderShop('all');
     if(document.getElementById('paymentGatewayContainer')) renderOrderSummary();
     updateWALinks();
 }
@@ -131,12 +129,13 @@ if(menuBtn) {
     });
 }
 
-// 6. RENDER SERVICES
+// 6. RENDER SERVICES (Banner Logic)
 function renderServices() {
     const container = document.getElementById('dynamicServiceList');
     if(!container) return;
     container.innerHTML = '';
     const lang = siteData.currentLang;
+    
     siteData.services.forEach(svc => {
         const name = lang === 'id' ? svc.name_id : svc.name_en;
         const desc = lang === 'id' ? svc.desc_id : svc.desc_en;
@@ -153,36 +152,91 @@ function renderServices() {
                     </td>
                 </tr>`; 
         });
+
+        // --- BANNER PROMO KHUSUS VIDEO ---
+        let promoBannerHTML = '';
+        
+        if (svc.id === 'video') {
+            const promoTitle = lang === 'id' ? 'BUDGET TERBATAS?' : 'LIMITED BUDGET?';
+            const promoDesc = lang === 'id' 
+                ? 'Jangan paksakan budget. Gunakan <strong>Template Siap Pakai</strong> kami. High Quality, harga mulai 50 Ribuan.' 
+                : 'Don\'t force the budget. Use our <strong>Ready-to-Use Templates</strong>. High Quality, starting from 50K IDR.';
+            const promoBtn = lang === 'id' ? 'LIHAT KATALOG ASET &rarr;' : 'VIEW ASSET CATALOG &rarr;';
+
+            // Menggunakan class "promo-banner" untuk animasi CSS
+            promoBannerHTML = `
+                <div class="promo-banner" style="margin: 30px 0 10px 0; padding: 25px; border: 1px dashed #555; border-radius: 12px; text-align: center; background: #050505;">
+                    <h3 style="color: #fff; font-size: 16px; margin-bottom: 10px; font-weight: bold;">${promoTitle}</h3>
+                    <p style="color: #999; font-size: 13px; margin-bottom: 20px; line-height: 1.6;">${promoDesc}</p>
+                    <a href="shop.html" class="hover-target" style="color: #fff; text-decoration: none; font-weight: bold; font-size: 12px; border-bottom: 1px solid #fff; padding-bottom: 2px;">
+                        ${promoBtn}
+                    </a>
+                </div>
+            `;
+        }
         
         const li = document.createElement('li');
         li.className = 'service-wrapper';
+        
         li.innerHTML = `
-            <div class="service-header hover-target" onclick="this.classList.toggle('active'); this.nextElementSibling.style.maxHeight = this.classList.contains('active') ? this.nextElementSibling.scrollHeight + 'px' : null;">
+            <div class="service-header hover-target" onclick="toggleService(this)">
                 <span class="service-name-main">${name}</span>
                 <span class="service-icon-state">▼</span>
             </div>
             <div class="service-body">
                 <p class="service-desc">${desc}</p>
                 <table class="price-table">${tableRows}</table>
+                ${promoBannerHTML}
             </div>`;
         container.appendChild(li);
     });
     bindHoverEvents();
 }
 
+// 6b. FUNGSI ACCORDION & ANIMASI BANNER
+window.toggleService = function(header) {
+    header.classList.toggle('active');
+    const body = header.nextElementSibling;
+    const banner = body.querySelector('.promo-banner');
+
+    if (header.classList.contains('active')) {
+        body.style.maxHeight = body.scrollHeight + "px";
+        if(banner) {
+            setTimeout(() => {
+                banner.classList.add('show'); 
+                body.style.maxHeight = (body.scrollHeight + banner.scrollHeight + 50) + "px";
+            }, 600);
+        }
+    } else {
+        body.style.maxHeight = null;
+        if(banner) {
+            banner.classList.remove('show');
+        }
+    }
+}
+
+// 7. RENDER FAQ (FUNGSI INI YANG SEBELUMNYA HILANG)
 function renderFAQ() {
     const container = document.getElementById('faqContent');
     if(!container) return;
     container.innerHTML = '';
     const lang = siteData.currentLang;
+    
     siteData.faq.forEach(item => {
         const q = lang === 'id' ? item.q_id : item.q_en;
         const a = lang === 'id' ? item.a_id : item.a_en;
-        container.innerHTML += `<div class="faq-item"><span class="faq-q">${q}</span><span class="faq-a">${a}</span></div>`;
+        
+        const div = document.createElement('div');
+        div.className = 'faq-item';
+        div.innerHTML = `
+            <span class="faq-q">${q}</span>
+            <p class="faq-a">${a}</p>
+        `;
+        container.appendChild(div);
     });
 }
 
-// 7. PORTFOLIO & CASE STUDY
+// 8. PORTFOLIO & CASE STUDY
 window.renderPortfolio = function(cat) {
     const grid = document.getElementById('portfolioGrid');
     if(!grid) return;
@@ -231,16 +285,12 @@ function openCaseStudy(item, imgSrc) {
                 <div class="case-study-details">
                     <h3>CLIENT</h3>
                     <p>${cs.client}</p>
-                    
                     <h3>PROBLEM</h3>
                     <p>${cs.problem}</p>
-                    
                     <h3>SOLUTION</h3>
                     <p>${cs.solution}</p>
-                    
                     <h3>RESULT</h3>
                     <p>${cs.result}</p>
-                    
                     <a href="services.html" class="service-action-btn hover-target" style="margin-top:20px;">START SIMILAR PROJECT</a>
                 </div>
             </div>
@@ -257,28 +307,23 @@ window.closeLightboxOnly = function() {
     if(modal) modal.classList.remove('show');
 }
 
-// 8. SHOP RENDER LOGIC (UPDATED MULTI-LANGUAGE)
+// 9. SHOP RENDER LOGIC
 window.renderShop = function(filter) {
     const grid = document.getElementById('shopGrid');
     if(!grid) return;
     
     grid.innerHTML = ''; 
-
-    // Ambil kamus bahasa saat ini
     const lang = siteData.currentLang; 
     const t = siteData.translations[lang]; 
 
-    // Update tombol filter aktif visual
     document.querySelectorAll('#shopFilter .filter-btn').forEach(btn => {
         btn.classList.remove('active');
-        // Cek teks tombol (sekarang dinamis, jadi kita cek atribut onclick atau strukturnya)
         const btnOnClick = btn.getAttribute('onclick');
         if(btnOnClick.includes(`'${filter}'`) || (filter === 'all' && btnOnClick.includes(`'all'`))) {
             btn.classList.add('active');
         }
     });
 
-    // Ambil data produk
     const items = filter === 'all' ? siteData.shop : siteData.shop.filter(p => p.category === filter);
 
     if(items.length === 0) {
@@ -288,7 +333,6 @@ window.renderShop = function(filter) {
     }
 
     items.forEach(p => {
-        // Logic Badge Bahasa
         let badgeText = t.badge_instant; 
         let badgeStyle = '';
 
@@ -316,11 +360,10 @@ window.renderShop = function(filter) {
         `;
         grid.appendChild(card);
     });
-    
     bindHoverEvents();
 }
 
-// 9. REVIEW SYSTEM
+// 10. REVIEW SYSTEM
 function setupReviewStars() {
     const stars = document.querySelectorAll('.star-icon');
     stars.forEach(star => {
@@ -350,7 +393,7 @@ window.submitReview = function() {
     document.getElementById('reviewFormContainer').style.display = 'none';
 }
 
-// 10. ORDER & PAYMENT LOGIC
+// 11. ORDER & PAYMENT LOGIC (Updated PDF with Brief)
 function initOrderPage() {
     const urlParams = new URLSearchParams(window.location.search);
     document.getElementById('orderService').value = urlParams.get('service') || '-';
@@ -367,6 +410,7 @@ function generateInvoicePDF(data) {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
     
+    // --- HEADER ---
     doc.setFontSize(22);
     doc.setFont("helvetica", "bold");
     doc.text("INVOICE", 105, 20, null, null, "center");
@@ -379,26 +423,44 @@ function generateInvoicePDF(data) {
     doc.setLineWidth(0.5);
     doc.line(20, 40, 190, 40);
     
+    // --- CLIENT INFO ---
     doc.setFontSize(10);
     doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, 50);
-    doc.text(`Client Name: ${data.name}`, 20, 60);
-    doc.text(`WhatsApp: ${data.phone}`, 20, 66);
-    doc.text(`Email: ${data.email || '-'}`, 20, 72);
+    doc.text(`Client Name: ${data.name}`, 20, 56);
+    doc.text(`WhatsApp: ${data.phone}`, 20, 62);
+    doc.text(`Email: ${data.email || '-'}`, 20, 68);
     
+    // --- ORDER DETAILS ---
     doc.setFont("helvetica", "bold");
-    doc.text("ORDER DETAILS:", 20, 85);
+    doc.text("ORDER DETAILS:", 20, 80);
     
     doc.setFont("helvetica", "normal");
-    doc.text(`Service: ${data.service}`, 20, 95);
-    doc.text(`Package: ${data.pkg}`, 20, 101);
+    doc.text(`Service: ${data.service}`, 20, 88);
+    doc.text(`Package: ${data.pkg}`, 20, 94);
+
+    // --- DESCRIPTION / BRIEF SECTION ---
+    doc.setFont("helvetica", "bold");
+    doc.text("BRIEF / DESCRIPTION:", 20, 105);
     
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    
+    const splitBrief = doc.splitTextToSize(data.brief || "-", 170); 
+    doc.text(splitBrief, 20, 112);
+    
+    let dynamicY = 112 + (splitBrief.length * 5) + 20; 
+
+    // --- TOTAL & FOOTER ---
+    doc.setLineWidth(0.5);
+    doc.line(20, dynamicY - 10, 190, dynamicY - 10);
+
     doc.setFontSize(14);
     doc.setFont("helvetica", "bold");
-    doc.text(`TOTAL PRICE: ${data.price}`, 190, 120, null, null, "right");
+    doc.text(`TOTAL PRICE: ${data.price}`, 190, dynamicY, null, null, "right");
     
     doc.setFontSize(10);
     doc.setFont("helvetica", "italic");
-    doc.text("Note: Please proceed to payment via the website to start your project.", 20, 130);
+    doc.text("Note: Please proceed to payment via the website to start your project.", 20, dynamicY + 10);
     
     doc.save(`Invoice_${data.name.replace(/\s+/g, '_')}.pdf`);
 }
@@ -478,35 +540,54 @@ function renderOrderSummary() {
     bindHoverEvents();
 }
 
+// 12. XENDIT DEMO MODAL
 window.openXenditDemo = function(price) {
     const modal = document.getElementById('lightboxModal');
+    
     const html = `
         <div class="modal-content xendit-modal-body">
             <div class="x-header">
                 <span class="x-logo">xendit</span>
                 <span class="x-amount">${price}</span>
             </div>
+            
             <div class="x-content">
-                <span class="x-label">VIRTUAL ACCOUNT (Demo)</span>
-                
-                <span class="x-label">QR CODE</span>
+                <span class="x-label">Virtual Account (Demo)</span>
+                <div class="x-option hover-target" onclick="alert('Demo: Payment Successful!')">
+                    <div class="x-icon" style="background:#005ce6; color:#fff;">BCA</div>
+                    <div class="x-name">BCA Virtual Account</div>
+                </div>
+                 <div class="x-option hover-target" onclick="alert('Demo: Payment Successful!')">
+                    <div class="x-icon" style="background:#f39c12; color:#fff;">BRI</div>
+                    <div class="x-name">BRI Virtual Account</div>
+                </div>
+
+                <span class="x-label">QR Code / E-Wallet</span>
                 <div class="x-option hover-target" onclick="alert('Redirecting to QRIS...')">
-                    <div class="x-icon">QRIS</div>
-                    <div class="x-name">QRIS Indonesia (GoPay, OVO, Dana, ShopeePay)</div>
+                    <div class="x-icon" style="background:#fff; border:1px solid #ddd;">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/QRIS_logo.svg/1200px-QRIS_logo.svg.png" style="width:25px; height:auto;">
+                    </div>
+                    <div class="x-name">QRIS (GoPay, OVO, Dana, ShopeePay)</div>
                 </div>
                 
-                <span class="x-label">E-WALLET / GLOBAL</span>
+                <span class="x-label">International</span>
                 <div class="x-option hover-target" onclick="alert('Redirecting to PayPal...')">
-                    <div class="x-icon">PP</div>
-                    <div class="x-name">PayPal International</div>
+                    <div class="x-icon" style="background:#003087; color:#fff;">PP</div>
+                    <div class="x-name">PayPal / Credit Card</div>
                 </div>
             </div>
+
             <div class="x-footer">
-                Powered by Xendit Payment Gateway (Demo Mode)
+                Secured by Xendit Payment Gateway (Demo Mode)
             </div>
-            <button onclick="closeLightboxOnly()" style="width:100%; padding:15px; background:#f0f0f0; border:none; color:#333; cursor:pointer; font-weight:bold;">CANCEL TRANSACTION</button>
+            
+            <button class="x-cancel-btn hover-target" onclick="closeLightboxOnly()">
+                CANCEL TRANSACTION
+            </button>
         </div>
     `;
+    
     modal.innerHTML = html;
     modal.classList.add('show');
+    bindHoverEvents();
 }
