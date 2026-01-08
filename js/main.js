@@ -307,15 +307,28 @@ window.closeLightboxOnly = function() {
     if(modal) modal.classList.remove('show');
 }
 
-// 9. SHOP RENDER LOGIC
-window.renderShop = function(filter) {
+// --- VARIABEL GLOBAL PAGINATION ---
+let currentShopPage = 1;
+const itemsPerPage = 6; // Batas 6 produk per halaman
+
+// --- FUNGSI RENDER SHOP BARU (DENGAN PAGINATION) ---
+window.renderShop = function(filter, page = 1) {
     const grid = document.getElementById('shopGrid');
     if(!grid) return;
     
+    // Smooth Scroll ke atas saat ganti halaman (bukan saat load awal)
+    if(page !== currentShopPage && page !== 1) {
+        const yOffset = -120; 
+        const y = grid.getBoundingClientRect().top + window.pageYOffset + yOffset;
+        window.scrollTo({top: y, behavior: 'smooth'});
+    }
+    
+    currentShopPage = page;
     grid.innerHTML = ''; 
     const lang = siteData.currentLang; 
     const t = siteData.translations[lang]; 
 
+    // Reset tombol filter aktif
     document.querySelectorAll('#shopFilter .filter-btn').forEach(btn => {
         btn.classList.remove('active');
         const btnOnClick = btn.getAttribute('onclick');
@@ -324,15 +337,29 @@ window.renderShop = function(filter) {
         }
     });
 
-    const items = filter === 'all' ? siteData.shop : siteData.shop.filter(p => p.category === filter);
+    // Ambil data sesuai filter
+    const allItems = filter === 'all' ? siteData.shop : siteData.shop.filter(p => p.category === filter);
 
-    if(items.length === 0) {
-        const emptyMsg = lang === 'id' ? 'Produk belum tersedia untuk kategori ini.' : 'Products not available in this category.';
-        grid.innerHTML = `<p style="color:#666; width:100%; text-align:center;">${emptyMsg}</p>`;
+    // Cek jika kosong
+    if(allItems.length === 0) {
+        const emptyMsg = lang === 'id' ? 'Produk belum tersedia.' : 'Products not available.';
+        grid.innerHTML = `<p style="color:#666; width:100%; text-align:center; padding: 40px;">${emptyMsg}</p>`;
+        renderPagination(0, filter); // Hapus tombol pagination
         return;
     }
 
-    items.forEach(p => {
+    // HITUNG PEMBAGIAN HALAMAN (Slicing)
+    const totalItems = allItems.length;
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    
+    if (page > totalPages) page = 1;
+    
+    const start = (page - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    const paginatedItems = allItems.slice(start, end);
+
+    // Render Item (Hanya yang masuk slice halaman ini)
+    paginatedItems.forEach((p, index) => {
         let badgeText = t.badge_instant; 
         let badgeStyle = '';
 
@@ -346,6 +373,9 @@ window.renderShop = function(filter) {
 
         const card = document.createElement('div');
         card.className = 'product-card hover-target';
+        // Animasi muncul bertahap (staggered)
+        card.style.animationDelay = `${index * 0.1}s`; 
+        
         card.innerHTML = `
             <div class="instant-badge" style="${badgeStyle}">${badgeText}</div>
             <img src="${p.img}" alt="${p.title}" class="product-img">
@@ -360,7 +390,44 @@ window.renderShop = function(filter) {
         `;
         grid.appendChild(card);
     });
+    
+    // Panggil fungsi buat tombol angka
+    renderPagination(totalPages, filter);
     bindHoverEvents();
+}
+
+// --- FUNGSI GENERATOR TOMBOL ANGKA ---
+function renderPagination(totalPages, currentFilter) {
+    let pagContainer = document.getElementById('shopPagination');
+    
+    // Buat container jika belum ada
+    if (!pagContainer) {
+        pagContainer = document.createElement('div');
+        pagContainer.id = 'shopPagination';
+        pagContainer.className = 'pagination-container';
+        const grid = document.getElementById('shopGrid');
+        grid.parentNode.insertBefore(pagContainer, grid.nextSibling);
+    }
+
+    pagContainer.innerHTML = '';
+
+    // Jika halaman cuma 1, tidak perlu tombol
+    if (totalPages <= 1) return;
+
+    // Loop membuat tombol angka
+    for (let i = 1; i <= totalPages; i++) {
+        const btn = document.createElement('button');
+        btn.className = `page-btn hover-target ${i === currentShopPage ? 'active' : ''}`;
+        btn.innerText = i;
+        
+        btn.onclick = () => {
+            // Panggil render ulang dengan halaman yang diklik
+            window.renderShop(currentFilter, i);
+        };
+        
+        pagContainer.appendChild(btn);
+    }
+    bindHoverEvents(); // Aktifkan efek kursor custom di tombol baru
 }
 
 // 10. REVIEW SYSTEM

@@ -502,3 +502,80 @@ footer {
         transform: scale(1) translateY(0);
     }
 }
+/* =========================================
+   TAMBAHAN FITUR: PAGINATION & MOBILE FIX
+   (Letakkan di baris paling bawah style.css)
+   ========================================= */
+
+/* 1. ANIMASI MASUK PRODUK (Fade In) */
+.product-card {
+    opacity: 0;
+    animation: fadeInGrid 0.6s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+}
+
+/* 2. GAYA TOMBOL PAGINATION (RESPONSIF) */
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px; /* Jarak antar tombol */
+    margin-top: 40px;
+    padding-bottom: 30px;
+    flex-wrap: wrap; /* Agar tombol turun ke bawah jika layar HP sempit */
+    width: 100%;
+}
+
+.page-btn {
+    width: 40px; /* Ukuran pas untuk jari di HP */
+    height: 40px;
+    border-radius: 50%;
+    background: #111;
+    border: 1px solid #333;
+    color: #888;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    flex-shrink: 0; /* Mencegah tombol menjadi gepeng */
+}
+
+.page-btn:hover {
+    border-color: #fff;
+    color: #fff;
+    transform: translateY(-3px);
+}
+
+.page-btn.active {
+    background: #fff;
+    color: #000;
+    border-color: #fff;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
+}
+
+/* 3. PERBAIKAN TAMPILAN KARTU DI HP (MOBILE FIX) */
+@media (max-width: 768px) {
+    .product-footer {
+        flex-direction: column; /* Susun vertikal (atas-bawah) */
+        align-items: flex-start;
+        gap: 10px; /* Beri jarak antara harga dan tombol */
+        padding-top: 12px;
+    }
+
+    .product-price {
+        font-size: 15px !important;
+        margin-bottom: 2px;
+    }
+
+    .buy-btn {
+        width: 100%; /* Tombol memenuhi lebar kartu */
+        text-align: center;
+        display: block;
+        padding: 10px 0;
+        font-size: 12px;
+        background: #fff;
+        color: #000;
+    }
+}
