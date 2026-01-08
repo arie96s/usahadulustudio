@@ -53,6 +53,18 @@
             <p style="font-size: 12px; color: #666; margin-top: 10px;" data-i18n="shop_note">*Secure payment & delivery powered by Gumroad/LemonSqueezy</p>
         </div>
 
+        <div class="currency-switch-container">
+            <span style="color:#666; font-size:11px; margin-right:10px; font-weight:bold;">CURRENCY:</span>
+            <div class="currency-toggle">
+                <button class="currency-btn active hover-target" data-curr="IDR" onclick="switchCurrency('IDR')">
+                    🇮🇩 IDR
+                </button>
+                <button class="currency-btn hover-target" data-curr="USD" onclick="switchCurrency('USD')">
+                    🌎 USD
+                </button>
+            </div>
+        </div>
+
         <div class="filter-container" id="shopFilter">
             <button class="filter-btn hover-target active" onclick="renderShop('all')" data-i18n="filter_all_assets">ALL ASSETS</button>
             <button class="filter-btn hover-target" onclick="renderShop('template')" data-i18n="filter_template">TEMPLATES</button>
@@ -60,9 +72,7 @@
             <button class="filter-btn hover-target" onclick="renderShop('vector')" data-i18n="filter_vector">VECTORS</button>
         </div>
 
-        <div class="shop-grid" id="shopGrid">
-            </div>
-
+        <div class="shop-grid" id="shopGrid"></div>
     </div>
 
     <footer>

@@ -1,4 +1,23 @@
-// js/main.js - USAHADULU STUDIO (Final Fix)
+// js/main.js - USAHADULU STUDIO (Final Fix + Multi-Currency)
+
+// --- KONFIGURASI MATA UANG & KURS ---
+let activeCurrency = 'IDR'; // Default Currency
+let currentRate = 16900; // Fallback Rate 2026 (sesuai request)
+
+// Fungsi Ambil Kurs Dunia (Real-time)
+async function fetchExchangeRate() {
+    try {
+        // Fetch API Gratis
+        const response = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
+        const data = await response.json();
+        if(data && data.rates && data.rates.IDR) {
+            currentRate = data.rates.IDR;
+            console.log("Updated Live Rate:", currentRate);
+        }
+    } catch (e) {
+        console.log("Using Fallback Rate:", currentRate);
+    }
+}
 
 // 1. FUNGSI INISIALISASI
 window.addEventListener('load', () => {
@@ -11,7 +30,8 @@ window.addEventListener('load', () => {
         }, 300); 
     }
     
-    // Inisialisasi Data
+    // Inisialisasi Data & Kurs
+    fetchExchangeRate();
     if(typeof updateLanguageUI === 'function') updateLanguageUI();
     if(typeof updateWALinks === 'function') updateWALinks();
     
@@ -35,13 +55,13 @@ window.addEventListener('load', () => {
     
     // Render Halaman
     if (document.getElementById('dynamicServiceList')) renderServices();
-    if (document.getElementById('faqContent')) renderFAQ(); // <-- INI YANG MEMBUAT Q&A MUNCUL
+    if (document.getElementById('faqContent')) renderFAQ();
     if (document.getElementById('portfolioGrid')) {
         renderPortfolio('all');
         renderFilters();
     }
     if (document.getElementById('shopGrid')) {
-        renderShop('all');
+        renderShop('all'); // Shop render dipanggil disini
     }
     if (document.getElementById('paymentGatewayContainer')) {
         renderOrderSummary(); 
@@ -65,8 +85,8 @@ window.toggleLanguage = function() {
     
     updateLanguageUI();
     if(document.getElementById('dynamicServiceList')) renderServices();
-    if(document.getElementById('faqContent')) renderFAQ(); // Re-render FAQ saat ganti bahasa
-    if(document.getElementById('shopGrid')) renderShop('all');
+    if(document.getElementById('faqContent')) renderFAQ(); 
+    if(document.getElementById('shopGrid')) renderShop('all'); // Re-render Shop
     if(document.getElementById('paymentGatewayContainer')) renderOrderSummary();
     updateWALinks();
 }
@@ -129,7 +149,7 @@ if(menuBtn) {
     });
 }
 
-// 6. RENDER SERVICES (Banner Logic)
+// 6. RENDER SERVICES
 function renderServices() {
     const container = document.getElementById('dynamicServiceList');
     if(!container) return;
@@ -163,7 +183,6 @@ function renderServices() {
                 : 'Don\'t force the budget. Use our <strong>Ready-to-Use Templates</strong>. High Quality, starting from 50K IDR.';
             const promoBtn = lang === 'id' ? 'LIHAT KATALOG ASET &rarr;' : 'VIEW ASSET CATALOG &rarr;';
 
-            // Menggunakan class "promo-banner" untuk animasi CSS
             promoBannerHTML = `
                 <div class="promo-banner" style="margin: 30px 0 10px 0; padding: 25px; border: 1px dashed #555; border-radius: 12px; text-align: center; background: #050505;">
                     <h3 style="color: #fff; font-size: 16px; margin-bottom: 10px; font-weight: bold;">${promoTitle}</h3>
@@ -215,7 +234,7 @@ window.toggleService = function(header) {
     }
 }
 
-// 7. RENDER FAQ (FUNGSI INI YANG SEBELUMNYA HILANG)
+// 7. RENDER FAQ
 function renderFAQ() {
     const container = document.getElementById('faqContent');
     if(!container) return;
@@ -309,14 +328,14 @@ window.closeLightboxOnly = function() {
 
 // --- VARIABEL GLOBAL PAGINATION ---
 let currentShopPage = 1;
-const itemsPerPage = 6; // Batas 6 produk per halaman
+const itemsPerPage = 6; 
 
-// --- FUNGSI RENDER SHOP BARU (DENGAN PAGINATION) ---
+// --- FUNGSI RENDER SHOP TERBARU (MULTI-CURRENCY + PAGINATION) ---
 window.renderShop = function(filter, page = 1) {
     const grid = document.getElementById('shopGrid');
     if(!grid) return;
     
-    // Smooth Scroll ke atas saat ganti halaman (bukan saat load awal)
+    // Smooth Scroll logic
     if(page !== currentShopPage && page !== 1) {
         const yOffset = -120; 
         const y = grid.getBoundingClientRect().top + window.pageYOffset + yOffset;
@@ -328,7 +347,13 @@ window.renderShop = function(filter, page = 1) {
     const lang = siteData.currentLang; 
     const t = siteData.translations[lang]; 
 
-    // Reset tombol filter aktif
+    // Update State Tombol Currency
+    document.querySelectorAll('.currency-btn').forEach(btn => {
+        if(btn.dataset.curr === activeCurrency) btn.classList.add('active');
+        else btn.classList.remove('active');
+    });
+
+    // Reset tombol filter
     document.querySelectorAll('#shopFilter .filter-btn').forEach(btn => {
         btn.classList.remove('active');
         const btnOnClick = btn.getAttribute('onclick');
@@ -337,70 +362,95 @@ window.renderShop = function(filter, page = 1) {
         }
     });
 
-    // Ambil data sesuai filter
     const allItems = filter === 'all' ? siteData.shop : siteData.shop.filter(p => p.category === filter);
 
-    // Cek jika kosong
     if(allItems.length === 0) {
         const emptyMsg = lang === 'id' ? 'Produk belum tersedia.' : 'Products not available.';
         grid.innerHTML = `<p style="color:#666; width:100%; text-align:center; padding: 40px;">${emptyMsg}</p>`;
-        renderPagination(0, filter); // Hapus tombol pagination
+        renderPagination(0, filter);
         return;
     }
 
-    // HITUNG PEMBAGIAN HALAMAN (Slicing)
+    // Pagination Logic
     const totalItems = allItems.length;
     const totalPages = Math.ceil(totalItems / itemsPerPage);
-    
     if (page > totalPages) page = 1;
-    
     const start = (page - 1) * itemsPerPage;
     const end = start + itemsPerPage;
     const paginatedItems = allItems.slice(start, end);
 
-    // Render Item (Hanya yang masuk slice halaman ini)
+    // Render Items dengan Logika Kurs
     paginatedItems.forEach((p, index) => {
-        let badgeText = t.badge_instant; 
         let badgeStyle = '';
+        let badgeText = p.badge || ''; 
 
-        if(p.badge === 'NEW') {
-            badgeText = t.badge_new; 
-            badgeStyle = 'background: #fff; color: #000;';
-        } else if (p.badge === 'BEST SELLER') {
-            badgeText = t.badge_best;
-            badgeStyle = 'background: #fff; color: #000;';
+        if(p.badge === 'NEW') badgeStyle = 'background: #fff; color: #000;';
+        else if (p.badge === 'BEST SELLER') badgeStyle = 'background: #ffd700; color: #000; border:none;';
+
+        // --- KALKULASI HARGA & MARKUP ---
+        let displayPrice, buyLink, btnText;
+
+        if (activeCurrency === 'IDR') {
+            // IDR (Harga Mentah dari Data)
+            displayPrice = "IDR " + (p.priceRaw / 1000).toFixed(0) + "K";
+            buyLink = p.link_idr;
+            btnText = lang === 'id' ? "BELI (MAYAR)" : "BUY (IDR)";
+        } else {
+            // USD (Rumus: (IDR / Rate) * 1.7)
+            let rawUsd = (p.priceRaw / currentRate) * 1.7;
+            
+            // Psychological Rounding (.99)
+            let finalUsd = Math.ceil(rawUsd) - 0.01; 
+            if (finalUsd < 0.99) finalUsd = 0.99; // Minimum price safety
+
+            displayPrice = "$ " + finalUsd.toFixed(2);
+            buyLink = p.link_usd;
+            btnText = "BUY (GUMROAD)";
         }
 
         const card = document.createElement('div');
         card.className = 'product-card hover-target';
-        // Animasi muncul bertahap (staggered)
         card.style.animationDelay = `${index * 0.1}s`; 
         
         card.innerHTML = `
-            <div class="instant-badge" style="${badgeStyle}">${badgeText}</div>
+            ${badgeText ? `<div class="instant-badge" style="${badgeStyle}">${badgeText}</div>` : ''}
             <img src="${p.img}" alt="${p.title}" class="product-img">
             <div class="product-info">
                 <span class="product-cat">${p.type}</span>
                 <h3 class="product-title">${p.title}</h3>
                 <div class="product-footer">
-                    <span class="product-price">${p.price}</span>
-                    <a href="${p.link}" target="_blank" class="buy-btn hover-target">${t.btn_buy}</a>
+                    <span class="product-price" style="${activeCurrency === 'USD' ? 'color:#ffd700;' : ''}">${displayPrice}</span>
+                    <a href="${buyLink}" target="_blank" class="buy-btn hover-target">${btnText}</a>
                 </div>
             </div>
         `;
         grid.appendChild(card);
     });
     
-    // Panggil fungsi buat tombol angka
     renderPagination(totalPages, filter);
     bindHoverEvents();
+}
+
+// Fungsi Switch Currency (Dipanggil dari HTML)
+window.switchCurrency = function(curr) {
+    activeCurrency = curr;
+    
+    // Cari filter yang sedang aktif agar tidak reset ke 'all'
+    const activeFilterBtn = document.querySelector('#shopFilter .filter-btn.active');
+    let currentFilter = 'all';
+    
+    if (activeFilterBtn) {
+        // Ekstrak nama filter dari atribut onclick, misal: renderShop('vector')
+        const match = activeFilterBtn.getAttribute('onclick').match(/'([^']+)'/);
+        if (match) currentFilter = match[1];
+    }
+    
+    renderShop(currentFilter, currentShopPage);
 }
 
 // --- FUNGSI GENERATOR TOMBOL ANGKA ---
 function renderPagination(totalPages, currentFilter) {
     let pagContainer = document.getElementById('shopPagination');
-    
-    // Buat container jika belum ada
     if (!pagContainer) {
         pagContainer = document.createElement('div');
         pagContainer.id = 'shopPagination';
@@ -410,24 +460,16 @@ function renderPagination(totalPages, currentFilter) {
     }
 
     pagContainer.innerHTML = '';
-
-    // Jika halaman cuma 1, tidak perlu tombol
     if (totalPages <= 1) return;
 
-    // Loop membuat tombol angka
     for (let i = 1; i <= totalPages; i++) {
         const btn = document.createElement('button');
         btn.className = `page-btn hover-target ${i === currentShopPage ? 'active' : ''}`;
         btn.innerText = i;
-        
-        btn.onclick = () => {
-            // Panggil render ulang dengan halaman yang diklik
-            window.renderShop(currentFilter, i);
-        };
-        
+        btn.onclick = () => window.renderShop(currentFilter, i);
         pagContainer.appendChild(btn);
     }
-    bindHoverEvents(); // Aktifkan efek kursor custom di tombol baru
+    bindHoverEvents(); 
 }
 
 // 10. REVIEW SYSTEM
@@ -477,7 +519,6 @@ function generateInvoicePDF(data) {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
     
-    // --- HEADER ---
     doc.setFontSize(22);
     doc.setFont("helvetica", "bold");
     doc.text("INVOICE", 105, 20, null, null, "center");
@@ -490,14 +531,12 @@ function generateInvoicePDF(data) {
     doc.setLineWidth(0.5);
     doc.line(20, 40, 190, 40);
     
-    // --- CLIENT INFO ---
     doc.setFontSize(10);
     doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, 50);
     doc.text(`Client Name: ${data.name}`, 20, 56);
     doc.text(`WhatsApp: ${data.phone}`, 20, 62);
     doc.text(`Email: ${data.email || '-'}`, 20, 68);
     
-    // --- ORDER DETAILS ---
     doc.setFont("helvetica", "bold");
     doc.text("ORDER DETAILS:", 20, 80);
     
@@ -505,7 +544,6 @@ function generateInvoicePDF(data) {
     doc.text(`Service: ${data.service}`, 20, 88);
     doc.text(`Package: ${data.pkg}`, 20, 94);
 
-    // --- DESCRIPTION / BRIEF SECTION ---
     doc.setFont("helvetica", "bold");
     doc.text("BRIEF / DESCRIPTION:", 20, 105);
     
@@ -517,7 +555,6 @@ function generateInvoicePDF(data) {
     
     let dynamicY = 112 + (splitBrief.length * 5) + 20; 
 
-    // --- TOTAL & FOOTER ---
     doc.setLineWidth(0.5);
     doc.line(20, dynamicY - 10, 190, dynamicY - 10);
 

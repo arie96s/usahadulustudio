@@ -4,20 +4,17 @@ const appConfig = {
     useLocalImages: false,
     localPath: 'img/',
     
-    // --- KONFIGURASI GOOGLE FORM (ISI DI SINI) ---
+    // --- KONFIGURASI GOOGLE FORM ---
     googleForm: {
-        // Ganti URL ini dengan URL Google Form Anda (pastikan akhiran /formResponse)
         actionUrl: "https://docs.google.com/forms/d/e/1FAIpQLSf3Xjl9rE08-l4YaZHrgUUX1VtTaWTuxzF6GoHi6uhcvvZqsQ/formResponse", 
-        
-        // Ganti angka entry.xxxxx sesuai dengan "Get Pre-filled Link" Google Form Anda
         inputs: {
-            name: "entry.168693984",    // ID untuk Nama
-            phone: "entry.1086076035",   // ID untuk No WA
-            email: "entry.1587178877",   // ID untuk Email
-            service: "entry.1698374412", // ID untuk Layanan (Service)
-            pkg: "entry.97551763",     // ID untuk Paket
-            price: "entry.1752180585",   // ID untuk Harga
-            brief: "entry.622426755"    // ID untuk Brief
+            name: "entry.168693984",    
+            phone: "entry.1086076035",   
+            email: "entry.1587178877",   
+            service: "entry.1698374412", 
+            pkg: "entry.97551763",     
+            price: "entry.1752180585",   
+            brief: "entry.622426755"    
         }
     }
 };
@@ -37,7 +34,6 @@ const siteData = {
             nav_payment: "METODE PEMBAYARAN",
             nav_terms: "SYARAT & KETENTUAN",
             
-            // --- TERJEMAHAN SHOP (ID) ---
             nav_shop: "TOKO ASET", 
             shop_title: "MARKET ASET KREATIF",
             shop_desc: "Tidak mau menunggu? Ambil aset premium siap pakai kami. Kualitas tinggi, bisa diedit, dan download instan.",
@@ -50,7 +46,6 @@ const siteData = {
             badge_instant: "UNDUH INSTAN",
             badge_new: "BARU",
             badge_best: "TERLARIS",
-            // ---------------------------
 
             hero_cta: "MULAI PROYEK",
             hero_tagline: "SOLUSI VISUAL PROFESIONAL UNTUK IDENTITAS BRAND ANDA",
@@ -87,7 +82,6 @@ const siteData = {
             nav_payment: "PAYMENT METHODS",
             nav_terms: "TERMS & CONDITIONS",
 
-            // --- TERJEMAHAN SHOP (EN) ---
             nav_shop: "ASSET STORE",
             shop_title: "CREATIVE ASSETS MARKET",
             shop_desc: "Don't want to wait? Grab our premium pre-made assets. High quality, fully editable, and instant download.",
@@ -100,7 +94,6 @@ const siteData = {
             badge_instant: "INSTANT DOWNLOAD",
             badge_new: "NEW",
             badge_best: "BEST SELLER",
-            // ---------------------------
 
             hero_cta: "START PROJECT",
             hero_tagline: "PROFESSIONAL VISUAL SOLUTIONS FOR YOUR BRAND IDENTITY",
@@ -250,16 +243,17 @@ const siteData = {
         { name: "Putri Anggraini", brand: "Wedding Client", quote: "Undangan digitalnya elegan dan smooth." }
     ],
 
-    // --- DATA SHOP ASSETS (PASTIKAN GANTI LINK) ---
+    // --- DATA SHOP ASSETS (MULTI-CURRENCY READY) ---
     shop: [
         {
             id: 101,
             category: 'template',
             title: 'METAL BAND LOGO KIT VOL.1',
             type: 'Adobe Illustrator / EPS',
-            price: 'IDR 149.000',
+            priceRaw: 149000, // Harga IDR
             img: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=600&q=80', 
-            link: 'https://gumroad.com/', // <--- GANTI LINK INI
+            link_idr: 'https://mayar.id/', // Link Mayar
+            link_usd: 'https://gumroad.com/', // Link Gumroad
             badge: 'BEST SELLER'
         },
         {
@@ -267,9 +261,10 @@ const siteData = {
             category: 'mockup',
             title: 'HEAVYWEIGHT TEE MOCKUP',
             type: 'Photoshop PSD (4K)',
-            price: 'IDR 99.000',
+            priceRaw: 99000,
             img: 'https://images.unsplash.com/photo-1571120038865-c35012e1284a?auto=format&fit=crop&w=600&q=80',
-            link: '#', // <--- GANTI LINK INI
+            link_idr: '#',
+            link_usd: '#',
             badge: null
         },
         {
@@ -277,9 +272,10 @@ const siteData = {
             category: 'vector',
             title: 'DARK SKULL VECTOR PACK',
             type: 'SVG / PNG / AI',
-            price: 'IDR 125.000',
+            priceRaw: 125000,
             img: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80',
-            link: '#', // <--- GANTI LINK INI
+            link_idr: '#',
+            link_usd: '#',
             badge: 'NEW'
         },
         {
@@ -287,9 +283,10 @@ const siteData = {
             category: 'template',
             title: 'RETRO INSTAGRAM FEEDS',
             type: 'Canva Template',
-            price: 'IDR 75.000',
+            priceRaw: 75000,
             img: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?auto=format&fit=crop&w=600&q=80',
-            link: '#', // <--- GANTI LINK INI
+            link_idr: '#',
+            link_usd: '#',
             badge: null
         },
         {
@@ -297,9 +294,10 @@ const siteData = {
             category: 'mockup',
             title: 'HOODIE STREETWEAR MOCKUP',
             type: 'Photoshop PSD',
-            price: 'IDR 110.000',
+            priceRaw: 110000,
             img: 'https://images.unsplash.com/photo-1556906781-9a412961c28c?auto=format&fit=crop&w=600&q=80',
-            link: '#', // <--- GANTI LINK INI
+            link_idr: '#',
+            link_usd: '#',
             badge: 'POPULAR'
         },
         {
@@ -307,9 +305,10 @@ const siteData = {
             category: 'vector',
             title: 'GOTHIC FONT BUNDLE',
             type: 'TTF / OTF',
-            price: 'IDR 199.000',
+            priceRaw: 199000,
             img: 'https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?auto=format&fit=crop&w=600&q=80',
-            link: '#', // <--- GANTI LINK INI
+            link_idr: '#',
+            link_usd: '#',
             badge: null
         }
     ]
