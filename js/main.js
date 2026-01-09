@@ -502,6 +502,95 @@ window.submitReview = function() {
     document.getElementById('reviewFormContainer').style.display = 'none';
 }
 
+// --- LOGIKA VOUCHER & KALKULASI HARGA ---
+
+let currentBasePrice = 0;   // Harga asli (angka)
+let currentFinalPrice = 0;  // Harga setelah diskon (angka)
+let appliedDiscountCode = null;
+
+// 1. Helper: Mengubah string "250K" atau "IDR 250K" menjadi angka 250000
+function parsePriceToNumber(priceStr) {
+    if(!priceStr) return 0;
+if(priceStr === 'TBD') return 0;
+
+    let cleanStr = priceStr.toString().toUpperCase().replace(/IDR/g, '').replace(/RP/g, '').trim();
+    
+    let multiplier = 1;
+    if(cleanStr.includes('K')) {
+        multiplier = 1000;
+        cleanStr = cleanStr.replace('K', '');
+    } else if (cleanStr.includes('M')) { // Jaga-jaga kalau harganya jutaan (1M)
+        multiplier = 1000000;
+        cleanStr = cleanStr.replace('M', '');
+    }
+    
+    return parseFloat(cleanStr) * multiplier;
+}
+
+// 2. Helper: Mengubah angka 187500 menjadi format "IDR 187.5K"
+function formatNumberToPrice(num) {
+    if(num >= 1000) {
+        return "IDR " + (num / 1000).toLocaleString('id-ID') + "K";
+    }
+    return "IDR " + num.toLocaleString('id-ID');
+}
+
+// 3. Fungsi Utama: Apply Voucher
+window.applyVoucher = function() {
+    const input = document.getElementById('voucherInput');
+    const msg = document.getElementById('voucherMsg');
+    const priceField = document.getElementById('orderPrice');
+    const discDisplay = document.getElementById('discountDisplay');
+    
+    const code = input.value.trim().toUpperCase();
+    const rawPriceStr = priceField.value; // Ambil harga asli dari field readonly
+    
+    // Simpan harga asli ke variabel global jika belum ada
+    if(currentBasePrice === 0) {
+        currentBasePrice = parsePriceToNumber(rawPriceStr);
+    }
+    
+    // Reset dulu
+    currentFinalPrice = currentBasePrice;
+    appliedDiscountCode = null;
+    msg.style.display = 'block';
+    discDisplay.style.display = 'none';
+
+    // Cek Database di data.js
+    if(siteData.activeVouchers && siteData.activeVouchers[code]) {
+        const voucher = siteData.activeVouchers[code];
+        
+        // Hitung Diskon
+        let discountAmount = 0;
+        if(voucher.type === 'percent') {
+            discountAmount = currentBasePrice * voucher.value;
+        } else if (voucher.type === 'fixed') {
+            discountAmount = voucher.value;
+        }
+        
+        currentFinalPrice = currentBasePrice - discountAmount;
+        if(currentFinalPrice < 0) currentFinalPrice = 0; // Anti minus
+
+        // Update UI
+        msg.style.color = '#2ed573';
+        msg.innerHTML = `Voucher <strong>${code}</strong> berhasil! Hemat ${formatNumberToPrice(discountAmount)}`;
+        
+        document.getElementById('discAmount').innerText = "-" + formatNumberToPrice(discountAmount);
+        document.getElementById('finalPriceDisplay').innerText = formatNumberToPrice(currentFinalPrice);
+        discDisplay.style.display = 'block';
+        
+        appliedDiscountCode = code; // Simpan status
+        
+        // Animasi feedback
+        input.style.borderColor = '#2ed573';
+    } else {
+        // Gagal
+        msg.style.color = '#ff4757';
+        msg.innerText = "Kode voucher tidak valid atau sudah kadaluwarsa.";
+        input.style.borderColor = '#ff4757';
+    }
+}
+
 // 11. ORDER & PAYMENT LOGIC (Updated PDF with Brief)
 function initOrderPage() {
     const urlParams = new URLSearchParams(window.location.search);
@@ -510,63 +599,74 @@ function initOrderPage() {
     document.getElementById('orderPrice').value = urlParams.get('price') || 'TBD';
 }
 
+// GANTI FUNGSI generateInvoicePDF DI js/main.js DENGAN INI:
+
 function generateInvoicePDF(data) {
-    if (!window.jspdf) {
-        console.error("jsPDF library not loaded");
-        return;
-    }
-    
+    if (!window.jspdf) return;
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
-    
-    doc.setFontSize(22);
-    doc.setFont("helvetica", "bold");
+
+    // HEADER
+    doc.setFontSize(22); 
+    doc.setFont("helvetica", "bold"); 
     doc.text("INVOICE", 105, 20, null, null, "center");
     
-    doc.setFontSize(12);
-    doc.setFont("helvetica", "normal");
+    doc.setFontSize(12); 
+    doc.setFont("helvetica", "normal"); 
     doc.text("USAHADULU STUDIO", 105, 28, null, null, "center");
-    doc.text("Professional Visual Solutions", 105, 34, null, null, "center");
-    
-    doc.setLineWidth(0.5);
     doc.line(20, 40, 190, 40);
-    
+
+    // INFO CLIENT (BAGIAN YANG DIPERBAIKI)
     doc.setFontSize(10);
     doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, 50);
-    doc.text(`Client Name: ${data.name}`, 20, 56);
-    doc.text(`WhatsApp: ${data.phone}`, 20, 62);
-    doc.text(`Email: ${data.email || '-'}`, 20, 68);
-    
-    doc.setFont("helvetica", "bold");
-    doc.text("ORDER DETAILS:", 20, 80);
+    doc.text(`Client: ${data.name}`, 20, 56);
+    doc.text(`Phone: ${data.phone}`, 20, 62);
+    doc.text(`Email: ${data.email || '-'}`, 20, 68); // <--- Baris Email dikembalikan
+
+    // INFO LAYANAN
+    doc.setFont("helvetica", "bold"); 
+    doc.text("ITEM DESCRIPTION:", 20, 80); // Posisi Y=80 aman (di bawah Email Y=68)
     
     doc.setFont("helvetica", "normal");
     doc.text(`Service: ${data.service}`, 20, 88);
     doc.text(`Package: ${data.pkg}`, 20, 94);
 
+    // BRIEF SECTION
     doc.setFont("helvetica", "bold");
-    doc.text("BRIEF / DESCRIPTION:", 20, 105);
-    
+    doc.text("BRIEF / NOTES:", 20, 105);
+
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(10);
-    
-    const splitBrief = doc.splitTextToSize(data.brief || "-", 170); 
+    const splitBrief = doc.splitTextToSize(data.brief || "-", 170);
     doc.text(splitBrief, 20, 112);
     
-    let dynamicY = 112 + (splitBrief.length * 5) + 20; 
+    // Garis Pembatas Bawah (Dinamis mengikuti panjang brief)
+    let yPos = 112 + (splitBrief.length * 5) + 15;
+    doc.line(20, yPos, 190, yPos);
+    yPos += 10;
 
-    doc.setLineWidth(0.5);
-    doc.line(20, dynamicY - 10, 190, dynamicY - 10);
+    // --- LOGIKA HARGA & DISKON ---
+    if(data.voucher) {
+        // Tampilkan harga asli dicoret (simulasi teks)
+        doc.setFont("helvetica", "normal");
+        doc.text(`Original Price:`, 140, yPos, null, null, "right");
+        doc.text(`${data.originalPrice}`, 190, yPos, null, null, "right");
+        yPos += 6;
+        
+        // Tampilkan Voucher Merah
+        doc.setTextColor(255, 0, 0); 
+        doc.text(`Voucher (${data.voucher}):`, 140, yPos, null, null, "right");
+        doc.text(`DISCOUNT APPLIED`, 190, yPos, null, null, "right");
+        yPos += 8;
+        doc.setTextColor(0, 0, 0); // Reset ke Hitam
+    }
 
-    doc.setFontSize(14);
+    // TOTAL HARGA
+    doc.setFontSize(14); 
     doc.setFont("helvetica", "bold");
-    doc.text(`TOTAL PRICE: ${data.price}`, 190, dynamicY, null, null, "right");
-    
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "italic");
-    doc.text("Note: Please proceed to payment via the website to start your project.", 20, dynamicY + 10);
-    
-    doc.save(`Invoice_${data.name.replace(/\s+/g, '_')}.pdf`);
+    doc.text(`TOTAL: ${data.price}`, 190, yPos, null, null, "right");
+
+    // DOWNLOAD
+    doc.save(`Invoice_${data.name}.pdf`);
 }
 
 window.submitOrder = function() {
@@ -576,46 +676,36 @@ window.submitOrder = function() {
     const brief = document.getElementById('clientBrief').value;
     const service = document.getElementById('orderService').value;
     const pkg = document.getElementById('orderPackage').value;
-    const price = document.getElementById('orderPrice').value;
-
-    if(!name || !phone) { alert("Harap lengkapi Nama dan No WA!"); return; }
-
-    const submitBtn = document.querySelector('.submit-order-btn');
-    submitBtn.innerText = "Generating Invoice...";
-    submitBtn.style.opacity = "0.7";
-    submitBtn.disabled = true;
-
-    const orderData = { name, phone, email, service, pkg, price, brief };
-
-    generateInvoicePDF(orderData);
-
-    if(appConfig.googleForm && appConfig.googleForm.actionUrl.includes("docs.google.com")) {
-        const gForm = appConfig.googleForm;
-        const formData = new FormData();
-        
-        if(gForm.inputs.name) formData.append(gForm.inputs.name, name);
-        if(gForm.inputs.phone) formData.append(gForm.inputs.phone, phone);
-        if(gForm.inputs.email) formData.append(gForm.inputs.email, email);
-        if(gForm.inputs.service) formData.append(gForm.inputs.service, service);
-        if(gForm.inputs.pkg) formData.append(gForm.inputs.pkg, pkg);
-        if(gForm.inputs.price) formData.append(gForm.inputs.price, price);
-        if(gForm.inputs.brief) formData.append(gForm.inputs.brief, brief);
-
-        fetch(gForm.actionUrl, {
-            method: 'POST',
-            mode: 'no-cors',
-            body: formData
-        }).then(() => {
-            console.log("Data sent to Google Form successfully.");
-        }).catch(err => {
-            console.error("Failed sending to Google Form:", err);
-        });
+    
+    // PERUBAHAN DISINI: Ambil harga final (diskon) atau harga normal
+    let finalPriceStr = document.getElementById('orderPrice').value;
+    
+    // Jika ada diskon aktif, gunakan harga diskon untuk data order
+    if(appliedDiscountCode && currentFinalPrice > 0) {
+        finalPriceStr = formatNumberToPrice(currentFinalPrice);
     }
 
+    if(!name || !phone || !brief) { alert("Harap lengkapi DATA & DESKRIPSI!"); return; }
+
+    const submitBtn = document.querySelector('.submit-order-btn');
+    submitBtn.innerText = "Processing...";
+    submitBtn.disabled = true;
+
+    // Masukkan data voucher ke object orderData agar tercatat di invoice
+    const orderData = { 
+        name, phone, email, service, pkg, brief, 
+        price: finalPriceStr, 
+        originalPrice: formatNumberToPrice(currentBasePrice || parsePriceToNumber(document.getElementById('orderPrice').value)),
+        voucher: appliedDiscountCode 
+    };
+
+    generateInvoicePDF(orderData); // Panggil fungsi PDF yang sudah diupdate (di bawah)
+
+    // Simpan ke LocalStorage untuk halaman Payment
     localStorage.setItem('currentOrder', JSON.stringify(orderData));
 
     setTimeout(() => {
-        alert("Invoice Downloaded! Redirecting to Payment...");
+        // Redirect ke Payment
         window.location.href = "payment.html";
     }, 2000);
 };

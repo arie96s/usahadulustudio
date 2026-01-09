@@ -242,6 +242,13 @@ const siteData = {
         { name: "Rian Ardiansyah", brand: "Street Rebels", quote: "Sudah 3x order desain kaos di sini. Selalu puas." },
         { name: "Putri Anggraini", brand: "Wedding Client", quote: "Undangan digitalnya elegan dan smooth." }
     ],
+    activeVouchers: {
+        "USDL-2026-X": { type: 'percent', value: 0.25 }, // Diskon 25% (Sesuai promo.html lama)
+        "USDL-2026-IG": { type: 'percent', value: 0.25 }, // Diskon 25% (Sesuai promo.html baru)
+        "MAGOS-VIP": { type: 'fixed', value: 50000 },    // Potongan fix 50 Ribu (Contoh)
+        "ADMIN-FREE": { type: 'percent', value: 1.00 }   // Gratis 100% (Untuk tes)
+    },
+
 
     // --- DATA SHOP ASSETS (MULTI-CURRENCY READY) ---
     shop: [

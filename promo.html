@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>USAHADULU | Special Offer</title>
+    <link rel="icon" type="image/png" href="img/logo_ambigram.png">
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- KHUSUS HALAMAN PROMO (SKULL PATTERN) --- */
+        body {
+            /* Fallback pattern jika gambar belum diupload */
+            background-color: #050505;
+            background-image: url('img/skull_pattern.png')
+-                radial-gradient(#151515 15%, transparent 16%),
+                radial-gradient(#151515 15%, transparent 16%);
+            background-size: 60px 60px;
+            background-position: 0 0, 30px 30px;
+            /* GANTI URL DI BAWAH INI DENGAN FILE GAMBAR SKULL ANDA (cth: img/skull_pat.png) */
+            /* background-image: url('img/skull_pattern.png'); */
+            /* background-repeat: repeat; */
+            /* background-size: 100px; */
+            
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .promo-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.95) 90%);
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .promo-card {
+            position: relative;
+            z-index: 10;
+            background: rgba(20, 20, 20, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 40px;
+            border-radius: 16px;
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            animation: floatUp 0.8s ease-out;
+        }
+
+        .promo-label {
+            display: inline-block;
+            background: #fff;
+            color: #000;
+            font-weight: 900;
+            font-size: 10px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+        }
+
+        .promo-title {
+            font-size: 32px;
+            font-weight: 900;
+            color: #fff;
+            margin-bottom: 10px;
+            line-height: 1.2;
+            text-transform: uppercase;
+        }
+
+        .promo-desc {
+            color: #aaa;
+            font-size: 14px;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        /* Voucher Area */
+        .voucher-box {
+            background: #000;
+            border: 1px dashed #444;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .voucher-code {
+            font-family: monospace;
+            font-size: 24px;
+            color: #fff;
+            font-weight: bold;
+            letter-spacing: 5px;
+            display: none; /* Hidden by default for safety */
+        }
+        
+        .voucher-mask {
+            font-size: 18px;
+            color: #555;
+            font-weight: bold;
+            display: block;
+        }
+
+        .status-msg {
+            font-size: 12px;
+            color: #ff4757;
+            margin-top: 10px;
+            font-weight: bold;
+            display: none;
+        }
+
+        .action-btn {
+            width: 100%;
+            padding: 15px;
+            background: #fff;
+            color: #000;
+            border: none;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.3s;
+        }
+        
+        .action-btn:disabled {
+            background: #333;
+            color: #666;
+            cursor: not-allowed;
+        }
+
+        .action-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(255,255,255,0.2);
+        }
+
+        .back-link {
+            display: block;
+            margin-top: 20px;
+            color: #666;
+            font-size: 12px;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        .back-link:hover { color: #fff; }
+
+        /* Loader specific for validation */
+        .validating-spinner {
+            display: inline-block;
+            width: 15px; height: 15px;
+            border: 2px solid #fff;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+            vertical-align: middle;
+            display: none;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        @keyframes floatUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+    </style>
+</head>
+<body>
+    <div id="cursor"></div>
+    <div class="promo-overlay"></div>
+
+    <div class="promo-card">
+        <span class="promo-label">LIMITED OFFER</span>
+        <h1 class="promo-title" id="displayTitle">LOADING...</h1>
+        <p class="promo-desc" id="displayDesc">Memeriksa ketersediaan voucher...</p>
+
+        <div class="voucher-box">
+            <span class="voucher-mask" id="voucherMask">●●●●●●●●</span>
+            <span class="voucher-code" id="voucherCode"></span> </div>
+
+        <button class="action-btn hover-target" id="claimBtn" onclick="validateAndClaim()">
+            <span class="validating-spinner" id="spinner"></span>
+            <span id="btnText">KLAIM VOUCHER</span>
+        </button>
+
+        <p class="status-msg" id="statusMessage"></p>
+
+        <a href="index.html" class="back-link hover-target">KEMBALI KE BERANDA</a>
+    </div>
+
+    <script src="js/main.js"></script>
+    <script>
+        // ==========================================
+        //  KONFIGURASI PROMO
+        // ==========================================
+        const promoConfig = {
+            title: "FLASH SALE DESAIN",
+            description: "Diskon 25% khusus pengunjung dari Story Instagram. Slot terbatas!",
+            code: "USDL-2026-IG", 
+            
+            // Format Tanggal: YYYY-MM-DDTHH:MM:SS (Tahun-Bulan-TglTJam:Menit:Detik)
+            expiryDate: "2026-02-20T23:59:00", 
+            
+            isActive: true // Ubah ke false untuk mematikan paksa
+        };
+
+        // ==========================================
+        //  LOGIKA UTAMA (REVISI FIX)
+        // ==========================================
+        const els = {
+            title: document.getElementById('displayTitle'),
+            desc: document.getElementById('displayDesc'),
+            mask: document.getElementById('voucherMask'),
+            code: document.getElementById('voucherCode'),
+            btn: document.getElementById('claimBtn'),
+            btnText: document.getElementById('btnText'),
+            msg: document.getElementById('statusMessage'),
+            spinner: document.getElementById('spinner')
+        };
+
+        // Render Teks
+        els.title.innerText = promoConfig.title;
+        els.desc.innerText = promoConfig.description;
+
+        // Fungsi Mendapatkan Waktu Paling Akurat
+        async function getReliableTime() {
+            try {
+                // CARA 1: Coba WorldTimeAPI (CORS Friendly)
+                const response = await fetch('https://worldtimeapi.org/api/timezone/Asia/Jakarta', { 
+                    signal: AbortSignal.timeout(3000) // Timeout 3 detik biar ga lama
+                });
+                if (!response.ok) throw new Error('API Error');
+                const data = await response.json();
+                console.log("Time Source: API Server");
+                return new Date(data.datetime);
+            } catch (err) {
+                try {
+                    // CARA 2: Coba Ambil Waktu Server Website (Date Header)
+                    // Ini sangat akurat jika website sudah dihosting (github pages)
+                    const headerReq = await fetch(window.location.href, { method: 'HEAD' });
+                    const serverDate = headerReq.headers.get('date');
+                    if (!serverDate) throw new Error('No Date Header');
+                    console.log("Time Source: Website Header");
+                    return new Date(serverDate);
+                } catch (e) {
+                    // CARA 3: Fallback ke Jam Lokal HP (Darurat)
+                    // Agar user tetap bisa klaim meski API mati
+                    console.log("Time Source: Local Device (Fallback)");
+                    return new Date();
+                }
+            }
+        }
+
+        async function validateAndClaim() {
+            // UI Loading State
+            els.btn.disabled = true;
+            els.btnText.innerText = "VERIFIKASI...";
+            els.spinner.style.display = "inline-block";
+            els.msg.style.display = "none";
+            els.msg.innerText = "";
+
+            // 1. Cek Kill Switch Manual
+            if (!promoConfig.isActive) {
+                showError("MAAF, PROMO DINONAKTIFKAN.");
+                return;
+            }
+
+            try {
+                // 2. Ambil Waktu
+                const now = await getReliableTime();
+                const expiryTime = new Date(promoConfig.expiryDate);
+
+                // 3. Bandingkan
+                if (now > expiryTime) {
+                    showError("VOUCHER SUDAH KEDALUWARSA (EXPIRED).");
+                } else {
+                    // Simulasi delay sedikit biar terasa 'checking'
+                    setTimeout(() => showSuccess(), 800);
+                }
+
+            } catch (error) {
+                console.error(error);
+                // Jika error parah, fallback ke local time logic
+                const localNow = new Date();
+                if (localNow > new Date(promoConfig.expiryDate)) {
+                    showError("EXPIRED.");
+                } else {
+                    showSuccess();
+                }
+            }
+        }
+
+        function showSuccess() {
+            els.mask.style.display = 'none';
+            els.code.style.display = 'block';
+            els.code.innerText = promoConfig.code;
+            
+            // Ubah tombol jadi Copy
+            els.btn.disabled = false; 
+            els.btnText.innerText = "COPY CODE";
+            els.btn.onclick = copyToClipboard; 
+            els.btn.style.background = "#2ed573"; 
+            els.btn.style.color = "#fff";
+            
+            els.spinner.style.display = "none";
+            
+            els.msg.style.display = 'block';
+            els.msg.style.color = '#2ed573';
+            els.msg.innerText = "Valid! Kode berhasil dibuka.";
+        }
+
+        function showError(text) {
+            els.btn.disabled = true;
+            els.btnText.innerText = "TIDAK TERSEDIA";
+            els.spinner.style.display = "none";
+            
+            els.msg.style.display = 'block';
+            els.msg.style.color = '#ff4757';
+            els.msg.innerText = text;
+        }
+
+        function copyToClipboard() {
+            navigator.clipboard.writeText(promoConfig.code);
+            const originalText = els.btnText.innerText;
+            els.btnText.innerText = "COPIED!";
+            setTimeout(() => els.btnText.innerText = "COPY CODE", 2000);
+        }
+    </script>
+</body>
+</html>
