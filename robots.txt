@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+
+# Pastikan Google bisa membaca file CSS dan JS agar tampilan di mata Google bagus (Mobile Friendly)
+Allow: /css/
+Allow: /js/
+Allow: /img/
+
+# Arahkan bot langsung ke Peta Situs
+Sitemap: https://arie96s.github.io/usahadulustudio/sitemap.xml
