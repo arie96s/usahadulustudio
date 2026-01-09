@@ -114,5 +114,54 @@
             }
         }, 4000);
     </script>
+<form id="orderForm">
+    <input type="text" id="nama" placeholder="Nama Pemesan" required>
+    <input type="text" id="voucher" placeholder="Kode Voucher">
+    <button type="submit">Kirim Pesanan</button>
+</form>
+
+<script type="module">
+  // 1. Import fungsi yang dibutuhkan dari Firebase
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+  // 2. Tempel Konfigurasi Firebase Anda di sini (DARI LANGKAH 3)
+  const firebaseConfig = {
+    apiKey: "AIzaSyDxxxx...",
+    authDomain: "proyek-anda.firebaseapp.com",
+    projectId: "proyek-anda",
+    storageBucket: "proyek-anda.appspot.com",
+    messagingSenderId: "123456...",
+    appId: "1:123456..."
+  };
+
+  // 3. Inisialisasi Firebase
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // 4. Logika Mengirim Data saat Form disubmit
+  document.getElementById('orderForm').addEventListener('submit', async (e) => {
+      e.preventDefault(); // Mencegah halaman refresh
+      
+      const namaUser = document.getElementById('nama').value;
+      const kodeVoucher = document.getElementById('voucher').value;
+
+      try {
+          // Kirim data ke koleksi bernama 'pesanan' di Firestore
+          const docRef = await addDoc(collection(db, "pesanan"), {
+              nama: namaUser,
+              voucher: kodeVoucher,
+              tanggal: new Date()
+          });
+          
+          alert("Pesanan berhasil masuk! ID: " + docRef.id);
+          document.getElementById('orderForm').reset(); // Kosongkan form
+      } catch (e) {
+          console.error("Error adding document: ", e);
+          alert("Gagal mengirim data. Cek konsol browser.");
+      }
+  });
+</script>
+
 </body>
 </html>
