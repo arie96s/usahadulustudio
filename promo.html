@@ -11,24 +11,25 @@
     <style>
         /* --- KHUSUS HALAMAN PROMO (SKULL PATTERN) --- */
         body {
-            /* Fallback pattern jika gambar belum diupload */
-            background-color: #050505;
-            background-image: url('img/skull_pattern.png')
--                radial-gradient(#151515 15%, transparent 16%),
-                radial-gradient(#151515 15%, transparent 16%);
-            background-size: 60px 60px;
-            background-position: 0 0, 30px 30px;
-            /* GANTI URL DI BAWAH INI DENGAN FILE GAMBAR SKULL ANDA (cth: img/skull_pat.png) */
-            /* background-image: url('img/skull_pattern.png'); */
-            /* background-repeat: repeat; */
-            /* background-size: 100px; */
-            
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            overflow: hidden;
-        }
+    background-color: #050505;
+    
+    /* --- BAGIAN PERBAIKAN --- */
+    /* Pastikan nama file sesuai (huruf besar/kecil berpengaruh) */
+    background-image: url('img/skull_pattern.png'); 
+    
+    /* Agar gambar diulang-ulang memenuhi layar */
+    background-repeat: repeat; 
+    
+    /* Ukuran gambar pattern (sesuaikan angka ini jika gambar terlalu besar/kecil) */
+    background-size: 100px; 
+    /* ------------------------ */
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    overflow: hidden;
+}
 
         .promo-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
