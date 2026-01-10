@@ -115,66 +115,70 @@
         }, 4000);
     </script>
 <script type="module">
-  // 1. Import dari CDN (URL Lengkap) agar jalan di Browser
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
-  import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-  // Analytics tidak wajib untuk database, kita skip dulu biar simple
+      // --- BAGIAN IMPORT (CDN v12.7.0 sesuai request) ---
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+      import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-analytics.js";
+      // Saya tambahkan Firestore (Database) dengan versi yang sama:
+      import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
-  // 2. Config ASLI USAHADULU Studio (Sudah saya masukkan)
-  const firebaseConfig = {
-    apiKey: "AIzaSyBW0DwqgnbXlDW7hR_Trlpge5LKm2dwXjk",
-    authDomain: "usahadulu-studio.firebaseapp.com",
-    projectId: "usahadulu-studio",
-    storageBucket: "usahadulu-studio.firebasestorage.app",
-    messagingSenderId: "196725488044",
-    appId: "1:196725488044:web:0d2486d434cd4dd8662209",
-    measurementId: "G-71T7QLRCQ6"
-  };
+      // --- KONFIGURASI (Milik Anda) ---
+      const firebaseConfig = {
+        apiKey: "AIzaSyBW0DwqgnbXlDW7hR_Trlpge5LKm2dwXjk",
+        authDomain: "usahadulu-studio.firebaseapp.com",
+        projectId: "usahadulu-studio",
+        storageBucket: "usahadulu-studio.firebasestorage.app",
+        messagingSenderId: "196725488044",
+        appId: "1:196725488044:web:0d2486d434cd4dd8662209",
+        measurementId: "G-71T7QLRCQ6"
+      };
 
-  // 3. Initialize Firebase & Database
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
+      // --- INISIALISASI ---
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+      const db = getFirestore(app); // Mengaktifkan Database
 
-  console.log("Firebase Siap! Menunggu input...");
+      console.log("Sistem Siap. Menunggu input...");
 
-  // 4. Logika Kirim Data
-  const formOrder = document.getElementById('orderForm');
-  
-  if (formOrder) {
-      formOrder.addEventListener('submit', async (e) => {
-          e.preventDefault();
-          console.log("Tombol ditekan. Memproses...");
+      // --- LOGIKA PENGIRIMAN DATA ---
+      const form = document.getElementById('orderForm');
 
-          // AMBIL DATA DARI HTML (Sesuaikan ID di sini jika beda)
-          // Pastikan di HTML ada <input id="nama"> dan <input id="voucher">
-          const namaUser = document.getElementById('nama') ? document.getElementById('nama').value : "Tanpa Nama";
-          const kodeVoucher = document.getElementById('voucher') ? document.getElementById('voucher').value : "-";
-
-          try {
-              // Kirim ke koleksi 'pesanan'
-              const docRef = await addDoc(collection(db, "pesanan"), {
-                  nama: namaUser,
-                  voucher: kodeVoucher,
-                  tanggal: new Date().toString() // Biar format tanggal mudah dibaca
-              });
+      // Cek apakah form ada di halaman
+      if (form) {
+          form.addEventListener('submit', async (e) => {
+              e.preventDefault(); // Mencegah halaman reload
               
-              console.log("SUKSES! ID Dokumen:", docRef.id);
-              alert("✅ Data Berhasil Masuk ke Database Firebase!");
-              formOrder.reset(); 
-          } catch (error) {
-              console.error("GAGAL KIRIM:", error);
-              
-              // Cek Error Permission
-              if(error.code === "permission-denied") {
-                  alert("⛔ Gagal: Database terkunci. Cek tab 'Rules' di Firebase Console.");
-              } else {
-                  alert("❌ Error: " + error.message);
+              // Ambil nilai dari input HTML
+              const namaValue = document.getElementById('nama').value;
+              const voucherValue = document.getElementById('voucher').value;
+
+              console.log("Mengirim data...", namaValue, voucherValue);
+
+              try {
+                  // Proses simpan ke Firebase (Koleksi: 'pesanan')
+                  const docRef = await addDoc(collection(db, "pesanan"), {
+                      nama: namaValue,
+                      voucher: voucherValue,
+                      waktu: new Date().toString() // Mencatat waktu otomatis
+                  });
+
+                  console.log("Berhasil! ID:", docRef.id);
+                  alert("✅ SUKSES! Pesanan berhasil dikirim ke Database.");
+                  form.reset(); // Kosongkan form setelah sukses
+
+              } catch (error) {
+                  console.error("Error saat mengirim:", error);
+                  
+                  if (error.code === "permission-denied") {
+                      alert("⛔ GAGAL: Izin ditolak. Pastikan 'Rules' di Firebase Console sudah diatur ke 'true'.");
+                  } else {
+                      alert("❌ TERJADI ERROR: " + error.message);
+                  }
               }
-          }
-      });
-  } else {
-      console.error("⚠️ Error: Form dengan id='orderForm' tidak ditemukan di HTML.");
-  }
-</script>
+          });
+      } else {
+          console.error("Form tidak ditemukan! Pastikan id='orderForm' ada di HTML.");
+      }
+    </script>
+    
 </body>
 </html>
