@@ -146,26 +146,26 @@
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 
-  // 4. Logika Mengirim Data saat Form disubmit
-  document.getElementById('orderForm').addEventListener('submit', async (e) => {
-      e.preventDefault(); // Mencegah halaman refresh
-      
+  /document.getElementById('orderForm').addEventListener('submit', async (e) => {
+      e.preventDefault(); 
+      console.log("1. Tombol ditekan"); // Cekpoint 1
+
       const namaUser = document.getElementById('nama').value;
       const kodeVoucher = document.getElementById('voucher').value;
+      console.log("2. Data diambil:", namaUser, kodeVoucher); // Cekpoint 2
 
       try {
-          // Kirim data ke koleksi bernama 'pesanan' di Firestore
+          console.log("3. Mencoba kirim ke Firebase..."); // Cekpoint 3
           const docRef = await addDoc(collection(db, "pesanan"), {
               nama: namaUser,
               voucher: kodeVoucher,
               tanggal: new Date()
           });
-          
-          alert("Pesanan berhasil masuk! ID: " + docRef.id);
-          document.getElementById('orderForm').reset(); // Kosongkan form
+          console.log("4. Berhasil! ID:", docRef.id); // Cekpoint 4
+          alert("Pesanan berhasil!");
       } catch (e) {
-          console.error("Error adding document: ", e);
-          alert("Gagal mengirim data. Cek konsol browser.");
+          console.error("ERROR TERJADI:", e); // Ini akan memunculkan detail error
+          alert("Gagal: " + e.message);
       }
   });
 </script>
