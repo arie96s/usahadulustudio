@@ -114,20 +114,14 @@
             }
         }, 4000);
     </script>
-
-    <form id="orderForm">
-    <input type="text" id="nama" placeholder="Nama Pemesan" required>
-    <input type="text" id="voucher" placeholder="Kode Voucher">
-    <button type="submit">Kirim Pesanan</button>
-</form>
+    
     <script type="module">
-  // --- 1. IMPORT FIREBASE (Versi 12.7.0) ---
+  // --- 1. IMPORT FIREBASE CORE ---
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-analytics.js";
-  // SAYA TAMBAHKAN INI AGAR BISA SIMPAN DATA KE DATABASE:
-  import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+  import { getFirestore } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
-  // --- 2. KONFIGURASI (PUNYA ANDA) ---
+  // --- 2. KONFIGURASI USAHADULU STUDIO ---
   const firebaseConfig = {
     apiKey: "AIzaSyBW0DwqgnbXlDW7hR_Trlpge5LKm2dwXjk",
     authDomain: "usahadulu-studio.firebaseapp.com",
@@ -138,51 +132,16 @@
     measurementId: "G-71T7QLRCQ6"
   };
 
-  // --- 3. INISIALISASI ---
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-  const db = getFirestore(app); // Mengaktifkan Database
+  // --- 3. INISIALISASI BACKEND (STANDBY) ---
+  try {
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app); // Analytics aktif mencatat pengunjung
+      const db = getFirestore(app);        // Database aktif (standby)
 
-  // --- 4. LOGIKA KIRIM PESANAN ---
-  // Pastikan ID form di HTML anda adalah: id="orderForm"
-  const orderForm = document.getElementById('orderForm');
-
-  if (orderForm) {
-    orderForm.addEventListener('submit', async (e) => {
-      e.preventDefault(); // Mencegah reload halaman
+      console.log("✅ Firebase Connected: Siap digunakan.");
       
-      // Ambil tombol submit agar bisa diubah textnya loading
-      const btnSubmit = orderForm.querySelector('button[type="submit"]');
-      const textAsli = btnSubmit ? btnSubmit.innerText : "Kirim";
-      if(btnSubmit) btnSubmit.innerText = "Mengirim...";
-
-      // Ambil data input (Pastikan ID input di HTML sesuai)
-      const namaVal = document.getElementById('nama') ? document.getElementById('nama').value : "Tanpa Nama";
-      const voucherVal = document.getElementById('voucher') ? document.getElementById('voucher').value : "-";
-      
-      try {
-        // Kirim ke Firebase (Nama tabel: 'pesanan')
-        const docRef = await addDoc(collection(db, "pesanan"), {
-          nama: namaVal,
-          voucher: voucherVal,
-          waktu: new Date().toString()
-        });
-        
-        // JIKA SUKSES
-        alert("✅ Pesanan Berhasil Terkirim! ID: " + docRef.id);
-        orderForm.reset(); // Kosongkan form
-
-      } catch (error) {
-        // JIKA GAGAL
-        console.error("Error Firebase:", error);
-        alert("❌ Gagal mengirim: " + error.message + "\n(Cek Console atau Security Rules)");
-      } finally {
-        // Kembalikan tombol seperti semula
-        if(btnSubmit) btnSubmit.innerText = textAsli;
-      }
-    });
-  } else {
-    console.error("⚠️ EROR: Form dengan id='orderForm' tidak ditemukan. Cek HTML Anda.");
+  } catch (error) {
+      console.error("❌ Firebase Error:", error);
   }
 </script>
     
