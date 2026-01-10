@@ -120,20 +120,19 @@
     <button type="submit">Kirim Pesanan</button>
 </form>
 
+<form id="orderForm">
+    <input type="text" id="nama" placeholder="Nama Pemesan" required>
+    <input type="text" id="voucher" placeholder="Kode Voucher">
+    <button type="submit">Kirim Pesanan</button>
+</form>
+
 <script type="module">
   // 1. Import fungsi yang dibutuhkan dari Firebase
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
   import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
- // Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
+  // 2. Tempel Konfigurasi Firebase Anda di sini (DARI LANGKAH 3)
+  const firebaseConfig = {
   apiKey: "AIzaSyBW0DwqgnbXlDW7hR_Trlpge5LKm2dwXjk",
   authDomain: "usahadulu-studio.firebaseapp.com",
   projectId: "usahadulu-studio",
@@ -143,13 +142,9 @@ const firebaseConfig = {
   measurementId: "G-71T7QLRCQ6"
 };
 
-// Initialize Firebase
+  // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
-
-  // 3. Inisialisasi Firebase
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
 
   // 4. Logika Mengirim Data saat Form disubmit
   document.getElementById('orderForm').addEventListener('submit', async (e) => {
