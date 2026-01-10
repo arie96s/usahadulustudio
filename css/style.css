@@ -619,3 +619,21 @@ footer {
 .currency-btn:hover:not(.active) {
     color: #fff;
 }
+/* --- ANIMASI TESTIMONI BARU (GLOW) --- */
+@keyframes glowAnimation {
+    0% { box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px #005ce6; border-color: #005ce6; }
+    50% { box-shadow: 0 0 20px #fff, 0 0 30px #005ce6, 0 0 40px #005ce6; border-color: #fff; transform: scale(1.02); }
+    100% { box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px #005ce6; border-color: #005ce6; }
+}
+
+.testi-card.new-entry {
+    animation: glowAnimation 2s infinite alternate;
+    border: 2px solid #fff;
+    background: #050505;
+    z-index: 10;
+}
+
+/* Sembunyikan form secara default, hanya muncul via JS */
+.review-input-section {
+    display: none; 
+}
