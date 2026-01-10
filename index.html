@@ -115,70 +115,70 @@
         }, 4000);
     </script>
 <script type="module">
-      // --- BAGIAN IMPORT (CDN v12.7.0 sesuai request) ---
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-      import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-analytics.js";
-      // Saya tambahkan Firestore (Database) dengan versi yang sama:
-      import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+  // --- 1. IMPORT FIREBASE (Versi 12.7.0) ---
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-analytics.js";
+  // SAYA TAMBAHKAN INI AGAR BISA SIMPAN DATA KE DATABASE:
+  import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
-      // --- KONFIGURASI (Milik Anda) ---
-      const firebaseConfig = {
-        apiKey: "AIzaSyBW0DwqgnbXlDW7hR_Trlpge5LKm2dwXjk",
-        authDomain: "usahadulu-studio.firebaseapp.com",
-        projectId: "usahadulu-studio",
-        storageBucket: "usahadulu-studio.firebasestorage.app",
-        messagingSenderId: "196725488044",
-        appId: "1:196725488044:web:0d2486d434cd4dd8662209",
-        measurementId: "G-71T7QLRCQ6"
-      };
+  // --- 2. KONFIGURASI (PUNYA ANDA) ---
+  const firebaseConfig = {
+    apiKey: "AIzaSyBW0DwqgnbXlDW7hR_Trlpge5LKm2dwXjk",
+    authDomain: "usahadulu-studio.firebaseapp.com",
+    projectId: "usahadulu-studio",
+    storageBucket: "usahadulu-studio.firebasestorage.app",
+    messagingSenderId: "196725488044",
+    appId: "1:196725488044:web:0d2486d434cd4dd8662209",
+    measurementId: "G-71T7QLRCQ6"
+  };
 
-      // --- INISIALISASI ---
-      const app = initializeApp(firebaseConfig);
-      const analytics = getAnalytics(app);
-      const db = getFirestore(app); // Mengaktifkan Database
+  // --- 3. INISIALISASI ---
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+  const db = getFirestore(app); // Mengaktifkan Database
 
-      console.log("Sistem Siap. Menunggu input...");
+  // --- 4. LOGIKA KIRIM PESANAN ---
+  // Pastikan ID form di HTML anda adalah: id="orderForm"
+  const orderForm = document.getElementById('orderForm');
 
-      // --- LOGIKA PENGIRIMAN DATA ---
-      const form = document.getElementById('orderForm');
+  if (orderForm) {
+    orderForm.addEventListener('submit', async (e) => {
+      e.preventDefault(); // Mencegah reload halaman
+      
+      // Ambil tombol submit agar bisa diubah textnya loading
+      const btnSubmit = orderForm.querySelector('button[type="submit"]');
+      const textAsli = btnSubmit ? btnSubmit.innerText : "Kirim";
+      if(btnSubmit) btnSubmit.innerText = "Mengirim...";
 
-      // Cek apakah form ada di halaman
-      if (form) {
-          form.addEventListener('submit', async (e) => {
-              e.preventDefault(); // Mencegah halaman reload
-              
-              // Ambil nilai dari input HTML
-              const namaValue = document.getElementById('nama').value;
-              const voucherValue = document.getElementById('voucher').value;
+      // Ambil data input (Pastikan ID input di HTML sesuai)
+      const namaVal = document.getElementById('nama') ? document.getElementById('nama').value : "Tanpa Nama";
+      const voucherVal = document.getElementById('voucher') ? document.getElementById('voucher').value : "-";
+      
+      try {
+        // Kirim ke Firebase (Nama tabel: 'pesanan')
+        const docRef = await addDoc(collection(db, "pesanan"), {
+          nama: namaVal,
+          voucher: voucherVal,
+          waktu: new Date().toString()
+        });
+        
+        // JIKA SUKSES
+        alert("✅ Pesanan Berhasil Terkirim! ID: " + docRef.id);
+        orderForm.reset(); // Kosongkan form
 
-              console.log("Mengirim data...", namaValue, voucherValue);
-
-              try {
-                  // Proses simpan ke Firebase (Koleksi: 'pesanan')
-                  const docRef = await addDoc(collection(db, "pesanan"), {
-                      nama: namaValue,
-                      voucher: voucherValue,
-                      waktu: new Date().toString() // Mencatat waktu otomatis
-                  });
-
-                  console.log("Berhasil! ID:", docRef.id);
-                  alert("✅ SUKSES! Pesanan berhasil dikirim ke Database.");
-                  form.reset(); // Kosongkan form setelah sukses
-
-              } catch (error) {
-                  console.error("Error saat mengirim:", error);
-                  
-                  if (error.code === "permission-denied") {
-                      alert("⛔ GAGAL: Izin ditolak. Pastikan 'Rules' di Firebase Console sudah diatur ke 'true'.");
-                  } else {
-                      alert("❌ TERJADI ERROR: " + error.message);
-                  }
-              }
-          });
-      } else {
-          console.error("Form tidak ditemukan! Pastikan id='orderForm' ada di HTML.");
+      } catch (error) {
+        // JIKA GAGAL
+        console.error("Error Firebase:", error);
+        alert("❌ Gagal mengirim: " + error.message + "\n(Cek Console atau Security Rules)");
+      } finally {
+        // Kembalikan tombol seperti semula
+        if(btnSubmit) btnSubmit.innerText = textAsli;
       }
-    </script>
+    });
+  } else {
+    console.error("⚠️ EROR: Form dengan id='orderForm' tidak ditemukan. Cek HTML Anda.");
+  }
+</script>
     
 </body>
 </html>
