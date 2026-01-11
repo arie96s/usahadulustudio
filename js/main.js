@@ -60,8 +60,14 @@ window.addEventListener('load', () => {
         renderPortfolio('all');
         renderFilters();
     }
+   // --- AREA PERBAIKAN ---
     if (document.getElementById('shopGrid')) {
-        renderShop('all'); // Shop render dipanggil disini
+        renderShop('all'); 
+    }
+    
+    // PASTIKAN INI DI LUAR KURUNG KURAWAL SHOP
+    if (document.getElementById('blogGrid')) {
+        renderBlog();
     }
     if (document.getElementById('paymentGatewayContainer')) {
         renderOrderSummary(); 
@@ -784,4 +790,63 @@ window.openXenditDemo = function(price) {
     modal.innerHTML = html;
     modal.classList.add('show');
     bindHoverEvents();
+    
+    },
+   // --- RENDER BLOG (ARTIKEL) ---
+window.renderBlog = function() {
+    const grid = document.getElementById('blogGrid');
+    if(!grid) return;
+    
+    // Cek apakah data blog ada di data.js
+    if(!siteData.blog || siteData.blog.length === 0) {
+        grid.innerHTML = '<p style="text-align:center; width:100%;">Belum ada artikel tersedia.</p>';
+        return;
+    }
+    
+    grid.innerHTML = ''; // Hapus tulisan "Memuat artikel..."
+
+    siteData.blog.forEach(post => {
+        const card = document.createElement('div');
+        card.className = 'blog-card hover-target';
+        // Saat diklik pindah ke halaman artikel
+        card.onclick = (e) => {
+    e.preventDefault(); // Mencegah pindah langsung
+    smoothNavigate(post.link); // Panggil animasi dulu
+};
+        
+        card.innerHTML = `
+            <div class="blog-thumb">
+                <img src="${post.img}" alt="${post.title}" loading="lazy">
+                <div class="blog-cat">${post.category}</div>
+            </div>
+            <div class="blog-info">
+                <div class="blog-meta">${post.date}</div>
+                <h3 class="blog-title">${post.title}</h3>
+                <p class="blog-excerpt">${post.excerpt}</p>
+                <span class="read-more-btn">BACA SELENGKAPNYA &rarr;</span>
+            </div>
+        `;
+        grid.appendChild(card);
+    });
+    
+    // Aktifkan efek cursor custom
+    if(typeof bindHoverEvents === 'function') bindHoverEvents(); 
+    // --- FUNGSI TRANSISI HALUS (SMOOTH PAGE TRANSITION) ---
+window.smoothNavigate = function(url) {
+    const preloader = document.getElementById('preloader');
+    
+    if(preloader) {
+        // 1. Munculkan Layar Hitam (Fade Out)
+        preloader.style.visibility = 'visible';
+        preloader.style.opacity = '1';
+        
+        // 2. Tunggu animasi CSS selesai (0.8 detik), baru pindah url
+        setTimeout(() => {
+            window.location.href = url;
+        }, 800); // 800ms sesuai durasi transisi di style.css
+    } else {
+        // Fallback jika preloader tidak ada
+        window.location.href = url;
+    }
+}
 }

@@ -35,7 +35,10 @@ ul { list-style: none; }
 #cursor {
     position: fixed; top: 0; left: 0; width: 20px; height: 20px;
     border: 2px solid #fff; border-radius: 50%; pointer-events: none;
-    z-index: 9999; transition: width 0.2s, height 0.2s, background-color 0.2s; 
+    
+    z-index: 999999; /* <--- UBAH JADI INI (Angka tertinggi) */
+    
+    transition: width 0.2s, height 0.2s, background-color 0.2s; 
     mix-blend-mode: difference; will-change: transform;
 }
 #cursor.hovered { width: 50px; height: 50px; background-color: rgba(255, 255, 255, 0.2); border-color: transparent; }
@@ -305,7 +308,42 @@ header.menu-active { background: #000; }
     border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 9px;
     font-weight: bold; border-radius: 20px; z-index: 2;
 }
+/* --- BLOG & ARTICLE STYLES --- */
+.blog-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 30px; margin-bottom: 50px;
+}
+.blog-card {
+    background: #111; border: 1px solid #333; border-radius: 8px; overflow: hidden;
+    transition: all 0.3s ease; display: flex; flex-direction: column;
+}
+.blog-card:hover { transform: translateY(-5px); border-color: #fff; }
+.blog-thumb { position: relative; width: 100%; aspect-ratio: 16/9; overflow: hidden; }
+.blog-thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; filter: grayscale(100%); }
+.blog-card:hover .blog-thumb img { transform: scale(1.1); filter: grayscale(0%); }
+.blog-cat {
+    position: absolute; top: 10px; left: 10px; background: #fff; color: #000;
+    padding: 3px 8px; font-size: 10px; font-weight: 900; text-transform: uppercase;
+}
+.blog-info { padding: 20px; flex: 1; display: flex; flex-direction: column; }
+.blog-meta { font-size: 11px; color: #666; margin-bottom: 10px; font-family: monospace; }
+.blog-title { font-size: 18px; color: #fff; margin-bottom: 10px; line-height: 1.4; font-weight: bold; }
+.blog-excerpt { font-size: 13px; color: #aaa; line-height: 1.6; margin-bottom: 20px; flex: 1; }
+.read-more-btn { font-size: 11px; font-weight: bold; color: #fff; text-transform: uppercase; letter-spacing: 1px; margin-top: auto; }
 
+/* Styles untuk Halaman Detail Artikel (Single Post) */
+.article-container { max-width: 700px; margin: 0 auto; }
+.article-header { text-align: center; margin-bottom: 40px; border-bottom: 1px dashed #333; padding-bottom: 30px; }
+.article-cat-tag { display: inline-block; border: 1px solid #555; padding: 5px 15px; border-radius: 50px; font-size: 11px; margin-bottom: 15px; color: #ccc; }
+.article-date { font-size: 12px; color: #666; margin-top: 10px; display: block; }
+.article-body { font-size: 16px; line-height: 1.8; color: #ccc; text-align: justify; }
+.article-body p { margin-bottom: 20px; }
+.article-body h2 { color: #fff; margin-top: 40px; margin-bottom: 15px; font-size: 22px; border-left: 3px solid #fff; padding-left: 15px; }
+.article-body ul { margin-bottom: 20px; padding-left: 20px; list-style: disc; color: #aaa; }
+.article-cta-box {
+    background: #111; border: 1px dashed #fff; padding: 30px; text-align: center;
+    margin: 60px 0; border-radius: 12px;
+}
 /* --- FOOTER & WA --- */
 footer {
     width: 100%; background-color: #000; color: #fff; padding: 60px 40px;
@@ -636,4 +674,96 @@ footer {
 /* Sembunyikan form secara default, hanya muncul via JS */
 .review-input-section {
     display: none; 
+}
+
+/* --- LEAD MAGNET POPUP --- */
+.lead-modal {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.9); z-index: 10000;
+    display: flex; justify-content: center; align-items: center;
+    opacity: 0; pointer-events: none; transition: all 0.5s ease;
+    backdrop-filter: blur(5px);
+}
+.lead-modal.show { opacity: 1; pointer-events: auto; }
+
+.lead-content {
+    background: #111; border: 1px solid #333; width: 90%; max-width: 800px;
+    display: flex; border-radius: 12px; overflow: hidden; position: relative;
+    box-shadow: 0 0 50px rgba(0,0,0,0.8);
+    transform: translateY(50px); transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.lead-modal.show .lead-content { transform: translateY(0); }
+
+.lead-left { flex: 1; display: none; } /* Default hidden di HP */
+.lead-left img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%); }
+.lead-right { flex: 1.2; padding: 40px; position: relative; display: flex; flex-direction: column; justify-content: center; }
+
+.close-lead {
+    position: absolute; top: 15px; right: 20px; color: #666; font-size: 24px; cursor: pointer; z-index: 10;
+}
+.close-lead:hover { color: #fff; }
+
+.lead-badge {
+    display: inline-block; background: #fff; color: #000; font-weight: 900;
+    padding: 2px 8px; font-size: 10px; border-radius: 4px; margin-bottom: 15px; width: fit-content;
+}
+.lead-right h2 { font-size: 24px; color: #fff; margin-bottom: 10px; line-height: 1.2; text-transform: uppercase; }
+.lead-right p { font-size: 14px; color: #888; margin-bottom: 25px; line-height: 1.6; }
+
+.lead-right input {
+    width: 100%; padding: 12px; margin-bottom: 10px; background: #000;
+    border: 1px solid #333; color: #fff; border-radius: 6px;
+}
+.lead-right input:focus { border-color: #fff; outline: none; }
+.lead-btn {
+    width: 100%; padding: 15px; background: #fff; color: #000; font-weight: 900;
+    border: none; border-radius: 6px; cursor: pointer; text-transform: uppercase; letter-spacing: 1px;
+    display: block; text-align: center; font-size: 12px;
+}
+.lead-btn:hover { background: #ccc; }
+
+@media (min-width: 768px) {
+    .lead-left { display: block; } /* Tampil gambar di Desktop */
+}
+
+/* --- 404 ERROR PAGE STYLES --- */
+.error-page-wrapper {
+    min-height: 80vh; /* Agar posisi selalu di tengah vertikal */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.error-card {
+    text-align: center;
+    max-width: 500px;
+    width: 100%;
+    animation: fadeInUp 0.8s ease-out;
+}
+
+.error-img {
+    width: 100%;
+    height: auto;
+    border-radius: 12px; /* Membuat sudut gambar tumpul */
+    border: 1px solid #333;
+    box-shadow: 0 0 30px rgba(255, 255, 255, 0.1); /* Efek glow tipis di belakang gambar */
+    margin-bottom: 30px;
+    transition: transform 0.3s;
+}
+
+.error-img:hover {
+    transform: scale(1.02) rotate(-1deg); /* Efek miring sedikit saat di-hover */
+}
+
+.error-actions p {
+    color: #888;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+/* Animasi Masuk */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
 }

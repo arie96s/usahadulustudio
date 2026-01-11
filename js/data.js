@@ -317,6 +317,48 @@ const siteData = {
             link_idr: '#',
             link_usd: '#',
             badge: null
+        }   
+    ],  // <--- INI YANG HILANG DI KODE ABANG (Penutup Array Shop)
+
+    // --- DATA BLOG / ARTIKEL ---
+    blog: [
+        {
+            id: 1,
+            // Judul Artikel di Card
+            title: "Anatomi Teror: Bedah Desain Tulang & Darah", 
+            
+            // Label kategori di pojok gambar
+            category: "CASE STUDY", 
+            
+            // Tanggal
+            date: "12 Jan 2026",
+            
+            // Tulisan pendek di bawah judul
+            excerpt: "Membongkar estetika visual horror, dari sejarah Death Metal hingga branding modern.",
+            
+            // --- BAGIAN INI YANG MENAMPILKAN GAMBARNYA ---
+            img: "img/horror-bone-art.png", 
+            
+            // Link ke file artikel lengkap yang tadi kita buat
+            link: "article-tren-2026.html"
+        },
+        {
+            id: 2,
+            title: "Tips Merawat Kaos Sablon Agar Tahan Lama",
+            category: "TIPS",
+            date: "10 Jan 2026",
+            excerpt: "Sayang kan kalau desain mahal-mahal cepat rusak? Simak cara cucinya di sini.",
+            img: "https://images.unsplash.com/photo-1571120038865-c35012e1284a?auto=format&fit=crop&w=600&q=80",
+            link: "article-tips-kaos.html"
+        },
+        {
+            id: 3,
+            title: "Pentingnya Logo Vector untuk Bisnis",
+            category: "EDUKASI",
+            date: "05 Jan 2026",
+            excerpt: "Kenapa file JPG pecah saat dicetak besar? Ini alasannya kenapa Anda butuh file Master (Vector).",
+            img: "https://images.unsplash.com/photo-1626785774573-4b7993143a2d?auto=format&fit=crop&w=600&q=80",
+            link: "article-vector-vs-bitmap.html"
         }
     ]
-};
+}; // <--- Penutup Akhir File
