@@ -19,6 +19,18 @@ async function fetchExchangeRate() {
     }
 }
 
+// --- [FIX BARU] HANDLE TOMBOL BACK BROWSER (Agar Preloader Gak Nyangkut) ---
+window.addEventListener('pageshow', (event) => {
+    if (event.persisted) {
+        // Matikan preloader paksa jika halaman dimuat dari cache (history back)
+        const preloader = document.getElementById('preloader');
+        if(preloader) {
+            preloader.style.opacity = '0';
+            preloader.style.visibility = 'hidden';
+        }
+    }
+});
+
 // 1. FUNGSI INISIALISASI
 window.addEventListener('load', () => {
     // Hide Preloader
@@ -791,7 +803,7 @@ window.openXenditDemo = function(price) {
     modal.classList.add('show');
     bindHoverEvents();
     
-    },
+    };
    // --- RENDER BLOG (ARTIKEL) ---
 window.renderBlog = function() {
     const grid = document.getElementById('blogGrid');
@@ -831,6 +843,7 @@ window.renderBlog = function() {
     
     // Aktifkan efek cursor custom
     if(typeof bindHoverEvents === 'function') bindHoverEvents(); 
+    }
     // --- FUNGSI TRANSISI HALUS (SMOOTH PAGE TRANSITION) ---
 window.smoothNavigate = function(url) {
     const preloader = document.getElementById('preloader');
@@ -848,5 +861,4 @@ window.smoothNavigate = function(url) {
         // Fallback jika preloader tidak ada
         window.location.href = url;
     }
-}
 }
