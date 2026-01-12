@@ -345,7 +345,7 @@ const siteData = {
         {
             id: 2,
             title: "Minang Distorsi: Ketika Adat Menabrak Estetika Metal",
-            category: "TIPS",
+            category: "CASE STUDY",
             date: "12 Jan 2026",
             excerpt: "Bedah desain logo Minang Distorsi. Analisis tren streetwear 2026 yang menggabungkan Local Wisdom dengan tipografi Gothic/Metal.",
             img: "img/artikel_2.png",
