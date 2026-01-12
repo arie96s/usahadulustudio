@@ -357,8 +357,8 @@ const siteData = {
             category: "EDUKASI",
             date: "12 Jan 2026",
             excerpt: "Analisis mendalam kenapa branding UMKM sering gagal. Bedah tren logo 2026 dan studi kasus brand raksasa Indonesia.",
-            img: "img/artikel_3.png",
-            link: "article_3_usahadulu.html"
+            img: "img/artikel3.png",
+            link: "artikel_3_usahadulu.html"
         }
     ]
 }; // <--- Penutup Akhir File
