@@ -353,12 +353,12 @@ const siteData = {
         },
         {
             id: 3,
-            title: "Pentingnya Logo Vector untuk Bisnis",
+            title: "Manifesto: 5 Kesalahan Fatal Logo UMKM yang Bikin Gagal Branding",
             category: "EDUKASI",
             date: "12 Jan 2026",
-            excerpt: "Kenapa file JPG pecah saat dicetak besar? Ini alasannya kenapa Anda butuh file Master (Vector).",
-            img: "https://images.unsplash.com/photo-1626785774573-4b7993143a2d?auto=format&fit=crop&w=600&q=80",
-            link: "article-vector-vs-bitmap.html"
+            excerpt: "Analisis mendalam kenapa branding UMKM sering gagal. Bedah tren logo 2026 dan studi kasus brand raksasa Indonesia.",
+            img: "img/artikel_3.png",
+            link: "article_3_usahadulu.html"
         }
     ]
 }; // <--- Penutup Akhir File
