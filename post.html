@@ -3,10 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blog Reader | USAHADULU Studio</title>
+    <title>USAHADULU Blog Reader</title>
     <link rel="icon" type="image/png" href="img/logo_ambigram.png">
+    
     <link rel="stylesheet" href="css/style.css">
+    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
@@ -28,7 +31,7 @@
     <div class="page-content">
         <div class="article-container">
             <div id="articleContent">
-                <p style="text-align:center; padding:50px;">Memuat Artikel...</p>
+                <p style="text-align:center; padding:50px; color:#888;">Sedang mengambil artikel...</p>
             </div>
         </div>
     </div>
@@ -49,15 +52,15 @@
         const targetTitle = params.get('title');
 
         if(targetTitle) {
-            // 2. Ambil data dari CMS
             fetch('/_data/blog.json')
                 .then(res => res.json())
                 .then(data => {
-                    // 3. Cari artikel yang judulnya cocok
+                    // 2. Cari artikel yang judulnya cocok
                     const article = data.items.find(item => item.title === targetTitle);
                     
                     if(article) {
-                        // 4. Render ke Layar
+                        // 3. Render ke Layar (Strukturnya SAMAKAN dengan artikel lama)
+                        // Kita pakai class 'article-header', 'article-body' biar CSS-nya masuk
                         const htmlContent = `
                             <div class="article-header">
                                 <span class="article-cat-tag">${article.category}</span>
@@ -72,9 +75,15 @@
                             </div>
                         `;
                         document.getElementById('articleContent').innerHTML = htmlContent;
+                        
+                        // Update Judul Tab Browser
+                        document.title = article.title + " | USAHADULU Blog";
                     } else {
-                        document.getElementById('articleContent').innerHTML = "<h1>Artikel tidak ditemukan.</h1>";
+                        document.getElementById('articleContent').innerHTML = "<h2 style='text-align:center; color:#fff;'>Artikel tidak ditemukan.</h2>";
                     }
+                })
+                .catch(err => {
+                    document.getElementById('articleContent').innerHTML = "<h2 style='text-align:center; color:#fff;'>Gagal memuat data.</h2>";
                 });
         }
     </script>
