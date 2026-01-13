@@ -359,6 +359,23 @@ const siteData = {
             excerpt: "Analisis mendalam kenapa branding UMKM sering gagal. Bedah tren logo 2026 dan studi kasus brand raksasa Indonesia.",
             img: "img/artikel3.png",
             link: "artikel_3_usahadulu.html"
-        }
+        },
+        {
+            id: 4,
+            title: "Manifesto: Identitas Visual & Kematian (Sekadar Jualan)",
+            category: "EDUKASI",
+            date: "13 Jan 2026",
+            excerpt: "Analisis tren streetwear 2026: Mengapa jualan di Instagram saja tidak cukup? Belajar dari Maternal Disaster dan pentingnya Website sebagai markas brand.",
+            img: "img/artikel_4.jpg",
+            link: "artikel_4.html"
+        },
+        {
+            id: 5,
+            title: "Manifesto: Identitas Visual & Kematian (Sekadar Jualan)",
+            category: "EDUKASI",
+            date: "13 Jan 2026",
+            excerpt: "Analisis tren streetwear 2026: Mengapa jualan di Instagram saja tidak cukup? Belajar dari Maternal Disaster dan pentingnya Website sebagai markas brand.",
+            img: "img/artikel_4.jpg",
+            link: "artikel_4.html"
     ]
 }; // <--- Penutup Akhir File
