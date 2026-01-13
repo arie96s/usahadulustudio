@@ -1,15 +1,14 @@
 backend:
   name: git-gateway
-  branch: main # Pastikan ini sesuai branch kamu (main/master)
+  branch: main # Pastikan ini "main" atau "master" sesuai repo kamu
 
-media_folder: "assets/img"
-public_folder: "/assets/img"
+media_folder: "img" # Langsung ke folder img biar kebaca script
+public_folder: "img"
 
 collections:
   - name: "data"
     label: "Database Website"
     files:
-      # --- PENGATURAN SHOP ---
       - file: "_data/shop.json"
         label: "Produk Shop"
         name: "shop"
@@ -18,34 +17,11 @@ collections:
             name: "items"
             widget: "list"
             fields:
-              - {label: "Nama Produk", name: "name", widget: "string"}
-              - {label: "Harga", name: "price", widget: "string", default: "Rp 0"}
-              - {label: "Gambar Produk", name: "image", widget: "image"}
-              - {label: "Deskripsi", name: "desc", widget: "text"}
-
-      # --- PENGATURAN PORTFOLIO ---
-      - file: "_data/portfolio.json"
-        label: "List Portfolio"
-        name: "portfolio"
-        fields:
-          - label: "Daftar Project"
-            name: "items"
-            widget: "list"
-            fields:
-              - {label: "Judul Project", name: "title", widget: "string"}
-              - {label: "Kategori", name: "category", widget: "string"}
-              - {label: "Gambar Utama", name: "image", widget: "image"}
-
-      # --- PENGATURAN BLOG ---
-      - file: "_data/blog.json"
-        label: "Artikel Blog"
-        name: "blog"
-        fields:
-          - label: "Daftar Artikel"
-            name: "items"
-            widget: "list"
-            fields:
-              - {label: "Judul Artikel", name: "title", widget: "string"}
-              - {label: "Tanggal", name: "date", widget: "datetime"}
-              - {label: "Gambar", name: "image", widget: "image"}
-              - {label: "Isi Tulisan", name: "body", widget: "markdown"}
+              - {label: "Nama Produk", name: "title", widget: "string"}
+              - {label: "Kategori", name: "category", widget: "select", options: ["template", "mockup", "vector"]}
+              - {label: "Tipe File (ex: PSD/AI)", name: "type", widget: "string"}
+              - {label: "Harga IDR (Angka Saja)", name: "priceRaw", widget: "number", hint: "Tulis 150000 tanpa titik/koma"}
+              - {label: "Gambar Produk", name: "img", widget: "image"}
+              - {label: "Link Mayar/WA (IDR)", name: "link_idr", widget: "string", default: "#"}
+              - {label: "Link Gumroad (USD)", name: "link_usd", widget: "string", default: "#"}
+              - {label: "Badge", name: "badge", widget: "select", options: ["NEW", "BEST SELLER", "POPULAR", "NONE"], required: false}
