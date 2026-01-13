@@ -51,12 +51,18 @@
         
         <div class="order-form-container" id="orderForm">
             <div class="form-group">
-                <label>LAYANAN DIPILIH (AUTO)</label>
-                <div style="display: flex; gap: 10px;">
-                    <input type="text" id="orderService" readonly class="form-input readonly">
-                    <input type="text" id="orderPackage" readonly class="form-input readonly">
-                </div>
-            </div>
+                <div class="form-group">
+    <label>PILIH LAYANAN & PAKET</label>
+    <div style="display: flex; gap: 10px; flex-direction: column;">
+        <select id="orderService" class="form-input" style="cursor: pointer;">
+            <option value="">-- Pilih Layanan --</option>
+        </select>
+        
+        <select id="orderPackage" class="form-input" style="cursor: pointer;">
+            <option value="">-- Pilih Paket --</option>
+        </select>
+    </div>
+</div>
             
             <div class="form-group">
                 <label>ESTIMASI HARGA</label>

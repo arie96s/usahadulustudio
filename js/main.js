@@ -611,10 +611,114 @@ window.applyVoucher = function() {
 
 // 11. ORDER & PAYMENT LOGIC (Updated PDF with Brief)
 function initOrderPage() {
+    const serviceSelect = document.getElementById('orderService');
+    const pkgSelect = document.getElementById('orderPackage');
+    const priceInput = document.getElementById('orderPrice');
+    
+    // 1. Cek apakah elemen ada (untuk menghindari error di halaman lain)
+    if (!serviceSelect || !pkgSelect || !priceInput) return;
+
+    // 2. Ambil Bahasa Aktif
+    const lang = siteData.currentLang || 'id';
+    
+    // 3. Kosongkan Dropdown Dulu
+    serviceSelect.innerHTML = '<option value="">-- Pilih Layanan / Select Service --</option>';
+    pkgSelect.innerHTML = '<option value="">-- Pilih Paket / Select Package --</option>';
+
+    // 4. Populate (Isi) Dropdown Service dari data.js
+    siteData.services.forEach((svc, index) => {
+        const option = document.createElement('option');
+        option.value = index; // Kita simpan index array-nya sebagai value
+        option.text = lang === 'id' ? svc.name_id : svc.name_en; // Nama sesuai bahasa
+        serviceSelect.appendChild(option);
+    });
+
+    // 5. Fungsi Update Paket saat Service dipilih
+    function updatePackages(selectedIndex) {
+        pkgSelect.innerHTML = ''; // Reset paket
+        
+        if (selectedIndex === "") {
+            pkgSelect.innerHTML = '<option value="">-- Pilih Paket Dahulu --</option>';
+            priceInput.value = "IDR 0";
+            return;
+        }
+
+        const selectedService = siteData.services[selectedIndex];
+        
+        // Loop paket di dalam service tersebut
+        selectedService.packages.forEach((pkg) => {
+            const opt = document.createElement('option');
+            opt.value = pkg.item; // Nama paket
+            opt.setAttribute('data-price', pkg.price); // Simpan harga di atribut data
+            opt.text = `${pkg.item}`;
+            pkgSelect.appendChild(opt);
+        });
+
+        // Otomatis pilih paket pertama dan update harga
+        if (pkgSelect.options.length > 0) {
+            pkgSelect.selectedIndex = 0;
+            updatePrice();
+        }
+    }
+
+    // 6. Fungsi Update Harga
+    function updatePrice() {
+        const selectedOption = pkgSelect.options[pkgSelect.selectedIndex];
+        if (selectedOption) {
+            const price = selectedOption.getAttribute('data-price');
+            priceInput.value = "IDR " + price; // Format harga
+            
+            // Reset logika diskon/voucher jika harga berubah
+            if(typeof currentBasePrice !== 'undefined') {
+                currentBasePrice = parsePriceToNumber("IDR " + price);
+                // Reset tampilan diskon jika user ganti paket
+                document.getElementById('discountDisplay').style.display = 'none';
+                document.getElementById('voucherMsg').style.display = 'none';
+                document.getElementById('voucherInput').value = '';
+                currentFinalPrice = currentBasePrice;
+                appliedDiscountCode = null;
+            }
+        }
+    }
+
+    // 7. Event Listeners (Saat user klik ganti)
+    serviceSelect.addEventListener('change', function() {
+        updatePackages(this.value);
+    });
+
+    pkgSelect.addEventListener('change', function() {
+        updatePrice();
+    });
+
+    // 8. LOGIKA URL PARAMETER (Agar link dari Artikel tetap jalan)
+    // Contoh link: order.html?service=LOGO&package=Basic
     const urlParams = new URLSearchParams(window.location.search);
-    document.getElementById('orderService').value = urlParams.get('service') || '-';
-    document.getElementById('orderPackage').value = urlParams.get('package') || '-';
-    document.getElementById('orderPrice').value = urlParams.get('price') || 'TBD';
+    const paramService = urlParams.get('service'); // Nama service dari URL
+    
+    if (paramService) {
+        // Cari index service berdasarkan nama (cocokkan ID atau EN)
+        const foundIndex = siteData.services.findIndex(s => 
+            s.name_id.includes(paramService) || s.name_en.includes(paramService)
+        );
+
+        if (foundIndex !== -1) {
+            serviceSelect.value = foundIndex; // Pilih Service
+            updatePackages(foundIndex); // Load Paket
+            
+            // Cek jika ada parameter paket spesifik
+            const paramPkg = urlParams.get('package');
+            if(paramPkg) {
+                // Loop opsi paket untuk mencari yang cocok
+                for(let i=0; i<pkgSelect.options.length; i++) {
+                    if(pkgSelect.options[i].value.includes(paramPkg)) {
+                        pkgSelect.selectedIndex = i;
+                        updatePrice();
+                        break;
+                    }
+                }
+            }
+        }
+    }
 }
 
 // GANTI FUNGSI generateInvoicePDF DI js/main.js DENGAN INI:
@@ -687,15 +791,31 @@ function generateInvoicePDF(data) {
     doc.save(`Invoice_${data.name}.pdf`);
 }
 
+// GANTI SELURUH FUNCTION submitOrder DI js/main.js DENGAN INI:
+
 window.submitOrder = function() {
     const name = document.getElementById('clientName').value;
     const phone = document.getElementById('clientPhone').value;
     const email = document.getElementById('clientEmail').value;
     const brief = document.getElementById('clientBrief').value;
-    const service = document.getElementById('orderService').value;
-    const pkg = document.getElementById('orderPackage').value;
     
-    // PERUBAHAN DISINI: Ambil harga final (diskon) atau harga normal
+    // --- PERBAIKAN DISINI ---
+    // Kita ambil elemen SELECT-nya dulu
+    const serviceSelect = document.getElementById('orderService');
+    const pkgSelect = document.getElementById('orderPackage');
+
+    // Ambil TEXT yang tampil (Contoh: "LOGO & BRANDING"), BUKAN value angkanya (0,1)
+    // Gunakan 'options[selectedIndex].text' agar yang terambil adalah nama layanannya
+    let service = "-";
+    if (serviceSelect.selectedIndex !== -1) {
+        service = serviceSelect.options[serviceSelect.selectedIndex].text;
+    }
+
+    // Untuk paket, karena value-nya sudah nama paket, bisa langsung ambil .value
+    const pkg = pkgSelect.value;
+    // ------------------------
+    
+    // Ambil harga final (diskon) atau harga normal
     let finalPriceStr = document.getElementById('orderPrice').value;
     
     // Jika ada diskon aktif, gunakan harga diskon untuk data order
@@ -703,13 +823,17 @@ window.submitOrder = function() {
         finalPriceStr = formatNumberToPrice(currentFinalPrice);
     }
 
-    if(!name || !phone || !brief) { alert("Harap lengkapi DATA & DESKRIPSI!"); return; }
+    // Validasi input (Pastikan user sudah memilih layanan & paket)
+    if(!name || !phone || !brief || service === "" || pkg === "" || service.includes("--")) { 
+        alert("Harap lengkapi DATA, pilih LAYANAN & PAKET, serta isi DESKRIPSI!"); 
+        return; 
+    }
 
     const submitBtn = document.querySelector('.submit-order-btn');
     submitBtn.innerText = "Processing...";
     submitBtn.disabled = true;
 
-    // Masukkan data voucher ke object orderData agar tercatat di invoice
+    // Masukkan data ke object orderData
     const orderData = { 
         name, phone, email, service, pkg, brief, 
         price: finalPriceStr, 
@@ -717,7 +841,7 @@ window.submitOrder = function() {
         voucher: appliedDiscountCode 
     };
 
-    generateInvoicePDF(orderData); // Panggil fungsi PDF yang sudah diupdate (di bawah)
+    generateInvoicePDF(orderData); 
 
     // Simpan ke LocalStorage untuk halaman Payment
     localStorage.setItem('currentOrder', JSON.stringify(orderData));
