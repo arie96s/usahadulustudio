@@ -174,5 +174,52 @@
             }
         }, 4000);
     </script>
+    <script>
+    fetch('/_data/blog.json')
+        .then(res => {
+            if (!res.ok) throw new Error("Data Blog Belum Ada");
+            return res.json();
+        })
+        .then(cmsData => {
+            if (cmsData.items && cmsData.items.length > 0) {
+                // Gunakan ID blogGrid yang sudah ada di HTML kamu
+                const container = document.getElementById('blogGrid');
+                container.innerHTML = ''; // Hapus tulisan "Memuat..."
+
+                cmsData.items.forEach(post => {
+                    // LOGIKA LINK:
+                    // Jika ada 'custom_link', pakai itu.
+                    // Jika tidak ada, arahkan ke post.html dengan parameter judul.
+                    let finalLink = '';
+                    if (post.custom_link) {
+                        finalLink = post.custom_link;
+                    } else {
+                        // Encode judul agar aman di URL (spasi jadi %20)
+                        finalLink = `post.html?title=${encodeURIComponent(post.title)}`;
+                    }
+
+                    const card = `
+                        <div class="blog-card hover-target" onclick="window.location.href='${finalLink}'">
+                            <div class="blog-thumb">
+                                <img src="${post.image}" alt="${post.title}" loading="lazy">
+                                <div class="blog-cat">${post.category}</div>
+                            </div>
+                            <div class="blog-info">
+                                <div class="blog-meta">${post.date}</div>
+                                <h3 class="blog-title">${post.title}</h3>
+                                <p class="blog-excerpt">${post.excerpt}</p>
+                                <span class="read-more-btn">BACA SELENGKAPNYA &rarr;</span>
+                            </div>
+                        </div>
+                    `;
+                    container.innerHTML += card;
+                });
+                
+                // Refresh cursor effect jika perlu
+                if(typeof bindHoverEvents === 'function') bindHoverEvents();
+            }
+        })
+        .catch(err => console.log("Blog CMS belum siap."));
+</script>
 </body>
 </html>
