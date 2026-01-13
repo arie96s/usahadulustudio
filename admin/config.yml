@@ -1,6 +1,6 @@
 backend:
   name: git-gateway
-  branch: main 
+  branch: main
 
 media_folder: "img"
 public_folder: "img"
@@ -9,7 +9,7 @@ collections:
   - name: "data"
     label: "Database Website"
     files:
-      # --- INI BAGIAN SHOP (JANGAN DIHAPUS) ---
+      # --- SHOP (JANGAN UBAH) ---
       - file: "_data/shop.json"
         label: "Produk Shop"
         name: "shop"
@@ -19,15 +19,15 @@ collections:
             widget: "list"
             fields:
               - {label: "Nama Produk", name: "title", widget: "string"}
-              - {label: "Kategori", name: "category", widget: "select", options: ["Template", "Mockup", "Vector"]}
+              - {label: "Kategori", name: "category", widget: "select", options: ["template", "mockup", "vector"]}
               - {label: "Tipe File", name: "type", widget: "string"}
               - {label: "Harga IDR", name: "priceRaw", widget: "number"}
-              - {label: "Gambar Produk", name: "img", widget: "image"}
-              - {label: "Link Mayar/WA", name: "link_idr", widget: "string", default: "#"}
+              - {label: "Gambar", name: "img", widget: "image"}
+              - {label: "Link Mayar", name: "link_idr", widget: "string", default: "#"}
               - {label: "Link Gumroad", name: "link_usd", widget: "string", default: "#"}
               - {label: "Badge", name: "badge", widget: "select", options: ["NEW", "BEST SELLER", "NONE"], required: false}
 
-      # --- INI BAGIAN BARU: PORTFOLIO ---
+      # --- PORTFOLIO (JANGAN UBAH) ---
       - file: "_data/portfolio.json"
         label: "Portfolio Item"
         name: "portfolio"
@@ -39,9 +39,28 @@ collections:
               - {label: "Judul Project", name: "title", widget: "string"}
               - {label: "Kategori", name: "category", widget: "select", options: ["logo", "apparel", "flyer", "web", "video"]}
               - {label: "Gambar Utama", name: "image", widget: "image"}
-              
-              # Data untuk Popup Case Study (Detail Project)
               - {label: "Nama Klien", name: "client", widget: "string", default: "-"}
-              - {label: "Masalah (Problem)", name: "problem", widget: "text", default: "Deskripsi masalah klien..."}
-              - {label: "Solusi (Solution)", name: "solution", widget: "text", default: "Solusi desain kami..."}
-              - {label: "Hasil (Result)", name: "result", widget: "text", default: "Hasil akhir project..."}
+              - {label: "Problem", name: "problem", widget: "text", default: "-"}
+              - {label: "Solution", name: "solution", widget: "text", default: "-"}
+              - {label: "Result", name: "result", widget: "text", default: "-"}
+
+      # --- BLOG (INI YANG BARU) ---
+      - file: "_data/blog.json"
+        label: "Artikel Blog"
+        name: "blog"
+        fields:
+          - label: "Daftar Artikel"
+            name: "items"
+            widget: "list"
+            fields:
+              - {label: "Judul Artikel", name: "title", widget: "string"}
+              - {label: "Tanggal (DD MMM YYYY)", name: "date", widget: "string"}
+              - {label: "Kategori", name: "category", widget: "select", options: ["EDUKASI", "CASE STUDY", "BRANDING", "TUTORIAL"]}
+              - {label: "Gambar Sampul", name: "image", widget: "image"}
+              - {label: "Cuplikan Pendek (Excerpt)", name: "excerpt", widget: "text"}
+              
+              # KOLOM PENTING UNTUK FILE LAMA
+              - {label: "Link Custom (ISI JIKA FILE HTML SUDAH ADA)", name: "custom_link", widget: "string", required: false, hint: "Contoh: artikel-tren-2026.html. Kosongkan jika ini artikel baru."}
+              
+              # Isian Artikel Baru
+              - {label: "Isi Artikel (Markdown)", name: "body", widget: "markdown", required: false}
