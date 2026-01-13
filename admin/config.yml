@@ -1,20 +1,51 @@
 backend:
   name: git-gateway
-  branch: main
+  branch: main # Pastikan ini sesuai branch kamu (main/master)
 
-media_folder: "img/portfolio"
-public_folder: "img/portfolio"
-
-site_url: https://usahadulustudio.com
-display_url: https://usahadulustudio.com
+media_folder: "assets/img"
+public_folder: "/assets/img"
 
 collections:
-  - name: "portfolio"
-    label: "Portfolio Images"
+  - name: "data"
+    label: "Database Website"
     files:
-      - label: "Upload Manager (Upload Disini)" 
-        name: "uploads"
-        file: "admin/uploads.json"
+      # --- PENGATURAN SHOP ---
+      - file: "_data/shop.json"
+        label: "Produk Shop"
+        name: "shop"
         fields:
-          - {label: "Judul Gambar (Bebas)", name: "title", widget: "string"}
-          - {label: "Gambar", name: "image", widget: "image"}
+          - label: "Daftar Produk"
+            name: "items"
+            widget: "list"
+            fields:
+              - {label: "Nama Produk", name: "name", widget: "string"}
+              - {label: "Harga", name: "price", widget: "string", default: "Rp 0"}
+              - {label: "Gambar Produk", name: "image", widget: "image"}
+              - {label: "Deskripsi", name: "desc", widget: "text"}
+
+      # --- PENGATURAN PORTFOLIO ---
+      - file: "_data/portfolio.json"
+        label: "List Portfolio"
+        name: "portfolio"
+        fields:
+          - label: "Daftar Project"
+            name: "items"
+            widget: "list"
+            fields:
+              - {label: "Judul Project", name: "title", widget: "string"}
+              - {label: "Kategori", name: "category", widget: "string"}
+              - {label: "Gambar Utama", name: "image", widget: "image"}
+
+      # --- PENGATURAN BLOG ---
+      - file: "_data/blog.json"
+        label: "Artikel Blog"
+        name: "blog"
+        fields:
+          - label: "Daftar Artikel"
+            name: "items"
+            widget: "list"
+            fields:
+              - {label: "Judul Artikel", name: "title", widget: "string"}
+              - {label: "Tanggal", name: "date", widget: "datetime"}
+              - {label: "Gambar", name: "image", widget: "image"}
+              - {label: "Isi Tulisan", name: "body", widget: "markdown"}
