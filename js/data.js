@@ -377,5 +377,6 @@ const siteData = {
             excerpt: "Jangan sampai logo pecah di tahun 2026. Panduan lengkap perbedaan Vektor (AI/EPS) dan Raster (JPG/PNG) serta kenapa website butuh SVG.",
             img: "img/artikel_5.png",
             link: "artikel_5_usahadulu.html"
+        }
     ]
 }; // <--- Penutup Akhir File
