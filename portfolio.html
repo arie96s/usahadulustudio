@@ -123,5 +123,41 @@
             }
         }, 4000);
     </script>
+    <script>
+    fetch('/_data/portfolio.json')
+        .then(res => {
+            if (!res.ok) throw new Error("Data CMS belum ada");
+            return res.json();
+        })
+        .then(cmsData => {
+            if (cmsData.items && cmsData.items.length > 0) {
+                console.log("Load Portfolio CMS...", cmsData.items);
+
+                // MAPPING DATA: Mengubah format CMS jadi format main.js
+                // Kita "menipu" main.js agar membaca gambar dari CMS sebagai demoUrl
+                const newData = cmsData.items.map(item => ({
+                    category: item.category,
+                    title: item.title,
+                    fileName: '',       // Dikosongkan karena kita pakai demoUrl
+                    demoUrl: item.image,// Gambar CMS masuk sini
+                    caseStudy: {        // Data detail untuk Popup
+                        client: item.client || "-",
+                        problem: item.problem || "-",
+                        solution: item.solution || "-",
+                        result: item.result || "-"
+                    }
+                }));
+
+                // Override data lama
+                siteData.portfolio = newData;
+
+                // Render ulang grid & filter
+                if (typeof renderPortfolio === 'function') {
+                    renderPortfolio('all');
+                }
+            }
+        })
+        .catch(err => console.log("Portfolio pakai data demo."));
+</script>
 </body>
 </html>
