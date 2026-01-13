@@ -371,11 +371,11 @@ const siteData = {
         },
         {
             id: 5,
-            title: "Manifesto: Identitas Visual & Kematian (Sekadar Jualan)",
+            title: "Manifesto: Bedanya File Vektor & Raster (Panduan Klien 2026)",
             category: "EDUKASI",
             date: "13 Jan 2026",
-            excerpt: "Analisis tren streetwear 2026: Mengapa jualan di Instagram saja tidak cukup? Belajar dari Maternal Disaster dan pentingnya Website sebagai markas brand.",
-            img: "img/artikel_4.jpg",
-            link: "artikel_4.html"
+            excerpt: "Jangan sampai logo pecah di tahun 2026. Panduan lengkap perbedaan Vektor (AI/EPS) dan Raster (JPG/PNG) serta kenapa website butuh SVG.",
+            img: "img/artikel_5.png",
+            link: "artikel_5_usahadulu.html"
     ]
 }; // <--- Penutup Akhir File
