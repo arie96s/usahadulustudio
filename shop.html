@@ -114,5 +114,30 @@
 
     <script src="js/data.js"></script>
     <script src="js/main.js"></script>
+    <script>
+    // 1. Cek apakah file JSON dari CMS sudah ada?
+    fetch('/_data/shop.json')
+        .then(response => {
+            if (!response.ok) throw new Error("Belum ada data CMS");
+            return response.json();
+        })
+        .then(cmsData => {
+            // 2. Jika data ditemukan...
+            if (cmsData.items && cmsData.items.length > 0) {
+                console.log("Menggunakan Data dari CMS...", cmsData.items);
+                
+                // 3. TIMPA data demo di data.js dengan data CMS
+                // (Ini magic-nya: kita manfaatkan struktur siteData yang sudah ada)
+                siteData.shop = cmsData.items;
+
+                // 4. Panggil ulang fungsi renderShop yang ada di main.js
+                // Supaya tampilan ter-update otomatis (termasuk pagination & currency)
+                renderShop('all'); 
+            }
+        })
+        .catch(err => {
+            console.log("CMS belum siap, menggunakan data demo bawaan.");
+        });
+</script>
     </body>
 </html>
