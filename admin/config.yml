@@ -1,14 +1,15 @@
 backend:
   name: git-gateway
-  branch: main # Pastikan ini "main" atau "master" sesuai repo kamu
+  branch: main 
 
-media_folder: "img" # Langsung ke folder img biar kebaca script
+media_folder: "img"
 public_folder: "img"
 
 collections:
   - name: "data"
     label: "Database Website"
     files:
+      # --- INI BAGIAN SHOP (JANGAN DIHAPUS) ---
       - file: "_data/shop.json"
         label: "Produk Shop"
         name: "shop"
@@ -18,10 +19,29 @@ collections:
             widget: "list"
             fields:
               - {label: "Nama Produk", name: "title", widget: "string"}
-              - {label: "Kategori", name: "category", widget: "select", options: ["template", "mockup", "vector"]}
-              - {label: "Tipe File (ex: PSD/AI)", name: "type", widget: "string"}
-              - {label: "Harga IDR (Angka Saja)", name: "priceRaw", widget: "number", hint: "Tulis 150000 tanpa titik/koma"}
+              - {label: "Kategori", name: "category", widget: "select", options: ["Template", "Mockup", "Vector"]}
+              - {label: "Tipe File", name: "type", widget: "string"}
+              - {label: "Harga IDR", name: "priceRaw", widget: "number"}
               - {label: "Gambar Produk", name: "img", widget: "image"}
-              - {label: "Link Mayar/WA (IDR)", name: "link_idr", widget: "string", default: "#"}
-              - {label: "Link Gumroad (USD)", name: "link_usd", widget: "string", default: "#"}
-              - {label: "Badge", name: "badge", widget: "select", options: ["NEW", "BEST SELLER", "POPULAR", "NONE"], required: false}
+              - {label: "Link Mayar/WA", name: "link_idr", widget: "string", default: "#"}
+              - {label: "Link Gumroad", name: "link_usd", widget: "string", default: "#"}
+              - {label: "Badge", name: "badge", widget: "select", options: ["NEW", "BEST SELLER", "NONE"], required: false}
+
+      # --- INI BAGIAN BARU: PORTFOLIO ---
+      - file: "_data/portfolio.json"
+        label: "Portfolio Item"
+        name: "portfolio"
+        fields:
+          - label: "Daftar Karya"
+            name: "items"
+            widget: "list"
+            fields:
+              - {label: "Judul Project", name: "title", widget: "string"}
+              - {label: "Kategori", name: "category", widget: "select", options: ["logo", "apparel", "flyer", "web", "video"]}
+              - {label: "Gambar Utama", name: "image", widget: "image"}
+              
+              # Data untuk Popup Case Study (Detail Project)
+              - {label: "Nama Klien", name: "client", widget: "string", default: "-"}
+              - {label: "Masalah (Problem)", name: "problem", widget: "text", default: "Deskripsi masalah klien..."}
+              - {label: "Solusi (Solution)", name: "solution", widget: "text", default: "Solusi desain kami..."}
+              - {label: "Hasil (Result)", name: "result", widget: "text", default: "Hasil akhir project..."}
