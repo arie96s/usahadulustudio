@@ -1,10 +1,14 @@
 {
   "items": [
     {
-      "price": "Rp 249.000",
-      "name": "MAGOS - MONSTERA I",
-      "image": "/assets/img/magos-monster-1.png",
-      "desc": "MONSTERA\n\nIni bukan monster dari dongeng.\nIni adalah kita, yang tumbuh dari luka.\n\nMONSTERA lahir dari hidup yang terlalu keras untuk disebut adil.\nIa terbentuk dari kegagalan yang tidak sempat ditangisi,\ndari mimpi yang dipaksa dewasa sebelum waktunya,\ndari hari-hari panjang yang menuntut kuat meski jiwa retak.\n\nRahang-ranjang yang saling bertumpuk adalah cerita tentang bertahan—\ntentang manusia yang saling menggigit bukan karena kejam,\ntapi karena takut kalah oleh hidup itu sendiri.\nTulang-tulang mencuat adalah pengingat:\ntak semua yang hidup punya kemewahan untuk utuh.\n\nWarna emasnya bukan lambang kejayaan.\nItu bekas cahaya—\nsisa harapan yang masih menyala di tengah gelap paling pekat.\nSeperti doa yang tidak pernah diucapkan,\ntapi tetap dipeluk diam-diam.\n\nMONSTERA adalah balada tentang tumbuh di lingkungan yang salah,\nnamun tetap memilih hidup.\nTentang menjadi keras tanpa kehilangan rasa.\nTentang menjadi buruk rupa,\nnamun jujur.\n\nJika hidup pernah mematahkanmu,\njika kamu pernah merasa jadi asing di dunia sendiri—\nmaka MONSTERA bukan sekadar ilustrasi.\n\nIa adalah lagu sunyi\nyang hanya didengar oleh mereka\nyang pernah hampir menyerah,\nnamun memilih bertahan.\n"
+      "link_idr": "#",
+      "link_usd": "#",
+      "title": "MONSTERA",
+      "category": "vector",
+      "type": "AI",
+      "priceRaw": 449000,
+      "img": "img/magos-monster-1.png",
+      "badge": "NEW"
     }
   ]
 }
