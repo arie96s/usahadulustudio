@@ -1,0 +1,20 @@
+backend:
+  name: git-gateway
+  branch: main
+
+media_folder: "img/portfolio"
+public_folder: "img/portfolio"
+
+site_url: https://usahadulustudio.com
+display_url: https://usahadulustudio.com
+
+collections:
+  - name: "portfolio"
+    label: "Portfolio Images"
+    files:
+      - label: "Upload Manager (Upload Disini)" 
+        name: "uploads"
+        file: "admin/uploads.json"
+        fields:
+          - {label: "Judul Gambar (Bebas)", name: "title", widget: "string"}
+          - {label: "Gambar", name: "image", widget: "image"}
