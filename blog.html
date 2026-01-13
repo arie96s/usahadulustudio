@@ -182,26 +182,28 @@
         })
         .then(cmsData => {
             if (cmsData.items && cmsData.items.length > 0) {
-                // Gunakan ID blogGrid yang sudah ada di HTML kamu
                 const container = document.getElementById('blogGrid');
-                container.innerHTML = ''; // Hapus tulisan "Memuat..."
+                container.innerHTML = ''; // Bersihkan tulisan "Memuat..."
 
                 cmsData.items.forEach(post => {
-                    // LOGIKA LINK:
-                    // Jika ada 'custom_link', pakai itu.
-                    // Jika tidak ada, arahkan ke post.html dengan parameter judul.
+                    // --- LOGIKA CERDAS DISINI ---
                     let finalLink = '';
-                    if (post.custom_link) {
+                    
+                    // 1. Cek apakah di CMS kolom "Link Custom" diisi?
+                    if (post.custom_link && post.custom_link.trim() !== "") {
+                        // Jika ya, berarti ini ARTIKEL LAMA. Buka file aslinya.
                         finalLink = post.custom_link;
                     } else {
-                        // Encode judul agar aman di URL (spasi jadi %20)
+                        // Jika kosong, berarti ini ARTIKEL BARU. Buka cetakan post.html
+                        // Kita kirim judulnya lewat URL
                         finalLink = `post.html?title=${encodeURIComponent(post.title)}`;
                     }
 
+                    // Render Kartu (Tampilan sama persis)
                     const card = `
                         <div class="blog-card hover-target" onclick="window.location.href='${finalLink}'">
                             <div class="blog-thumb">
-                                <img src="${post.image}" alt="${post.title}" loading="lazy">
+                                <img src="${post.image}" alt="${post.title}" loading="lazy" style="width:100%; height:100%; object-fit:cover;">
                                 <div class="blog-cat">${post.category}</div>
                             </div>
                             <div class="blog-info">
@@ -215,7 +217,7 @@
                     container.innerHTML += card;
                 });
                 
-                // Refresh cursor effect jika perlu
+                // Aktifkan efek cursor custom (dari main.js)
                 if(typeof bindHoverEvents === 'function') bindHoverEvents();
             }
         })
