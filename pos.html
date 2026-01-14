@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>USAHADULU | POS System</title>
+    <meta name="description" content="Sistem Kasir Terintegrasi USAHADULU Studio.">
+    <link rel="icon" type="image/png" href="img/logo_ambigram.png">
+
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/pos.css"> <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+    <div id="preloader"><img src="img/logo_ambigram.png" class="loader-logo"></div>
+    <div id="cursor"></div>
+
+    <header id="posHeader">
+        <div class="header-left">
+            <div class="brand-logo hover-target"><a href="index.html"><img src="img/logo_ambigram.png" alt="HOME" style="height:40px;"></a></div>
+            <div class="pos-status">
+                <span class="status-dot"></span> SYSTEM ONLINE
+            </div>
+        </div>
+        <div class="header-right">
+            <span id="clockDisplay">00:00</span>
+            <div class="menu-btn hover-target" id="menuBtn"><span></span><span></span><span></span></div>
+        </div>
+    </header>
+
+    <div class="nav-overlay" id="navOverlay">
+        <ul class="menu-list">
+            <li class="menu-item"><a href="index.html" class="menu-title hover-target">HOME</a></li>
+            <li class="menu-item"><a href="pos.html" class="menu-title hover-target" style="color:#fff;">CASHIER / POS</a></li>
+            <li class="menu-item"><a href="services.html" class="menu-title hover-target">SERVICES</a></li>
+        </ul>
+    </div>
+
+    <div class="pos-container">
+        
+        <div class="pos-products-area">
+            <div class="pos-filter-bar">
+                <input type="text" id="searchProduct" class="pos-search hover-target" placeholder="CARI PRODUK / SCAN BARCODE...">
+                <div class="pos-categories" id="categoryFilters">
+                    <button class="filter-btn active hover-target" onclick="filterProducts('all')">SEMUA</button>
+                    <button class="filter-btn hover-target" onclick="filterProducts('service')">JASA</button>
+                    <button class="filter-btn hover-target" onclick="filterProducts('asset')">ASET DIGITAL</button>
+                    <button class="filter-btn hover-target" onclick="filterProducts('merch')">MERCHANDISE</button>
+                </div>
+            </div>
+
+            <div class="pos-grid" id="productGrid">
+                </div>
+        </div>
+
+        <div class="pos-sidebar">
+            <div class="sidebar-header">
+                <h3>CURRENT ORDER</h3>
+                <button class="clear-btn hover-target" onclick="clearCart()">CLEAR</button>
+            </div>
+
+            <div class="cart-items-container" id="cartContainer">
+                <div class="empty-cart-state">
+                    <p>Keranjang Kosong</p>
+                </div>
+            </div>
+
+            <div class="pos-calculations">
+                <div class="calc-row">
+                    <span>Subtotal</span>
+                    <span id="subtotalDisplay">Rp 0</span>
+                </div>
+                <div class="calc-row">
+                    <span>Pajak (PPN 11%)</span>
+                    <span id="taxDisplay">Rp 0</span>
+                </div>
+                <div class="calc-row total">
+                    <span>TOTAL</span>
+                    <span id="totalDisplay">Rp 0</span>
+                </div>
+            </div>
+
+            <div class="pos-actions">
+                <button class="pay-btn hover-target" onclick="openPaymentModal()">
+                    BAYAR SEKARANG
+                </button>
+            </div>
+            
+            <div class="powered-by">
+                POWERED BY <strong>USAHADULU STUDIO</strong>
+            </div>
+        </div>
+    </div>
+
+    <div id="paymentModal" class="modal">
+        <div class="modal-content pos-modal-content">
+            <div class="close-modal hover-target" onclick="closeModal()">×</div>
+            <h2 class="modal-title">PEMBAYARAN</h2>
+            
+            <div class="payment-summary">
+                <small>Total Tagihan</small>
+                <div class="big-total" id="modalTotalDisplay">Rp 0</div>
+            </div>
+
+            <div class="form-group">
+                <label>Metode Pembayaran</label>
+                <div class="payment-methods">
+                    <button class="method-btn active hover-target" onclick="selectMethod('cash')">CASH</button>
+                    <button class="method-btn hover-target" onclick="selectMethod('qris')">QRIS</button>
+                    <button class="method-btn hover-target" onclick="selectMethod('transfer')">TRANSFER</button>
+                </div>
+            </div>
+
+            <div class="form-group" id="cashInputGroup">
+                <label>Uang Diterima (Cash)</label>
+                <input type="number" id="cashInput" class="form-input hover-target" placeholder="Contoh: 50000" oninput="calculateChange()">
+            </div>
+
+            <div class="change-display">
+                <span>Kembalian:</span>
+                <strong id="changeDisplay">Rp 0</strong>
+            </div>
+
+            <button class="service-action-btn hover-target" style="width:100%; margin-top:20px;" onclick="processTransaction()">
+                SELESAIKAN TRANSAKSI
+            </button>
+        </div>
+    </div>
+
+    <div id="receiptModal" class="modal">
+        <div class="modal-content pos-modal-content" style="text-align:center;">
+            <div class="check-icon">✓</div>
+            <h2 class="modal-title">TRANSAKSI BERHASIL</h2>
+            <p style="color:#888; margin-bottom:20px;">Struk transaksi telah dibuat.</p>
+            
+            <div class="receipt-preview" id="receiptPreview">
+                </div>
+
+            <div class="receipt-actions">
+                <button class="filter-btn hover-target" onclick="printReceipt()">PRINT / PDF</button>
+                <button class="filter-btn hover-target" onclick="newTransaction()">TRANSAKSI BARU</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/data.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/pos.js"></script>
+</body>
+</html>
