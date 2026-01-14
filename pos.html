@@ -206,10 +206,22 @@
             <button class="clear-btn" onclick="resetHistoryData()" style="width:100%; margin-top:15px; border-color:#ff4757; color:#ff4757; padding:10px;">RESET SEMUA DATA KEUANGAN</button>
         </div>
 
-        <div id="settingsTab" class="tab-content" style="display:none; text-align:center; color:#888;">
-            <p>Fitur Export Excel akan segera hadir.</p>
-        </div>
-
+        <div id="settingsTab" class="tab-content" style="display:none; text-align:center;">
+    <div style="padding: 20px; border: 1px dashed #333; border-radius: 10px; margin-bottom: 20px;">
+        <h4 style="color:#fff; margin-bottom:10px;">BACKUP DATA</h4>
+        <p style="color:#888; font-size:12px; margin-bottom:15px;">
+            Unduh rekap penjualan ke dalam format Excel (.csv) untuk laporan pembukuan bulanan.
+        </p>
+        <button class="pay-btn hover-target" onclick="downloadExcel()" style="border-color:#2ed573; color:#2ed573; margin-top:0;">
+            DOWNLOAD EXCEL (.CSV)
+        </button>
+    </div>
+    
+    <div style="padding: 20px; border: 1px dashed #333; border-radius: 10px;">
+        <h4 style="color:#ff4757; margin-bottom:10px;">DANGER ZONE</h4>
+        <button class="clear-btn" onclick="resetHistoryData()" style="width:100%; padding:10px; border-color:#ff4757; color:#ff4757;">
+            RESET / HAPUS SEMUA DATA
+        </button>
     </div>
 </div>
 
