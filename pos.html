@@ -140,6 +140,26 @@
             <div class="receipt-actions">
                 <button class="filter-btn hover-target" onclick="printReceipt()">PRINT / PDF</button>
                 <button class="filter-btn hover-target" onclick="newTransaction()">TRANSAKSI BARU</button>
+                    <div id="emailModal" class="modal">
+        <div class="modal-content pos-modal-content">
+            <div class="close-modal hover-target" onclick="closeModal()">×</div>
+            <h2 class="modal-title">KIRIM STRUK DIGITAL</h2>
+            
+            <p style="color:#888; font-size:12px; margin-bottom:20px;">
+                Pengirim: <strong>usahadulustudio@gmail.com</strong> (Default)
+            </p>
+
+            <div class="form-group">
+                <label>Email Klien</label>
+                <input type="email" id="clientEmailInput" class="form-input hover-target" placeholder="contoh: klien@email.com">
+            </div>
+
+            <button class="pay-btn hover-target" onclick="processEmailSend()">
+                KIRIM SEKARANG ➜
+            </button>
+        </div>
+    </div>
+
             </div>
         </div>
     </div>
