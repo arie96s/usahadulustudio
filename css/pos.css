@@ -129,12 +129,31 @@ body {
 .calc-row.total { color: #fff; font-size: 18px; font-weight: 900; margin-top: 10px; border-top: 1px solid #333; padding-top: 10px; }
 
 .pay-btn {
-    width: 100%; padding: 15px; background: #fff; color: #000;
-    font-weight: 900; border: none; margin-top: 20px; font-size: 16px;
-    text-transform: uppercase; letter-spacing: 1px; transition: 0.3s;
+    width: 100%; 
+    padding: 15px; 
+    
+    /* Style Dasar mengikuti tema .service-action-btn */
+    background: transparent; 
+    border: 1px solid #fff; 
+    color: #fff;
+    border-radius: 50px; /* Membuat sudut membulat seperti tombol lain */
+    
+    font-weight: bold; 
+    margin-top: 20px; 
+    font-size: 14px;
+    text-transform: uppercase; 
+    letter-spacing: 2px; 
+    transition: all 0.3s ease;
+    cursor: none; /* Ikuti cursor custom */
 }
-.pay-btn:hover { background: #ccc; letter-spacing: 3px; }
 
+.pay-btn:hover { 
+    background: #fff; 
+    color: #000; 
+    box-shadow: 0 0 15px rgba(255,255,255,0.5);
+    transform: translateY(-2px); /* Efek naik sedikit, bukan mengembang */
+    letter-spacing: 2px; /* Pastikan huruf tidak melebar */
+}
 .powered-by { text-align: center; font-size: 9px; color: #444; margin-top: 15px; text-transform: uppercase; }
 
 /* Style Modal Khusus POS */
