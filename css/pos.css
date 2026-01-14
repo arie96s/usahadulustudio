@@ -339,3 +339,49 @@ body {
 .menu-btn.active span:nth-child(3) {
     transform: translateY(-7px) rotate(-45deg);
 }
+
+/* --- CUSTOM CURSOR STYLES --- */
+#cursor {
+    width: 20px;
+    height: 20px;
+    border: 1px solid #fff; /* Warna lingkaran kursor */
+    background-color: rgba(255, 255, 255, 0.1); /* Sedikit transparan di tengah */
+    border-radius: 50%;
+    position: fixed;
+    pointer-events: none; /* PENTING: Agar klik tembus ke tombol di bawahnya */
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: transform 0.1s ease, background-color 0.2s;
+    mix-blend-mode: difference; /* Efek keren agar kontras dengan background */
+    display: none; /* Sembunyikan dulu secara default */
+}
+
+/* Efek saat hover elemen yang bisa diklik */
+#cursor.active {
+    transform: translate(-50%, -50%) scale(2.5);
+    background-color: rgba(255, 255, 255, 1);
+    border-color: transparent;
+    mix-blend-mode: normal;
+    opacity: 0.5;
+}
+
+/* Tampilkan hanya di Desktop (Layar > 768px) */
+@media (min-width: 769px) {
+    #cursor {
+        display: block;
+    }
+    /* Sembunyikan kursor bawaan sistem */
+    body, a, button, input, .pos-card, .hover-target {
+        cursor: none !important;
+    }
+}
+
+/* Sembunyikan custom cursor di HP agar tidak mengganggu */
+@media (max-width: 768px) {
+    #cursor {
+        display: none !important;
+    }
+    body, a, button, input {
+        cursor: auto !important;
+    }
+}
