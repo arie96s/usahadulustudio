@@ -1,4 +1,4 @@
-/* css/pos.css - FULL VERSION (Updated) */
+/* css/pos.css - FINAL FIX (Sudut Tumpul & Tombol X) */
 
 :root {
     --pos-bg: #050505;
@@ -8,15 +8,24 @@
 }
 
 body {
-    overflow: hidden; /* Mencegah scroll double di layout Desktop */
+    overflow: hidden; /* Desktop tidak boleh scroll body */
 }
 
-/* Header Khusus POS */
+/* --- HEADER KHUSUS POS --- */
 #posHeader {
     position: fixed; top: 0; left: 0; width: 100%; height: 70px;
     background: #000; border-bottom: 1px solid var(--pos-border);
     display: flex; justify-content: space-between; align-items: center;
     padding: 0 30px; z-index: 900;
+}
+
+/* FIX: Tombol Menu Hamburger agar X muncul di atas overlay */
+#posHeader .menu-btn {
+    z-index: 2000 !important; 
+    position: relative;
+}
+.menu-btn.active span {
+    background-color: #ffffff !important;
 }
 
 .pos-status {
@@ -26,20 +35,11 @@ body {
 .status-dot { width: 8px; height: 8px; background: var(--accent-green); border-radius: 50%; box-shadow: 0 0 5px var(--accent-green); }
 .header-right { display: flex; align-items: center; gap: 20px; color: #fff; font-family: monospace; font-size: 14px;}
 
-/* PERBAIKAN TOMBOL MENU (Agar X terlihat dan bisa diklik) */
-#posHeader .menu-btn {
-    z-index: 2000 !important;
-    position: relative;
-}
-.menu-btn.active span {
-    background-color: #ffffff !important;
-}
-
-/* Container Utama */
+/* --- LAYOUT UTAMA --- */
 .pos-container {
     display: flex;
     height: 100vh;
-    padding-top: 70px; /* Space untuk header */
+    padding-top: 70px; 
 }
 
 /* Kolom Kiri: Produk */
@@ -51,14 +51,14 @@ body {
     border-right: 1px solid var(--pos-border);
 }
 
-.pos-filter-bar {
-    margin-bottom: 25px;
-}
+.pos-filter-bar { margin-bottom: 25px; }
 
+/* FIX: Input Search Tumpul */
 .pos-search {
     width: 100%; background: #000; border: 1px solid var(--pos-border);
-    padding: 15px; color: #fff; border-radius: 8px; margin-bottom: 15px;
+    padding: 15px; color: #fff; margin-bottom: 15px;
     font-family: 'Inter', sans-serif; text-transform: uppercase;
+    border-radius: 12px; /* SUDUT TUMPUL */
 }
 .pos-search:focus { border-color: #fff; outline: none; }
 
@@ -76,15 +76,14 @@ body {
 .pos-card {
     background: var(--pos-panel);
     border: 1px solid var(--pos-border);
-    border-radius: 8px;
-    cursor: none;
+    border-radius: 12px; /* SUDUT TUMPUL KARTU */
+    cursor: none; 
     transition: all 0.2s;
     overflow: hidden;
     position: relative;
     display: flex;
     flex-direction: column;
 }
-
 .pos-card:hover { border-color: #fff; transform: translateY(-3px); }
 .pos-card:active { transform: scale(0.98); }
 
@@ -96,12 +95,11 @@ body {
 .pos-price { font-size: 14px; color: #ffd700; font-weight: 900; }
 .pos-stock { font-size: 10px; color: #666; position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.8); padding: 2px 5px; border-radius: 4px; }
 
-/* Kolom Kanan: Sidebar Transaksi */
+/* Kolom Kanan: Sidebar */
 .pos-sidebar {
     width: 350px;
     background: #000;
-    display: flex;
-    flex-direction: column;
+    display: flex; flex-direction: column;
     padding: 20px;
     height: 100%;
 }
@@ -114,16 +112,12 @@ body {
 .clear-btn { background: none; border: 1px solid #333; color: #ff4757; font-size: 10px; padding: 4px 8px; border-radius: 4px; }
 .clear-btn:hover { background: #ff4757; color: #fff; }
 
-.cart-items-container {
-    flex: 1;
-    overflow-y: auto;
-    margin-bottom: 20px;
-}
-
+.cart-items-container { flex: 1; overflow-y: auto; margin-bottom: 20px; }
 .cart-item {
     display: flex; justify-content: space-between; align-items: center;
-    background: #111; padding: 10px; border-radius: 6px; margin-bottom: 8px;
+    background: #111; padding: 10px; margin-bottom: 8px;
     border: 1px solid transparent;
+    border-radius: 8px; /* SUDUT TUMPUL ITEM */
 }
 .cart-item:hover { border-color: #444; }
 
@@ -141,77 +135,91 @@ body {
 
 /* TOMBOL BAYAR (Sesuai Tema & Tidak Mengembang) */
 .pay-btn {
-    width: 100%; 
-    padding: 15px; 
-    background: transparent; 
-    border: 1px solid #fff; 
-    color: #fff;
-    border-radius: 50px; 
-    font-weight: bold; 
-    margin-top: 20px; 
-    font-size: 14px;
-    text-transform: uppercase; 
-    letter-spacing: 2px; 
-    transition: all 0.3s ease;
-    cursor: none; 
+    width: 100%; padding: 15px; 
+    background: transparent; border: 1px solid #fff; color: #fff;
+    font-weight: bold; margin-top: 20px; font-size: 14px;
+    text-transform: uppercase; letter-spacing: 2px; transition: all 0.3s ease; cursor: none; 
+    border-radius: 50px; /* BULAT PENUH */
 }
-
 .pay-btn:hover { 
-    background: #fff; 
-    color: #000; 
-    box-shadow: 0 0 15px rgba(255,255,255,0.5);
-    transform: translateY(-2px); 
+    background: #fff; color: #000; 
+    box-shadow: 0 0 15px rgba(255,255,255,0.5); transform: translateY(-2px); 
     letter-spacing: 2px;
 }
 
-/* MODAL PEMBAYARAN (Sudut Tumpul) */
+/* --- MODAL PEMBAYARAN (FIX SUDUT TUMPUL & TOMBOL X) --- */
 .pos-modal-content {
     background: #111; 
     border: 1px solid #fff; 
     width: 400px; 
     padding: 30px;
-    border-radius: 20px; /* Sudut Tumpul */
+    
+    /* FIX PENTING: Agar tombol X tidak kabur */
+    position: relative; 
+    
+    /* FIX PENTING: Agar sudut tumpul */
+    border-radius: 20px; 
     box-shadow: 0 10px 40px rgba(0,0,0,0.8);
 }
 
 .big-total { font-size: 32px; font-weight: 900; color: #fff; margin: 10px 0 20px 0; }
 .payment-methods { display: flex; gap: 10px; margin-bottom: 20px; }
-.method-btn { flex: 1; background: #000; border: 1px solid #333; color: #888; padding: 10px; font-size: 12px; font-weight: bold; border-radius: 8px; }
+
+/* Tombol Pilihan Cash/QRIS Tumpul */
+.method-btn { 
+    flex: 1; background: #000; border: 1px solid #333; color: #888; 
+    padding: 10px; font-size: 12px; font-weight: bold; 
+    border-radius: 10px; /* SUDUT TUMPUL */
+}
 .method-btn.active, .method-btn:hover { background: #fff; color: #000; }
 
 .form-group { margin-bottom: 15px; }
 .form-group label { display: block; color: #888; font-size: 12px; margin-bottom: 5px; }
-/* Input Field Sudut Tumpul */
-.pos-modal-content input {
+
+/* Input Uang Tumpul */
+#cashInput {
     width: 100%; background: #000; border: 1px solid #333; color: #fff;
-    padding: 12px; border-radius: 10px; font-size: 16px;
+    padding: 12px; font-size: 16px;
+    border-radius: 10px; /* SUDUT TUMPUL */
 }
-.pos-modal-content input:focus { border-color: #fff; outline: none; }
+#cashInput:focus { border-color: #fff; outline: none; }
 
 .change-display { display: flex; justify-content: space-between; margin-top: 15px; font-size: 14px; color: #ccc; }
-
 .check-icon { font-size: 50px; color: var(--accent-green); margin-bottom: 10px; }
 
-/* PREVIEW STRUK (Sudut Tumpul) */
-.receipt-preview {
-    background: #fff;
-    color: #000;
-    padding: 15px;
-    font-family: 'Courier New', monospace; 
-    font-size: 12px;
-    text-align: left;
-    margin: 20px 0;
-    max-height: 200px;
-    overflow-y: auto;
-    border-radius: 10px; 
-    border: 1px solid #ddd; 
+/* FIX: Close Modal Style (Tombol X di Modal) */
+.pos-modal-content .close-modal {
+    position: absolute; 
+    top: 15px; 
+    right: 15px; 
+    color: #fff; 
+    font-size: 24px; 
+    cursor: pointer;
+    z-index: 10;
+    width: 30px; height: 30px;
+    display: flex; justify-content: center; align-items: center;
+    background: #222; border-radius: 50%; border: 1px solid #333;
+}
+.pos-modal-content .close-modal:hover {
+    background: #fff; color: #000;
 }
 
+/* Preview Struk Tumpul */
+.receipt-preview {
+    background: #fff; color: #000; padding: 15px;
+    font-family: 'Courier New', monospace; font-size: 12px; text-align: left;
+    margin: 20px 0; max-height: 200px; overflow-y: auto;
+    border-radius: 10px; /* SUDUT TUMPUL */
+    border: 1px solid #ddd; 
+}
 .receipt-actions { display: flex; gap: 10px; justify-content: center; }
 
-/* === MOBILE RESPONSIVE === */
+
+/* =========================================
+   MOBILE RESPONSIVE (HP) - RAPI & FIX
+   ========================================= */
 @media (max-width: 768px) {
-    body { overflow: auto; }
+    body { overflow: auto; } /* Aktifkan scroll di HP */
     
     .pos-container { 
         flex-direction: column; 
@@ -224,6 +232,7 @@ body {
         height: auto; 
         overflow-y: visible; 
         padding-bottom: 20px;
+        order: 1; /* Produk di Atas */
     }
 
     .pos-grid {
@@ -242,7 +251,7 @@ body {
         border-left: none;
         padding: 20px;
         background: #0a0a0a; 
-        order: 2; 
+        order: 2; /* Cart di Bawah */
     }
 
     #posHeader { padding: 0 15px; }
