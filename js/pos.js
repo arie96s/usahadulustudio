@@ -1,7 +1,6 @@
-// js/pos.js
+// js/pos.js - Full Fixed Version
 
-// 1. DATA PRODUK (Simulasi Database)
-// Mengambil gaya penamaan dari Usahadulu (Asset, Service, Merch)
+// --- 1. DATA PRODUK (Simulasi Database) ---
 const products = [
     { id: 1, name: "LOGO BASIC PACKAGE", price: 250000, category: "service", img: "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?auto=format&fit=crop&w=300&q=60" },
     { id: 2, name: "METAL FONT BUNDLE", price: 150000, category: "asset", img: "https://images.unsplash.com/photo-1571120038865-c35012e1284a?auto=format&fit=crop&w=300&q=60" },
@@ -18,30 +17,34 @@ let cart = [];
 let currentFilter = 'all';
 let paymentMethod = 'cash';
 
-// Format Rupiah
+// Helper Format Rupiah
 const fmtIDR = (num) => {
     return "Rp " + num.toLocaleString('id-ID');
 }
 
-// 2. INITIALIZATION
+// --- 2. INITIALIZATION & CLOCK ---
 document.addEventListener('DOMContentLoaded', () => {
-    renderProducts('all');
-    updateClock();
-    setInterval(updateClock, 1000);
+    // Tampilkan semua produk saat awal load
+    filterProducts('all'); 
     
-    // Search Listener
-    document.getElementById('searchProduct').addEventListener('input', (e) => {
-        const keyword = e.target.value.toLowerCase();
-        const filtered = products.filter(p => p.name.toLowerCase().includes(keyword));
-        renderGrid(filtered);
-    });
+    // Jalankan Jam
+    startClock();
+    
+    // Listener Pencarian
+    const searchInput = document.getElementById('searchProduct');
+    if(searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            const keyword = e.target.value.toLowerCase();
+            const filtered = products.filter(p => p.name.toLowerCase().includes(keyword));
+            renderGrid(filtered);
+        });
+    }
 });
 
-// Jam Digital
+// Fungsi Jam Realtime
 function startClock() {
     function update() {
         const now = new Date();
-        // Format jam:menit (24 jam)
         const timeString = now.toLocaleTimeString('id-ID', {
             hour: '2-digit', 
             minute:'2-digit'
@@ -49,17 +52,18 @@ function startClock() {
         const clockEl = document.getElementById('clockDisplay');
         if(clockEl) clockEl.innerText = timeString;
     }
-    update(); // Jalankan langsung
+    update(); // Update langsung
     setInterval(update, 1000); // Update tiap detik
 }
 
-// 3. RENDER PRODUCTS
+// --- 3. RENDER & FILTER PRODUCTS ---
 function filterProducts(cat) {
     currentFilter = cat;
     
     // Update Button Active State
     document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-    event.target.classList.add('active');
+    // Highlight tombol yang diklik (jika event tersedia)
+    if(event && event.target) event.target.classList.add('active');
 
     if(cat === 'all') {
         renderGrid(products);
@@ -71,10 +75,12 @@ function filterProducts(cat) {
 
 function renderGrid(items) {
     const grid = document.getElementById('productGrid');
+    if(!grid) return;
+    
     grid.innerHTML = '';
 
     if(items.length === 0) {
-        grid.innerHTML = '<p style="color:#666; col-span:3;">Produk tidak ditemukan.</p>';
+        grid.innerHTML = '<p style="color:#666; width:100%; text-align:center; margin-top:20px;">Produk tidak ditemukan.</p>';
         return;
     }
 
@@ -96,11 +102,11 @@ function renderGrid(items) {
         grid.appendChild(card);
     });
 
-    // Re-bind cursor effect (karena element baru dibuat)
-    if(typeof bindHoverEvents === 'function') bindHoverEvents(); // Dari main.js
+    // Re-bind cursor effect (dari main.js)
+    if(typeof bindHoverEvents === 'function') bindHoverEvents(); 
 }
 
-// 4. CART LOGIC
+// --- 4. CART LOGIC ---
 function addToCart(id) {
     const product = products.find(p => p.id === id);
     const existingItem = cart.find(item => item.id === id);
@@ -131,8 +137,9 @@ function clearCart() {
 
 function updateCartUI() {
     const container = document.getElementById('cartContainer');
+    if(!container) return;
+    
     container.innerHTML = '';
-
     let subtotal = 0;
 
     if(cart.length === 0) {
@@ -161,27 +168,37 @@ function updateCartUI() {
     const tax = subtotal * 0.11; // PPN 11%
     const total = subtotal + tax;
 
-    document.getElementById('subtotalDisplay').innerText = fmtIDR(subtotal);
-    document.getElementById('taxDisplay').innerText = fmtIDR(tax);
-    document.getElementById('totalDisplay').innerText = fmtIDR(total);
-    
-    // Update Modal Total juga
-    document.getElementById('modalTotalDisplay').innerText = fmtIDR(total);
+    // Update UI Displays
+    const subDisplay = document.getElementById('subtotalDisplay');
+    const taxDisplay = document.getElementById('taxDisplay');
+    const totDisplay = document.getElementById('totalDisplay');
+    const modalTotDisplay = document.getElementById('modalTotalDisplay');
+
+    if(subDisplay) subDisplay.innerText = fmtIDR(subtotal);
+    if(taxDisplay) taxDisplay.innerText = fmtIDR(tax);
+    if(totDisplay) totDisplay.innerText = fmtIDR(total);
+    if(modalTotDisplay) modalTotDisplay.innerText = fmtIDR(total);
 
     if(typeof bindHoverEvents === 'function') bindHoverEvents();
 }
 
-// 5. PAYMENT LOGIC
+// --- 5. PAYMENT LOGIC ---
 function openPaymentModal() {
     if(cart.length === 0) {
         alert("Keranjang masih kosong!");
         return;
     }
     const modal = document.getElementById('paymentModal');
-    modal.classList.add('show');
-    document.getElementById('cashInput').value = '';
-    document.getElementById('changeDisplay').innerText = 'Rp 0';
-    selectMethod('cash'); // Default
+    if(modal) {
+        modal.classList.add('show');
+        const cashInput = document.getElementById('cashInput');
+        if(cashInput) cashInput.value = '';
+        
+        const changeDisplay = document.getElementById('changeDisplay');
+        if(changeDisplay) changeDisplay.innerText = 'Rp 0';
+        
+        selectMethod('cash'); // Default method
+    }
 }
 
 function closeModal() {
@@ -191,41 +208,52 @@ function closeModal() {
 function selectMethod(method) {
     paymentMethod = method;
     document.querySelectorAll('.method-btn').forEach(btn => btn.classList.remove('active'));
-    // Cari tombol yang diklik (agak manual traversing karena onclick di html)
-    event.target.classList.add('active');
+    if(event && event.target) event.target.classList.add('active');
 
     const cashGroup = document.getElementById('cashInputGroup');
-    if(method === 'cash') {
-        cashGroup.style.display = 'block';
-    } else {
-        cashGroup.style.display = 'none';
-        document.getElementById('changeDisplay').innerText = '-';
+    const changeDisplay = document.getElementById('changeDisplay');
+    
+    if(cashGroup) {
+        if(method === 'cash') {
+            cashGroup.style.display = 'block';
+        } else {
+            cashGroup.style.display = 'none';
+            if(changeDisplay) changeDisplay.innerText = '-';
+        }
     }
 }
 
 function calculateChange() {
-    const totalText = document.getElementById('totalDisplay').innerText;
+    const totDisplay = document.getElementById('totalDisplay');
+    if(!totDisplay) return;
+
+    const totalText = totDisplay.innerText;
     const total = parseInt(totalText.replace(/[^0-9]/g, '')); // Hapus Rp dan titik
     
-    const cashInput = document.getElementById('cashInput').value;
-    const cash = parseInt(cashInput) || 0;
+    const cashInput = document.getElementById('cashInput');
+    const cash = cashInput ? (parseInt(cashInput.value) || 0) : 0;
+    
+    const changeDisplay = document.getElementById('changeDisplay');
 
-    if(cash >= total) {
-        document.getElementById('changeDisplay').innerText = fmtIDR(cash - total);
-        document.getElementById('changeDisplay').style.color = '#2ed573';
-    } else {
-        document.getElementById('changeDisplay').innerText = "Uang Kurang!";
-        document.getElementById('changeDisplay').style.color = '#ff4757';
+    if(changeDisplay) {
+        if(cash >= total) {
+            changeDisplay.innerText = fmtIDR(cash - total);
+            changeDisplay.style.color = '#2ed573';
+        } else {
+            changeDisplay.innerText = "Uang Kurang!";
+            changeDisplay.style.color = '#ff4757';
+        }
     }
 }
 
 function processTransaction() {
-    const totalText = document.getElementById('totalDisplay').innerText;
+    const totDisplay = document.getElementById('totalDisplay');
+    const totalText = totDisplay ? totDisplay.innerText : "0";
     const total = parseInt(totalText.replace(/[^0-9]/g, ''));
     
     if(paymentMethod === 'cash') {
-        const cashInput = document.getElementById('cashInput').value;
-        const cash = parseInt(cashInput) || 0;
+        const cashInput = document.getElementById('cashInput');
+        const cash = cashInput ? (parseInt(cashInput.value) || 0) : 0;
         if(cash < total) {
             alert("Pembayaran Gagal: Uang Cash Kurang!");
             return;
@@ -237,19 +265,20 @@ function processTransaction() {
     showReceiptModal();
 }
 
-// 6. RECEIPT & PRINTING
+// --- 6. RECEIPT & PRINTING ---
 function showReceiptModal() {
     const modal = document.getElementById('receiptModal');
     const preview = document.getElementById('receiptPreview');
+    if(!modal || !preview) return;
     
     const now = new Date();
     const dateStr = now.toLocaleDateString() + " " + now.toLocaleTimeString();
     const totalText = document.getElementById('totalDisplay').innerText;
     
-    // Generate Struk HTML Sederhana
+    // Generate Struk HTML (Preview di layar)
     let itemsHtml = cart.map(item => `
-        <div style="display:flex; justify-content:space-between;">
-            <span>${item.name} x${item.qty}</span>
+        <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+            <span>${item.name} <span style="font-size:10px; color:#666;">(x${item.qty})</span></span>
             <span>${fmtIDR(item.price * item.qty)}</span>
         </div>
     `).join('');
@@ -258,14 +287,14 @@ function showReceiptModal() {
         <div style="text-align:center; border-bottom:1px dashed #000; padding-bottom:10px; margin-bottom:10px;">
             <strong>USAHADULU STUDIO</strong><br>
             Citimall Dumai, Riau<br>
-            ${dateStr}
+            <span style="font-size:10px;">${dateStr}</span>
         </div>
         ${itemsHtml}
         <div style="border-top:1px dashed #000; margin-top:10px; padding-top:10px; display:flex; justify-content:space-between; font-weight:bold;">
             <span>TOTAL</span>
             <span>${totalText}</span>
         </div>
-        <div style="text-align:center; margin-top:20px;">
+        <div style="text-align:center; margin-top:20px; font-size:10px;">
             TERIMA KASIH!<br>
             #SupportLocalCreative
         </div>
@@ -279,10 +308,13 @@ function newTransaction() {
     clearCart();
 }
 
-// js/pos.js - Bagian Paling Bawah
-
+// Fungsi Print PDF (Struk Thermal 80mm)
 window.printReceipt = function() {
     // Pastikan library jsPDF terbaca
+    if (!window.jspdf) {
+        alert("Library PDF belum termuat. Coba refresh halaman.");
+        return;
+    }
     const { jsPDF } = window.jspdf;
     
     // 1. Setup Ukuran Kertas Thermal (80mm x Auto/150mm)
@@ -313,7 +345,7 @@ window.printReceipt = function() {
     doc.text(dateStr, 40, y, { align: "center" });
     y += 6;
 
-    // Garis Pemisah (Dashed line simulasi dengan text)
+    // Garis Pemisah
     doc.text("--------------------------------", 40, y, { align: "center" });
     y += 5;
 
@@ -321,51 +353,50 @@ window.printReceipt = function() {
     doc.setFontSize(9);
     
     cart.forEach(item => {
-        // Nama Produk (Kiri)
-        // Potong nama jika terlalu panjang agar tidak menabrak harga
+        // Nama Produk (Kiri) - Potong jika terlalu panjang
         let name = item.name.length > 18 ? item.name.substring(0, 18) + ".." : item.name;
         
         doc.text(name, 5, y);
         
         // Harga Total per Item (Kanan)
         const priceStr = fmtIDR(item.price * item.qty);
-        doc.text(priceStr, 75, y, { align: "right" }); // 75 = Kanan (batas kertas 80 - margin 5)
+        doc.text(priceStr, 75, y, { align: "right" }); 
         
         y += 4;
         
-        // Detail Qty di bawah nama (kecil)
+        // Detail Qty di bawah nama
         doc.setFontSize(7);
         doc.text(`(${item.qty} x ${fmtIDR(item.price)})`, 5, y);
-        doc.setFontSize(9); // Kembalikan ukuran font
+        doc.setFontSize(9); 
         
-        y += 5; // Jarak antar item
+        y += 5; 
     });
 
     // --- 4. TOTAL & PEMBAYARAN ---
     doc.text("--------------------------------", 40, y, { align: "center" });
     y += 5;
 
-    const totalText = document.getElementById('totalDisplay').innerText;
+    const totDisplay = document.getElementById('totalDisplay');
+    const totalText = totDisplay ? totDisplay.innerText : "0";
     
     doc.setFontSize(10);
     doc.setFont(undefined, 'bold');
     
-    // Tulis TOTAL (Kiri) dan Angka (Kanan)
     doc.text("TOTAL", 5, y);
     doc.text(totalText, 75, y, { align: "right" });
     y += 6;
 
-    // Info Pembayaran
     doc.setFontSize(8);
     doc.setFont(undefined, 'normal');
     doc.text(`Metode: ${paymentMethod.toUpperCase()}`, 5, y);
     y += 4;
     
     if(paymentMethod === 'cash') {
-        const cashInput = document.getElementById('cashInput').value;
+        const cashInput = document.getElementById('cashInput');
         const changeText = document.getElementById('changeDisplay').innerText;
+        const cashVal = cashInput ? parseInt(cashInput.value) : 0;
         
-        doc.text(`Tunai : Rp ${parseInt(cashInput).toLocaleString('id-ID')}`, 5, y);
+        doc.text(`Tunai : Rp ${cashVal.toLocaleString('id-ID')}`, 5, y);
         y += 4;
         doc.text(`Kembali: ${changeText}`, 5, y);
     }
