@@ -99,15 +99,50 @@
     </div>
 
     <div id="paymentModal" class="modal">
-        <div class="modal-content pos-modal-content">
-            <div class="close-modal hover-target" onclick="closeModal()">×</div>
-            
-            <h2 class="modal-title">DIGITAL / HARD CASH</h2>
-            
-            <div class="payment-summary">
-                <small>Total Tagihan</small>
-                <div class="big-total" id="modalTotalDisplay">Rp 0</div>
+    <div class="modal-content pos-modal-content">
+        <div class="close-modal hover-target" onclick="closeModal()">×</div>
+        
+        <h2 class="modal-title">PEMBAYARAN</h2>
+        
+        <div class="payment-type-box" style="display:flex; gap:10px; margin-bottom:15px; background:#000; padding:5px; border-radius:50px; border:1px solid #333;">
+            <button id="btnFull" class="type-btn active" onclick="setPaymentType('full')" style="flex:1; border:none; background:transparent; color:#888; border-radius:50px; padding:10px; font-weight:bold; cursor:pointer;">LUNAS</button>
+            <button id="btnDp" class="type-btn" onclick="setPaymentType('dp')" style="flex:1; border:none; background:transparent; color:#888; border-radius:50px; padding:10px; font-weight:bold; cursor:pointer;">DP / TERMIN</button>
+        </div>
+
+        <div class="payment-summary" style="text-align:center;">
+            <small>Total Tagihan</small>
+            <div class="big-total" id="modalTotalDisplay">Rp 0</div>
+        </div>
+
+        <div class="form-group">
+            <label>Nama Klien (Opsional untuk Cash)</label>
+            <input type="text" id="clientNameInput" class="form-input hover-target" placeholder="Contoh: Budi Distro" style="width:100%; background:#000; border:1px solid #333; color:#fff; padding:10px; border-radius:10px;">
+        </div>
+
+        <div class="form-group">
+            <label>Metode Pembayaran</label>
+            <div class="payment-methods">
+                <button class="method-btn active hover-target" onclick="selectMethod('cash')">CASH</button>
+                <button class="method-btn hover-target" onclick="selectMethod('qris')">QRIS</button>
+                <button class="method-btn hover-target" onclick="selectMethod('transfer')">TRANSFER</button>
             </div>
+        </div>
+
+        <div class="form-group" id="cashInputGroup">
+            <label id="inputLabel">Nominal Diterima</label>
+            <input type="number" id="cashInput" class="form-input hover-target" placeholder="Rp 0" oninput="calculateChange()">
+        </div>
+
+        <div class="change-display">
+            <span id="changeLabel">Kembalian:</span>
+            <strong id="changeDisplay">Rp 0</strong>
+        </div>
+
+        <button class="pay-btn hover-target" style="width:100%; margin-top:20px;" onclick="processTransaction()">
+            SELESAIKAN TRANSAKSI
+        </button>
+    </div>
+</div>
 
             <div class="form-group">
                 <label>Metode Pembayaran</label>
