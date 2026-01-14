@@ -162,3 +162,14 @@ body {
     border-radius: 8px; 
     border: 1px solid #ddd; /* Opsional: Tambah sedikit border agar lebih tegas */
 }
+
+/* PERBAIKAN TOMBOL MENU */
+#posHeader .menu-btn {
+    z-index: 2000 !important; /* Memaksa tombol di atas segalanya */
+    position: relative;
+}
+
+/* Pastikan warna garis tombol tetap putih saat menu terbuka */
+.menu-btn.active span {
+    background-color: #ffffff !important;
+}
