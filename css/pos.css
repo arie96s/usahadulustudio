@@ -1,4 +1,4 @@
-/* css/pos.css - FINAL FIX (Sudut Tumpul & Tombol X) */
+/* css/pos.css - FINAL FIX (Clean & Working) */
 
 :root {
     --pos-bg: #050505;
@@ -109,7 +109,8 @@ body {
     border-bottom: 1px dashed #333; padding-bottom: 15px; margin-bottom: 15px;
 }
 .sidebar-header h3 { font-size: 16px; color: #fff; margin: 0; }
-..clear-btn { 
+
+.clear-btn { 
     background: transparent; 
     border: 1px solid #ff4757; 
     color: #ff4757; 
@@ -127,6 +128,7 @@ body {
     color: #fff; 
     box-shadow: 0 0 15px rgba(255, 71, 87, 0.6); /* Efek Cahaya Merah */
 }
+
 .cart-items-container { flex: 1; overflow-y: auto; margin-bottom: 20px; }
 .cart-item {
     display: flex; justify-content: space-between; align-items: center;
