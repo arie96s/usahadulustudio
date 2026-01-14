@@ -270,7 +270,7 @@ window.printReceipt = function() {
     doc.setFontSize(10); doc.setFont(undefined, 'bold');
     doc.text("USAHADULU STUDIO", 40, y, { align: "center" }); y += 4;
     doc.setFontSize(8); doc.setFont(undefined, 'normal');
-    doc.text("Citimall Dumai, Riau", 40, y, { align: "center" }); y += 4;
+    doc.text("ONLINE / IRL", 40, y, { align: "center" }); y += 4;
     const now = new Date();
     doc.text(now.toLocaleDateString('id-ID') + " " + now.toLocaleTimeString('id-ID'), 40, y, { align: "center" }); y += 6;
     doc.text("--------------------------------", 40, y, { align: "center" }); y += 5;
@@ -302,7 +302,7 @@ window.printReceipt = function() {
     }
     
     y += 10;
-    doc.text("TERIMA KASIH!", 40, y, { align: "center" }); y += 4;
+    doc.text("KEEP THE RECEIPTS", 40, y, { align: "center" }); y += 4;
     doc.text("#SupportLocalCreative", 40, y, { align: "center" });
     
     doc.save(`Struk_Usahadulu_${Date.now()}.pdf`);
