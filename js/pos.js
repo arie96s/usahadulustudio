@@ -527,3 +527,224 @@ function downloadExcel() {
     link.click();
     document.body.removeChild(link);
 }
+
+// ============================================================
+// 👇 FITUR DOWN PAYMENT (DP) & LOGIKA BARU (PASTE DI BAWAH) 👇
+// ============================================================
+
+let isDpMode = false; // Status apakah sedang mode DP atau Lunas
+
+// 1. Fungsi Ganti Mode (Lunas vs DP)
+window.setPaymentType = function(type) {
+    isDpMode = (type === 'dp');
+    
+    // Update Tampilan Tombol
+    document.getElementById('btnFull').className = isDpMode ? 'type-btn' : 'type-btn active';
+    document.getElementById('btnDp').className = isDpMode ? 'type-btn active' : 'type-btn';
+    
+    // Update Label
+    const changeLabel = document.getElementById('changeLabel');
+    const inputLabel = document.getElementById('inputLabel');
+    const cashInput = document.getElementById('cashInput');
+
+    if(isDpMode) {
+        changeLabel.innerText = "SISA TAGIHAN (HUTANG):";
+        changeLabel.style.color = "#ff4757"; // Merah warnanya
+        inputLabel.innerText = "Nominal DP (Masuk)";
+        
+        // Kalau DP, input nominal WAJIB muncul walau metodenya Transfer/QRIS
+        document.getElementById('cashInputGroup').style.display = 'block';
+        cashInput.placeholder = "Masukkan jumlah DP...";
+    } else {
+        changeLabel.innerText = "Kembalian:";
+        changeLabel.style.color = "#ccc";
+        inputLabel.innerText = "Nominal Diterima";
+        
+        // Reset tampilan input sesuai metode pembayaran yang aktif
+        selectMethod(paymentMethod); 
+    }
+    
+    // Reset hitungan
+    if(cashInput) cashInput.value = '';
+    calculateChange();
+}
+
+// 2. Override Fungsi 'selectMethod' (Update Logika Input)
+window.selectMethod = function(method) {
+    paymentMethod = method;
+    document.querySelectorAll('.method-btn').forEach(btn => btn.classList.remove('active'));
+    if(event && event.target) event.target.classList.add('active');
+
+    const cashGroup = document.getElementById('cashInputGroup');
+    const cashInput = document.getElementById('cashInput');
+
+    // Jika Mode DP: Input harus SELALU muncul (karena kita perlu input nominal DP)
+    if (isDpMode) {
+        cashGroup.style.display = 'block';
+        cashInput.focus();
+    } 
+    // Jika Mode LUNAS:
+    else {
+        if(method === 'cash') {
+            cashGroup.style.display = 'block'; // Cash butuh input
+            cashInput.value = '';
+            cashInput.focus();
+        } else {
+            // QRIS/Transfer Lunas biasanya pas sesuai tagihan
+            cashGroup.style.display = 'none'; 
+            const totalText = document.getElementById('totalDisplay').innerText;
+            const total = parseInt(totalText.replace(/[^0-9]/g, ''));
+            
+            // Auto-fill nilai input dengan total tagihan (di balik layar)
+            cashInput.value = total; 
+            document.getElementById('changeDisplay').innerText = "LUNAS (Pas)";
+        }
+    }
+    calculateChange();
+}
+
+// 3. Override Fungsi Hitung Kembalian (Support Hutang)
+window.calculateChange = function() {
+    const totalText = document.getElementById('totalDisplay').innerText;
+    const total = parseInt(totalText.replace(/[^0-9]/g, ''));
+    const cashInput = document.getElementById('cashInput');
+    const cash = cashInput ? (parseInt(cashInput.value) || 0) : 0;
+    const changeDisplay = document.getElementById('changeDisplay');
+
+    if(isDpMode) {
+        // Logika DP: Total - Bayar = Sisa Hutang
+        const sisa = total - cash;
+        if(sisa > 0) {
+            changeDisplay.innerText = fmtIDR(sisa);
+            changeDisplay.style.color = '#ff4757'; // Merah
+        } else if (sisa === 0) {
+            changeDisplay.innerText = "LUNAS (DP 100%?)";
+            changeDisplay.style.color = '#2ed573';
+        } else {
+            changeDisplay.innerText = "KELEBIHAN BAYAR!";
+        }
+    } else {
+        // Logika Normal: Bayar - Total = Kembalian
+        if(cash >= total) {
+            changeDisplay.innerText = fmtIDR(cash - total);
+            changeDisplay.style.color = '#2ed573'; // Hijau
+        } else {
+            changeDisplay.innerText = "Uang Kurang!";
+            changeDisplay.style.color = '#ff4757';
+        }
+    }
+}
+
+// 4. Override Proses Transaksi (Simpan Status DP)
+window.processTransaction = function() {
+    const totalText = document.getElementById('totalDisplay').innerText;
+    const total = parseInt(totalText.replace(/[^0-9]/g, ''));
+    const cashInput = document.getElementById('cashInput');
+    const cash = cashInput ? (parseInt(cashInput.value) || 0) : 0;
+    const clientName = document.getElementById('clientNameInput').value || "Guest";
+
+    // Validasi
+    if(isDpMode) {
+        if(cash <= 0) { alert("Nominal DP tidak boleh nol!"); return; }
+        if(cash >= total) { 
+            // Kalau DP inputnya >= Total, anggap saja Lunas
+            if(!confirm("Nominal DP setara/lebih dari Total. Ubah jadi LUNAS?")) return;
+            isDpMode = false;
+        }
+    } else {
+        // Mode Lunas: Uang gak boleh kurang
+        if(cash < total) { alert("Uang pembayaran kurang! Gunakan mode DP jika ingin hutang."); return; }
+    }
+
+    // Simpan Data
+    saveTransactionToHistory(total, cash, clientName);
+    
+    closeModal();
+    showReceiptModal(total, cash, clientName);
+}
+
+// 5. Update Simpan History (Tambah Kolom Client & Status)
+window.saveTransactionToHistory = function(total, paid, client) {
+    // Hitung Sisa
+    let status = 'LUNAS';
+    let debt = 0;
+    
+    if (paid < total) {
+        status = 'DP / PARTIAL';
+        debt = total - paid;
+    }
+
+    const newTrx = {
+        id: "TRX-" + Date.now().toString().slice(-6),
+        date: new Date().toISOString(),
+        items: [...cart],
+        total: total,
+        paid: paid,       // Nominal yang dibayar sekarang
+        debt: debt,       // Sisa hutang
+        status: status,   // Status pembayaran
+        client: client,   // Nama Klien
+        method: paymentMethod
+    };
+
+    transactionHistory.push(newTrx);
+    localStorage.setItem('usahadulu_sales', JSON.stringify(transactionHistory));
+}
+
+// 6. Update Struk / Receipt (Tampilkan Detail Pembayaran)
+window.showReceiptModal = function(total, paid, client) {
+    const modal = document.getElementById('receiptModal');
+    const preview = document.getElementById('receiptPreview');
+    const now = new Date();
+    
+    // Cek Status
+    const debt = total - paid;
+    const statusLabel = debt > 0 ? "BELUM LUNAS (DP)" : "LUNAS";
+    
+    let itemsHtml = cart.map(item => `
+        <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+            <span>${item.name} <span style="font-size:10px; color:#666;">(x${item.qty})</span></span>
+            <span>${fmtIDR(item.price * item.qty)}</span>
+        </div>
+    `).join('');
+
+    preview.innerHTML = `
+        <div style="text-align:center; border-bottom:1px dashed #000; padding-bottom:10px; margin-bottom:10px;">
+            <strong>USAHADULU STUDIO</strong><br>
+            Citimall Dumai, Riau<br>
+            <span style="font-size:10px;">${now.toLocaleString('id-ID')}</span><br>
+            <span style="font-size:10px;">Klien: ${client.toUpperCase()}</span>
+        </div>
+        ${itemsHtml}
+        <div style="border-top:1px dashed #000; margin-top:10px; padding-top:10px;">
+            <div style="display:flex; justify-content:space-between; font-weight:bold;">
+                <span>TOTAL TAGIHAN</span>
+                <span>${fmtIDR(total)}</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:11px; margin-top:5px;">
+                <span>BAYAR (${paymentMethod.toUpperCase()})</span>
+                <span>${fmtIDR(paid)}</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:11px; margin-top:5px; color:${debt > 0 ? 'red' : 'black'};">
+                <span>SISA TAGIHAN</span>
+                <span>${fmtIDR(debt)}</span>
+            </div>
+            <div style="text-align:center; margin-top:10px; border:1px solid #000; padding:2px; font-weight:bold; font-size:10px;">
+                STATUS: ${statusLabel}
+            </div>
+        </div>
+        <div style="text-align:center; margin-top:20px; font-size:10px;">
+            TERIMA KASIH!<br>KEEP THE RECEIPTS.
+        </div>
+    `;
+
+    // Pastikan tombol-tombol action ada
+    const actionsDiv = modal.querySelector('.receipt-actions');
+    if(actionsDiv) {
+        actionsDiv.innerHTML = `
+            <button class="filter-btn hover-target" onclick="printReceipt()">PRINT / PDF</button>
+            <button class="filter-btn hover-target" onclick="newTransaction()">NEW ORDER</button>
+        `;
+    }
+
+    modal.classList.add('show');
+}
