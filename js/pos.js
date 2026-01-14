@@ -269,23 +269,106 @@ function newTransaction() {
     clearCart();
 }
 
-function printReceipt() {
-    // Menggunakan jsPDF untuk generate PDF
+// js/pos.js - Bagian Paling Bawah
+
+window.printReceipt = function() {
+    // Pastikan library jsPDF terbaca
     const { jsPDF } = window.jspdf;
+    
+    // 1. Setup Ukuran Kertas Thermal (80mm x Auto/150mm)
     const doc = new jsPDF({
         orientation: "portrait",
         unit: "mm",
-        format: [80, 150] // Ukuran kertas struk thermal 80mm
+        format: [80, 150] 
     });
 
-    const receiptContent = document.getElementById('receiptPreview').innerText;
+    // Setup Font Monospace (Penting agar lurus seperti mesin kasir)
+    doc.setFont("courier", "normal");
     
-    doc.setFont("monospace");
+    let y = 10; // Posisi vertikal awal (Y coordinate)
+
+    // --- 2. HEADER ---
     doc.setFontSize(10);
+    doc.setFont(undefined, 'bold');
+    doc.text("USAHADULU STUDIO", 40, y, { align: "center" }); // 40 adalah tengah dari lebar 80
+    y += 4;
+
+    doc.setFontSize(8);
+    doc.setFont(undefined, 'normal');
+    doc.text("Citimall Dumai, Riau", 40, y, { align: "center" });
+    y += 4;
+
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('id-ID') + " " + now.toLocaleTimeString('id-ID');
+    doc.text(dateStr, 40, y, { align: "center" });
+    y += 6;
+
+    // Garis Pemisah (Dashed line simulasi dengan text)
+    doc.text("--------------------------------", 40, y, { align: "center" });
+    y += 5;
+
+    // --- 3. DAFTAR ITEM (LOOPING CART) ---
+    doc.setFontSize(9);
     
-    // Split text agar tidak melebar
-    const splitText = doc.splitTextToSize(receiptContent, 70);
-    doc.text(splitText, 5, 10);
+    cart.forEach(item => {
+        // Nama Produk (Kiri)
+        // Potong nama jika terlalu panjang agar tidak menabrak harga
+        let name = item.name.length > 18 ? item.name.substring(0, 18) + ".." : item.name;
+        
+        doc.text(name, 5, y);
+        
+        // Harga Total per Item (Kanan)
+        const priceStr = fmtIDR(item.price * item.qty);
+        doc.text(priceStr, 75, y, { align: "right" }); // 75 = Kanan (batas kertas 80 - margin 5)
+        
+        y += 4;
+        
+        // Detail Qty di bawah nama (kecil)
+        doc.setFontSize(7);
+        doc.text(`(${item.qty} x ${fmtIDR(item.price)})`, 5, y);
+        doc.setFontSize(9); // Kembalikan ukuran font
+        
+        y += 5; // Jarak antar item
+    });
+
+    // --- 4. TOTAL & PEMBAYARAN ---
+    doc.text("--------------------------------", 40, y, { align: "center" });
+    y += 5;
+
+    const totalText = document.getElementById('totalDisplay').innerText;
     
-    doc.save("Struk_Usahadulu.pdf");
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'bold');
+    
+    // Tulis TOTAL (Kiri) dan Angka (Kanan)
+    doc.text("TOTAL", 5, y);
+    doc.text(totalText, 75, y, { align: "right" });
+    y += 6;
+
+    // Info Pembayaran
+    doc.setFontSize(8);
+    doc.setFont(undefined, 'normal');
+    doc.text(`Metode: ${paymentMethod.toUpperCase()}`, 5, y);
+    y += 4;
+    
+    if(paymentMethod === 'cash') {
+        const cashInput = document.getElementById('cashInput').value;
+        const changeText = document.getElementById('changeDisplay').innerText;
+        
+        doc.text(`Tunai : Rp ${parseInt(cashInput).toLocaleString('id-ID')}`, 5, y);
+        y += 4;
+        doc.text(`Kembali: ${changeText}`, 5, y);
+    }
+
+    // --- 5. FOOTER ---
+    y += 10;
+    doc.setFontSize(8);
+    doc.text("TERIMA KASIH!", 40, y, { align: "center" });
+    y += 4;
+    doc.text("#SupportLocalCreative", 40, y, { align: "center" });
+    y += 4;
+    doc.text("Simpan struk ini sbg bukti.", 40, y, { align: "center" });
+
+    // --- 6. SIMPAN FILE ---
+    doc.save(`Struk_Usahadulu_${Date.now()}.pdf`);
 }
