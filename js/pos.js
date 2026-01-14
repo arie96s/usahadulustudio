@@ -526,3 +526,18 @@ if(menuBtn && navOverlay) {
         navOverlay.classList.toggle('open');
     });
 }
+
+// --- 8. FIX: HAPUS PRELOADER SAAT HALAMAN SIAP ---
+window.addEventListener('load', () => {
+    const preloader = document.getElementById('preloader');
+    if (preloader) {
+        // Efek fade-out agar halus
+        preloader.style.transition = 'opacity 0.5s ease';
+        preloader.style.opacity = '0';
+        
+        // Hapus elemen setelah animasi selesai (0.5 detik)
+        setTimeout(() => {
+            preloader.style.display = 'none';
+        }, 500);
+    }
+});
