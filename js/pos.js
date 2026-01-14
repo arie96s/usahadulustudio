@@ -213,6 +213,11 @@ function processTransaction() {
         const cash = cashInput ? (parseInt(cashInput.value) || 0) : 0;
         if(cash < total) { alert("Uang Cash Kurang!"); return; }
     }
+    
+    // --- TAMBAHKAN BARIS INI (WAJIB) ---
+    saveTransactionToHistory(); 
+    // -----------------------------------
+
     closeModal();
     showReceiptModal();
 }
@@ -357,4 +362,124 @@ window.printReceipt = function() {
     doc.text("KEEP THE RECEIPTS.", 40, y, { align: "center" });
     
     doc.save(`Struk_Usahadulu_${Date.now()}.pdf`);
+}
+
+// --- 7. HISTORY & SECURITY LOGIC (NEW) ---
+
+const ADMIN_PIN = "692196"; // GANTI PIN INI UNTUK KEAMANAN
+let transactionHistory = JSON.parse(localStorage.getItem('usahadulu_sales')) || [];
+
+// Modifikasi fungsi 'processTransaction' yang lama
+// Tambahkan baris ini SEBELUM 'showReceiptModal()' di dalam fungsi processTransaction:
+/*
+    saveTransactionToHistory(); // <--- Tambahkan ini
+    showReceiptModal();
+*/
+
+function saveTransactionToHistory() {
+    const totalText = document.getElementById('totalDisplay').innerText;
+    const totalVal = parseInt(totalText.replace(/[^0-9]/g, ''));
+    
+    const newTrx = {
+        id: "TRX-" + Date.now().toString().slice(-6),
+        date: new Date().toISOString(),
+        items: [...cart], // Copy cart
+        total: totalVal,
+        method: paymentMethod
+    };
+
+    transactionHistory.push(newTrx);
+    // Simpan ke LocalStorage Browser
+    localStorage.setItem('usahadulu_sales', JSON.stringify(transactionHistory));
+}
+
+// Fungsi Buka Admin Panel dengan PIN
+function openAdminPanel() {
+    const inputPin = prompt("MASUKKAN PIN ADMIN UNTUK AKSES DATA KEUANGAN:");
+    
+    if (inputPin === ADMIN_PIN) {
+        updateAdminUI();
+        document.getElementById('adminModal').classList.add('show');
+    } else if (inputPin !== null) {
+        alert("PIN SALAH! AKSES DITOLAK.");
+    }
+}
+
+function updateAdminUI() {
+    const listContainer = document.getElementById('transactionList');
+    listContainer.innerHTML = '';
+    
+    let totalRevenue = 0;
+    let cashIn = 0;
+    let digitalIn = 0;
+
+    // Urutkan dari yang terbaru
+    const reversedHistory = [...transactionHistory].reverse();
+
+    if(reversedHistory.length === 0) {
+        listContainer.innerHTML = '<div style="text-align:center; color:#444; padding:20px;">Belum ada data transaksi.</div>';
+    }
+
+    reversedHistory.forEach(trx => {
+        // Hitung Recap
+        totalRevenue += trx.total;
+        if(trx.method === 'cash') cashIn += trx.total;
+        else digitalIn += trx.total;
+
+        // Render List HTML
+        const dateObj = new Date(trx.date);
+        const dateStr = dateObj.toLocaleDateString('id-ID') + ' ' + dateObj.toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'});
+
+        const div = document.createElement('div');
+        div.className = 'history-item';
+        div.onclick = () => alertDetail(trx); // Klik untuk lihat detail
+        div.innerHTML = `
+            <div>
+                <span class="h-id">#${trx.id}</span>
+                <span class="h-date">${dateStr}</span>
+            </div>
+            <div style="display:flex; align-items:center;">
+                <span class="h-total">${fmtIDR(trx.total)}</span>
+                <span class="h-method">${trx.method.toUpperCase()}</span>
+            </div>
+        `;
+        listContainer.appendChild(div);
+    });
+
+    // Update Angka di Box Summary
+    document.getElementById('admTotalRevenue').innerText = fmtIDR(totalRevenue);
+    document.getElementById('admTotalCash').innerText = fmtIDR(cashIn);
+    document.getElementById('admTotalDigital').innerText = fmtIDR(digitalIn);
+}
+
+// Fitur Klik item history untuk lihat detail (Simple Alert dulu)
+function alertDetail(trx) {
+    let itemDetails = trx.items.map(i => `- ${i.name} (x${i.qty})`).join('\n');
+    alert(`DETAIL TRANSAKSI #${trx.id}\n\nItem:\n${itemDetails}\n\nTotal: ${fmtIDR(trx.total)}\nMetode: ${trx.method.toUpperCase()}`);
+}
+
+function resetHistoryData() {
+    const confirmReset = confirm("PERINGATAN KERAS!\n\nApakah anda yakin ingin MENGHAPUS SEMUA DATA penjualan selamanya?\nData tidak bisa dikembalikan.");
+    if(confirmReset) {
+        const doubleCheck = prompt("Ketik 'DELETE' untuk konfirmasi penghapusan:");
+        if(doubleCheck === 'DELETE') {
+            transactionHistory = [];
+            localStorage.removeItem('usahadulu_sales');
+            updateAdminUI();
+            alert("Data Keuangan telah di-reset menjadi 0.");
+        }
+    }
+}
+
+function switchAdminTab(tabName) {
+    document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    
+    if(tabName === 'history') {
+        document.getElementById('historyTab').style.display = 'block';
+        event.target.classList.add('active');
+    } else {
+        document.getElementById('settingsTab').style.display = 'block';
+        event.target.classList.add('active');
+    }
 }
