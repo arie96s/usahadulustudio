@@ -321,19 +321,45 @@ function showReceiptModal(total, paid, client) {
     let itemsHtml = cart.map(item => `<div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>${item.name} <span style="font-size:10px;">(x${item.qty})</span></span><span>${fmtIDR(item.price * item.qty)}</span></div>`).join('');
 
     preview.innerHTML = `
+        // LOGIKA LABEL DINAMIS
+    const debt = total - paid;
+    const statusLabel = debt > 0 ? "BELUM LUNAS (DP)" : "LUNAS";
+    
+    // Jika ada hutang, labelnya "SISA HUTANG". Jika lunas/kembali, labelnya "KEMBALIAN"
+    const sisaLabel = debt > 0 ? "SISA HUTANG" : "KEMBALIAN";
+    const sisaValue = debt > 0 ? debt : Math.abs(debt); // Hilangkan tanda minus untuk kembalian
+    const sisaColor = debt > 0 ? '#ff4757' : '#2ed573'; // Merah jika hutang, Hijau jika lunas
+
+    preview.innerHTML = `
         <div style="text-align:center; border-bottom:1px dashed #000; padding-bottom:10px; margin-bottom:10px;">
             <strong>USAHADULU STUDIO</strong><br>
+            Citimall Dumai, Riau<br>
             <span style="font-size:10px;">${new Date().toLocaleString('id-ID')}</span><br>
-            <span style="font-size:10px;">Klien: ${client}</span>
+            <span style="font-size:10px;">Klien: ${client.toUpperCase()}</span>
         </div>
         ${itemsHtml}
         <div style="border-top:1px dashed #000; margin-top:10px; padding-top:10px;">
-            <div style="display:flex; justify-content:space-between; font-weight:bold;"><span>TOTAL TAGIHAN</span><span>${fmtIDR(total)}</span></div>
-            <div style="display:flex; justify-content:space-between; font-size:11px;"><span>BAYAR (${paymentMethod.toUpperCase()})</span><span>${fmtIDR(paid)}</span></div>
-            <div style="display:flex; justify-content:space-between; font-size:11px; color:${debt>0?'red':'black'}"><span>SISA HUTANG</span><span>${fmtIDR(debt)}</span></div>
-            <div style="text-align:center; margin-top:5px; border:1px solid #000; font-size:10px;">STATUS: ${statusLabel}</div>
+            <div style="display:flex; justify-content:space-between; font-weight:bold;">
+                <span>TOTAL TAGIHAN</span>
+                <span>${fmtIDR(total)}</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:11px; margin-top:5px;">
+                <span>BAYAR (${paymentMethod.toUpperCase()})</span>
+                <span>${fmtIDR(paid)}</span>
+            </div>
+            
+            <div style="display:flex; justify-content:space-between; font-size:11px; margin-top:5px; color:${sisaColor}; font-weight:bold;">
+                <span>${sisaLabel}</span>
+                <span>${fmtIDR(sisaValue)}</span>
+            </div>
+
+            <div style="text-align:center; margin-top:10px; border:1px solid #000; padding:2px; font-weight:bold; font-size:10px;">
+                STATUS: ${statusLabel}
+            </div>
         </div>
-        <div style="text-align:center; margin-top:20px; font-size:10px;">TERIMA KASIH!</div>
+        <div style="text-align:center; margin-top:20px; font-size:10px;">
+            TERIMA KASIH!<br>KEEP THE RECEIPTS.
+        </div>
     `;
 
     // INJECT TOMBOL EMAIL & PDF
@@ -493,4 +519,15 @@ window.printReceipt = function() {
     // --- 6. SAVE FILE ---
     // Nama file unik berdasarkan waktu
     doc.save(`Struk_Usahadulu_${now.getTime()}.pdf`);
+}
+
+// TOGGLE MENU BUTTON
+const menuBtn = document.getElementById('menuBtn');
+const navOverlay = document.getElementById('navOverlay');
+
+if(menuBtn && navOverlay) {
+    menuBtn.addEventListener('click', () => {
+        menuBtn.classList.toggle('active'); // Ini kunci animasinya
+        navOverlay.classList.toggle('open');
+    });
 }
