@@ -315,13 +315,7 @@ function showReceiptModal(total, paid, client) {
     const preview = document.getElementById('receiptPreview');
     if(!modal || !preview) return;
 
-    const debt = total - paid;
-    const statusLabel = debt > 0 ? "BELUM LUNAS (DP)" : "LUNAS";
-    
-    let itemsHtml = cart.map(item => `<div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>${item.name} <span style="font-size:10px;">(x${item.qty})</span></span><span>${fmtIDR(item.price * item.qty)}</span></div>`).join('');
-
-    preview.innerHTML = `
-        // LOGIKA LABEL DINAMIS
+    // LOGIKA LABEL DINAMIS (DIPERBAIKI)
     const debt = total - paid;
     const statusLabel = debt > 0 ? "BELUM LUNAS (DP)" : "LUNAS";
     
@@ -329,6 +323,8 @@ function showReceiptModal(total, paid, client) {
     const sisaLabel = debt > 0 ? "SISA HUTANG" : "KEMBALIAN";
     const sisaValue = debt > 0 ? debt : Math.abs(debt); // Hilangkan tanda minus untuk kembalian
     const sisaColor = debt > 0 ? '#ff4757' : '#2ed573'; // Merah jika hutang, Hijau jika lunas
+    
+    let itemsHtml = cart.map(item => `<div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>${item.name} <span style="font-size:10px;">(x${item.qty})</span></span><span>${fmtIDR(item.price * item.qty)}</span></div>`).join('');
 
     preview.innerHTML = `
         <div style="text-align:center; border-bottom:1px dashed #000; padding-bottom:10px; margin-bottom:10px;">
@@ -389,7 +385,6 @@ function processEmailSend() {
 
 function newTransaction() { closeModal(); clearCart(); }
 
-// --- 7. FUNGSI PRINT PDF (VERSI RAPI & DETAIL) ---
 // --- 7. FUNGSI PRINT PDF (VERSI FINAL & PROFESSIONAL) ---
 window.printReceipt = function() {
     // Cek Library PDF
