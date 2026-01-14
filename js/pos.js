@@ -1,6 +1,6 @@
-// js/pos.js - Full Fixed Version
+// js/pos.js - Final Fixed Version (Clock & Modal)
 
-// --- 1. DATA PRODUK (Simulasi Database) ---
+// --- 1. DATA PRODUK ---
 const products = [
     { id: 1, name: "LOGO BASIC PACKAGE", price: 250000, category: "service", img: "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?auto=format&fit=crop&w=300&q=60" },
     { id: 2, name: "METAL FONT BUNDLE", price: 150000, category: "asset", img: "https://images.unsplash.com/photo-1571120038865-c35012e1284a?auto=format&fit=crop&w=300&q=60" },
@@ -12,7 +12,6 @@ const products = [
     { id: 8, name: "CUSTOM ILLUSTRATION", price: 600000, category: "service", img: "https://images.unsplash.com/photo-1534972195531-d756b9bfa9f2?auto=format&fit=crop&w=300&q=60" }
 ];
 
-// State Aplikasi
 let cart = [];
 let currentFilter = 'all';
 let paymentMethod = 'cash';
@@ -22,15 +21,35 @@ const fmtIDR = (num) => {
     return "Rp " + num.toLocaleString('id-ID');
 }
 
-// --- 2. INITIALIZATION & CLOCK ---
+// --- 2. FUNGSI JAM (Dipindah ke atas agar terbaca duluan) ---
+function startClock() {
+    console.log("Memulai Jam..."); // Cek Console browser jika jam tidak muncul
+    function update() {
+        const now = new Date();
+        const timeString = now.toLocaleTimeString('id-ID', {
+            hour: '2-digit', 
+            minute:'2-digit'
+        });
+        const clockEl = document.getElementById('clockDisplay');
+        if(clockEl) {
+            clockEl.innerText = timeString;
+        } else {
+            console.warn("Element #clockDisplay tidak ditemukan di HTML!");
+        }
+    }
+    update(); 
+    setInterval(update, 1000); 
+}
+
+// --- 3. INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', () => {
-    // Tampilkan semua produk saat awal load
+    // 1. Jalankan Jam
+    startClock();
+
+    // 2. Load Produk
     filterProducts('all'); 
     
-    // Jalankan Jam
-    startClock();
-    
-    // Listener Pencarian
+    // 3. Listener Search
     const searchInput = document.getElementById('searchProduct');
     if(searchInput) {
         searchInput.addEventListener('input', (e) => {
@@ -41,42 +60,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Fungsi Jam Realtime
-function startClock() {
-    function update() {
-        const now = new Date();
-        const timeString = now.toLocaleTimeString('id-ID', {
-            hour: '2-digit', 
-            minute:'2-digit'
-        });
-        const clockEl = document.getElementById('clockDisplay');
-        if(clockEl) clockEl.innerText = timeString;
-    }
-    update(); // Update langsung
-    setInterval(update, 1000); // Update tiap detik
-}
-
-// --- 3. RENDER & FILTER PRODUCTS ---
+// --- 4. LOGIKA PRODUK & CART ---
 function filterProducts(cat) {
     currentFilter = cat;
-    
-    // Update Button Active State
     document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-    // Highlight tombol yang diklik (jika event tersedia)
     if(event && event.target) event.target.classList.add('active');
 
-    if(cat === 'all') {
-        renderGrid(products);
-    } else {
-        const filtered = products.filter(p => p.category === cat);
-        renderGrid(filtered);
-    }
+    if(cat === 'all') renderGrid(products);
+    else renderGrid(products.filter(p => p.category === cat));
 }
 
 function renderGrid(items) {
     const grid = document.getElementById('productGrid');
     if(!grid) return;
-    
     grid.innerHTML = '';
 
     if(items.length === 0) {
@@ -88,7 +84,6 @@ function renderGrid(items) {
         const card = document.createElement('div');
         card.className = 'pos-card hover-target';
         card.onclick = () => addToCart(p.id);
-        
         card.innerHTML = `
             <img src="${p.img}" class="pos-img" alt="${p.name}">
             <div class="pos-info">
@@ -101,21 +96,14 @@ function renderGrid(items) {
         `;
         grid.appendChild(card);
     });
-
-    // Re-bind cursor effect (dari main.js)
     if(typeof bindHoverEvents === 'function') bindHoverEvents(); 
 }
 
-// --- 4. CART LOGIC ---
 function addToCart(id) {
     const product = products.find(p => p.id === id);
     const existingItem = cart.find(item => item.id === id);
-
-    if(existingItem) {
-        existingItem.qty++;
-    } else {
-        cart.push({ ...product, qty: 1 });
-    }
+    if(existingItem) existingItem.qty++;
+    else cart.push({ ...product, qty: 1 });
     updateCartUI();
 }
 
@@ -123,9 +111,7 @@ function updateCartQty(id, change) {
     const item = cart.find(i => i.id === id);
     if(item) {
         item.qty += change;
-        if(item.qty <= 0) {
-            cart = cart.filter(i => i.id !== id);
-        }
+        if(item.qty <= 0) cart = cart.filter(i => i.id !== id);
     }
     updateCartUI();
 }
@@ -138,7 +124,6 @@ function clearCart() {
 function updateCartUI() {
     const container = document.getElementById('cartContainer');
     if(!container) return;
-    
     container.innerHTML = '';
     let subtotal = 0;
 
@@ -164,40 +149,28 @@ function updateCartUI() {
         });
     }
 
-    // Calculations
-    const tax = subtotal * 0.11; // PPN 11%
+    const tax = subtotal * 0.11; 
     const total = subtotal + tax;
 
-    // Update UI Displays
-    const subDisplay = document.getElementById('subtotalDisplay');
-    const taxDisplay = document.getElementById('taxDisplay');
-    const totDisplay = document.getElementById('totalDisplay');
-    const modalTotDisplay = document.getElementById('modalTotalDisplay');
-
-    if(subDisplay) subDisplay.innerText = fmtIDR(subtotal);
-    if(taxDisplay) taxDisplay.innerText = fmtIDR(tax);
-    if(totDisplay) totDisplay.innerText = fmtIDR(total);
-    if(modalTotDisplay) modalTotDisplay.innerText = fmtIDR(total);
+    if(document.getElementById('subtotalDisplay')) document.getElementById('subtotalDisplay').innerText = fmtIDR(subtotal);
+    if(document.getElementById('taxDisplay')) document.getElementById('taxDisplay').innerText = fmtIDR(tax);
+    if(document.getElementById('totalDisplay')) document.getElementById('totalDisplay').innerText = fmtIDR(total);
+    if(document.getElementById('modalTotalDisplay')) document.getElementById('modalTotalDisplay').innerText = fmtIDR(total);
 
     if(typeof bindHoverEvents === 'function') bindHoverEvents();
 }
 
-// --- 5. PAYMENT LOGIC ---
+// --- 5. LOGIKA PEMBAYARAN ---
 function openPaymentModal() {
-    if(cart.length === 0) {
-        alert("Keranjang masih kosong!");
-        return;
-    }
+    if(cart.length === 0) { alert("Keranjang kosong!"); return; }
     const modal = document.getElementById('paymentModal');
     if(modal) {
         modal.classList.add('show');
         const cashInput = document.getElementById('cashInput');
         if(cashInput) cashInput.value = '';
-        
         const changeDisplay = document.getElementById('changeDisplay');
         if(changeDisplay) changeDisplay.innerText = 'Rp 0';
-        
-        selectMethod('cash'); // Default method
+        selectMethod('cash');
     }
 }
 
@@ -224,15 +197,10 @@ function selectMethod(method) {
 }
 
 function calculateChange() {
-    const totDisplay = document.getElementById('totalDisplay');
-    if(!totDisplay) return;
-
-    const totalText = totDisplay.innerText;
-    const total = parseInt(totalText.replace(/[^0-9]/g, '')); // Hapus Rp dan titik
-    
+    const totalText = document.getElementById('totalDisplay').innerText;
+    const total = parseInt(totalText.replace(/[^0-9]/g, ''));
     const cashInput = document.getElementById('cashInput');
     const cash = cashInput ? (parseInt(cashInput.value) || 0) : 0;
-    
     const changeDisplay = document.getElementById('changeDisplay');
 
     if(changeDisplay) {
@@ -247,25 +215,18 @@ function calculateChange() {
 }
 
 function processTransaction() {
-    const totDisplay = document.getElementById('totalDisplay');
-    const totalText = totDisplay ? totDisplay.innerText : "0";
+    const totalText = document.getElementById('totalDisplay').innerText;
     const total = parseInt(totalText.replace(/[^0-9]/g, ''));
-    
     if(paymentMethod === 'cash') {
         const cashInput = document.getElementById('cashInput');
         const cash = cashInput ? (parseInt(cashInput.value) || 0) : 0;
-        if(cash < total) {
-            alert("Pembayaran Gagal: Uang Cash Kurang!");
-            return;
-        }
+        if(cash < total) { alert("Uang Cash Kurang!"); return; }
     }
-
-    // Sukses
     closeModal();
     showReceiptModal();
 }
 
-// --- 6. RECEIPT & PRINTING ---
+// --- 6. PRINT RECEIPT ---
 function showReceiptModal() {
     const modal = document.getElementById('receiptModal');
     const preview = document.getElementById('receiptPreview');
@@ -273,9 +234,7 @@ function showReceiptModal() {
     
     const now = new Date();
     const dateStr = now.toLocaleDateString() + " " + now.toLocaleTimeString();
-    const totalText = document.getElementById('totalDisplay').innerText;
     
-    // Generate Struk HTML (Preview di layar)
     let itemsHtml = cart.map(item => `
         <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
             <span>${item.name} <span style="font-size:10px; color:#666;">(x${item.qty})</span></span>
@@ -292,124 +251,59 @@ function showReceiptModal() {
         ${itemsHtml}
         <div style="border-top:1px dashed #000; margin-top:10px; padding-top:10px; display:flex; justify-content:space-between; font-weight:bold;">
             <span>TOTAL</span>
-            <span>${totalText}</span>
+            <span>${document.getElementById('totalDisplay').innerText}</span>
         </div>
         <div style="text-align:center; margin-top:20px; font-size:10px;">
-            TERIMA KASIH!<br>
-            #SupportLocalCreative
+            TERIMA KASIH!<br>#SupportLocalCreative
         </div>
     `;
-
     modal.classList.add('show');
 }
 
-function newTransaction() {
-    closeModal();
-    clearCart();
-}
-
-// Fungsi Print PDF (Struk Thermal 80mm)
 window.printReceipt = function() {
-    // Pastikan library jsPDF terbaca
-    if (!window.jspdf) {
-        alert("Library PDF belum termuat. Coba refresh halaman.");
-        return;
-    }
+    if (!window.jspdf) { alert("Library PDF belum termuat."); return; }
     const { jsPDF } = window.jspdf;
-    
-    // 1. Setup Ukuran Kertas Thermal (80mm x Auto/150mm)
-    const doc = new jsPDF({
-        orientation: "portrait",
-        unit: "mm",
-        format: [80, 150] 
-    });
-
-    // Setup Font Monospace (Penting agar lurus seperti mesin kasir)
+    const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: [80, 150] });
     doc.setFont("courier", "normal");
     
-    let y = 10; // Posisi vertikal awal (Y coordinate)
-
-    // --- 2. HEADER ---
-    doc.setFontSize(10);
-    doc.setFont(undefined, 'bold');
-    doc.text("USAHADULU STUDIO", 40, y, { align: "center" }); // 40 adalah tengah dari lebar 80
-    y += 4;
-
-    doc.setFontSize(8);
-    doc.setFont(undefined, 'normal');
-    doc.text("Citimall Dumai, Riau", 40, y, { align: "center" });
-    y += 4;
-
+    let y = 10;
+    doc.setFontSize(10); doc.setFont(undefined, 'bold');
+    doc.text("USAHADULU STUDIO", 40, y, { align: "center" }); y += 4;
+    doc.setFontSize(8); doc.setFont(undefined, 'normal');
+    doc.text("Citimall Dumai, Riau", 40, y, { align: "center" }); y += 4;
     const now = new Date();
-    const dateStr = now.toLocaleDateString('id-ID') + " " + now.toLocaleTimeString('id-ID');
-    doc.text(dateStr, 40, y, { align: "center" });
-    y += 6;
+    doc.text(now.toLocaleDateString('id-ID') + " " + now.toLocaleTimeString('id-ID'), 40, y, { align: "center" }); y += 6;
+    doc.text("--------------------------------", 40, y, { align: "center" }); y += 5;
 
-    // Garis Pemisah
-    doc.text("--------------------------------", 40, y, { align: "center" });
-    y += 5;
-
-    // --- 3. DAFTAR ITEM (LOOPING CART) ---
     doc.setFontSize(9);
-    
     cart.forEach(item => {
-        // Nama Produk (Kiri) - Potong jika terlalu panjang
         let name = item.name.length > 18 ? item.name.substring(0, 18) + ".." : item.name;
-        
         doc.text(name, 5, y);
-        
-        // Harga Total per Item (Kanan)
-        const priceStr = fmtIDR(item.price * item.qty);
-        doc.text(priceStr, 75, y, { align: "right" }); 
-        
+        doc.text(fmtIDR(item.price * item.qty), 75, y, { align: "right" }); 
         y += 4;
-        
-        // Detail Qty di bawah nama
         doc.setFontSize(7);
         doc.text(`(${item.qty} x ${fmtIDR(item.price)})`, 5, y);
         doc.setFontSize(9); 
-        
         y += 5; 
     });
 
-    // --- 4. TOTAL & PEMBAYARAN ---
-    doc.text("--------------------------------", 40, y, { align: "center" });
-    y += 5;
-
-    const totDisplay = document.getElementById('totalDisplay');
-    const totalText = totDisplay ? totDisplay.innerText : "0";
-    
-    doc.setFontSize(10);
-    doc.setFont(undefined, 'bold');
-    
+    doc.text("--------------------------------", 40, y, { align: "center" }); y += 5;
+    doc.setFontSize(10); doc.setFont(undefined, 'bold');
     doc.text("TOTAL", 5, y);
-    doc.text(totalText, 75, y, { align: "right" });
-    y += 6;
-
-    doc.setFontSize(8);
-    doc.setFont(undefined, 'normal');
-    doc.text(`Metode: ${paymentMethod.toUpperCase()}`, 5, y);
-    y += 4;
+    doc.text(document.getElementById('totalDisplay').innerText, 75, y, { align: "right" }); y += 6;
+    
+    doc.setFontSize(8); doc.setFont(undefined, 'normal');
+    doc.text(`Metode: ${paymentMethod.toUpperCase()}`, 5, y); y += 4;
     
     if(paymentMethod === 'cash') {
-        const cashInput = document.getElementById('cashInput');
-        const changeText = document.getElementById('changeDisplay').innerText;
-        const cashVal = cashInput ? parseInt(cashInput.value) : 0;
-        
-        doc.text(`Tunai : Rp ${cashVal.toLocaleString('id-ID')}`, 5, y);
-        y += 4;
-        doc.text(`Kembali: ${changeText}`, 5, y);
+        const cashVal = document.getElementById('cashInput') ? parseInt(document.getElementById('cashInput').value) : 0;
+        doc.text(`Tunai : Rp ${cashVal.toLocaleString('id-ID')}`, 5, y); y += 4;
+        doc.text(`Kembali: ${document.getElementById('changeDisplay').innerText}`, 5, y);
     }
-
-    // --- 5. FOOTER ---
+    
     y += 10;
-    doc.setFontSize(8);
-    doc.text("TERIMA KASIH!", 40, y, { align: "center" });
-    y += 4;
+    doc.text("TERIMA KASIH!", 40, y, { align: "center" }); y += 4;
     doc.text("#SupportLocalCreative", 40, y, { align: "center" });
-    y += 4;
-    doc.text("Simpan struk ini sbg bukti.", 40, y, { align: "center" });
-
-    // --- 6. SIMPAN FILE ---
+    
     doc.save(`Struk_Usahadulu_${Date.now()}.pdf`);
 }
