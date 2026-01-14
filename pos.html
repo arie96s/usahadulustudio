@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>USAHADULU | POS System</title>
+    <meta name="description" content="Sistem Kasir Terintegrasi USAHADULU Studio.">
     <link rel="icon" type="image/png" href="img/logo_ambigram.png">
 
     <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/pos.css"> 
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/pos.css"> <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
@@ -39,9 +39,11 @@
     </div>
 
     <div class="pos-container">
+        
         <div class="pos-products-area">
             <div class="pos-filter-bar">
                 <input type="text" id="searchProduct" class="pos-search hover-target" placeholder="CARI PRODUK / SCAN BARCODE...">
+                
                 <div class="pos-categories" id="categoryFilters">
                     <button class="filter-btn active hover-target" onclick="filterProducts('all')">SEMUA</button>
                     <button class="filter-btn hover-target" onclick="filterProducts('service')">JASA</button>
@@ -49,54 +51,62 @@
                     <button class="filter-btn hover-target" onclick="filterProducts('merch')">MERCHANDISE</button>
                 </div>
             </div>
-            <div class="pos-grid" id="productGrid"></div>
+
+            <div class="pos-grid" id="productGrid">
+                </div>
         </div>
 
         <div class="pos-sidebar">
             <div class="sidebar-header">
-                <h3>CURRENT ORDER</h3>
-                <div style="display:flex; gap:5px;">
-                    <button class="clear-btn hover-target" onclick="openAdminPanel()" style="color:#2ed573; border-color:#2ed573;">HISTORY</button>
-                    <button class="clear-btn hover-target" onclick="clearCart()">CLEAR</button>
+    <h3>CURRENT ORDER</h3>
+    <div style="display:flex; gap:5px;">
+        <button class="clear-btn hover-target" onclick="openAdminPanel()" style="color:#2ed573; border-color:#2ed573;">HISTORY</button>
+        <button class="clear-btn hover-target" onclick="clearCart()">CLEAR</button>
+    </div>
+</div>
+
+            <div class="cart-items-container" id="cartContainer">
+                <div class="empty-cart-state">
+                    <p>Keranjang Kosong</p>
                 </div>
             </div>
 
-            <div class="cart-items-container" id="cartContainer">
-                <div class="empty-cart-state"><p>Keranjang Kosong</p></div>
-            </div>
-
             <div class="pos-calculations">
-                <div class="calc-row"><span>Subtotal</span><span id="subtotalDisplay">Rp 0</span></div>
-                <div class="calc-row"><span>Pajak (PPN 11%)</span><span id="taxDisplay">Rp 0</span></div>
-                <div class="calc-row total"><span>TOTAL</span><span id="totalDisplay">Rp 0</span></div>
+                <div class="calc-row">
+                    <span>Subtotal</span>
+                    <span id="subtotalDisplay">Rp 0</span>
+                </div>
+                <div class="calc-row">
+                    <span>Pajak (PPN 11%)</span>
+                    <span id="taxDisplay">Rp 0</span>
+                </div>
+                <div class="calc-row total">
+                    <span>TOTAL</span>
+                    <span id="totalDisplay">Rp 0</span>
+                </div>
             </div>
 
             <div class="pos-actions">
-                <button class="pay-btn hover-target" onclick="openPaymentModal()">BAYAR SEKARANG</button>
+                <button class="pay-btn hover-target" onclick="openPaymentModal()">
+                    BAYAR SEKARANG
+                </button>
             </div>
             
-            <div class="powered-by">POWERED BY <strong>USAHADULU STUDIO</strong></div>
+            <div class="powered-by">
+                POWERED BY <strong>USAHADULU STUDIO</strong>
+            </div>
         </div>
     </div>
 
     <div id="paymentModal" class="modal">
         <div class="modal-content pos-modal-content">
             <div class="close-modal hover-target" onclick="closeModal()">×</div>
-            <h2 class="modal-title">PEMBAYARAN</h2>
             
-            <div class="payment-type-box" style="display:flex; gap:10px; margin-bottom:15px; background:#000; padding:5px; border-radius:50px; border:1px solid #333;">
-                <button id="btnFull" class="type-btn active" onclick="setPaymentType('full')" style="flex:1; border:none; background:transparent; color:#888; border-radius:50px; padding:10px; font-weight:bold; cursor:pointer;">LUNAS</button>
-                <button id="btnDp" class="type-btn" onclick="setPaymentType('dp')" style="flex:1; border:none; background:transparent; color:#888; border-radius:50px; padding:10px; font-weight:bold; cursor:pointer;">DP / TERMIN</button>
-            </div>
-
-            <div class="payment-summary" style="text-align:center;">
+            <h2 class="modal-title">DIGITAL / HARD CASH</h2>
+            
+            <div class="payment-summary">
                 <small>Total Tagihan</small>
                 <div class="big-total" id="modalTotalDisplay">Rp 0</div>
-            </div>
-
-            <div class="form-group">
-                <label>Nama Klien (Opsional)</label>
-                <input type="text" id="clientNameInput" class="form-input hover-target" placeholder="Contoh: Budi Distro" style="width:100%; background:#000; border:1px solid #333; color:#fff; padding:10px; border-radius:10px; margin-bottom:15px;">
             </div>
 
             <div class="form-group">
@@ -109,70 +119,99 @@
             </div>
 
             <div class="form-group" id="cashInputGroup">
-                <label id="inputLabel">Nominal Diterima</label>
-                <input type="number" id="cashInput" class="form-input hover-target" placeholder="Rp 0" oninput="calculateChange()">
+                <label>Uang Diterima (Cash)</label>
+                <input type="number" id="cashInput" class="form-input hover-target" placeholder="Contoh: 50000" oninput="calculateChange()">
             </div>
 
             <div class="change-display">
-                <span id="changeLabel">Kembalian:</span>
+                <span>Kembalian:</span>
                 <strong id="changeDisplay">Rp 0</strong>
             </div>
 
-            <button class="pay-btn hover-target" style="width:100%; margin-top:20px;" onclick="processTransaction()">SELESAIKAN TRANSAKSI</button>
+            <button class="pay-btn hover-target" style="width:100%; margin-top:20px;" onclick="processTransaction()">
+                SELESAIKAN TRANSAKSI
+            </button>
         </div>
     </div>
 
     <div id="receiptModal" class="modal">
         <div class="modal-content pos-modal-content" style="text-align:center;">
             <div class="close-modal hover-target" onclick="closeModal()">×</div>
+
             <div class="check-icon">✓</div>
             <h2 class="modal-title">TRANSAKSI BERHASIL</h2>
-            <div class="receipt-preview" id="receiptPreview"></div>
-            <div class="receipt-actions"></div> </div>
+            <p style="color:#888; margin-bottom:20px;">Struk transaksi telah dibuat.</p>
+            
+            <div class="receipt-preview" id="receiptPreview">
+                </div>
+
+            <div class="receipt-actions">
+                <button class="filter-btn hover-target" onclick="printReceipt()">PRINT / PDF</button>
+                <button class="filter-btn hover-target" onclick="openEmailModal()" style="border-color:#2ed573; color:#2ed573;">RECEIPT TO EMAIL</button>
+                <button class="filter-btn hover-target" onclick="newTransaction()">NEW ORDER</button>
+            </div>
+        </div>
     </div>
 
     <div id="emailModal" class="modal">
         <div class="modal-content pos-modal-content">
             <div class="close-modal hover-target" onclick="closeModal()">×</div>
+            
             <h2 class="modal-title">KIRIM STRUK DIGITAL</h2>
-            <p style="color:#888; font-size:12px; margin-bottom:20px;">Pengirim: <strong>usahadulustudio@gmail.com</strong></p>
+            
+            <p style="color:#888; font-size:12px; margin-bottom:20px;">
+                Pengirim: <strong>usahadulustudio@gmail.com</strong> (Default)
+            </p>
+
             <div class="form-group">
                 <label>Email Klien</label>
                 <input type="email" id="clientEmailInput" class="form-input hover-target" placeholder="contoh: klien@email.com">
             </div>
-            <button class="pay-btn hover-target" onclick="processEmailSend()">KIRIM SEKARANG ➜</button>
+
+            <button class="pay-btn hover-target" onclick="processEmailSend()">
+                KIRIM SEKARANG ➜
+            </button>
         </div>
     </div>
 
     <div id="adminModal" class="modal">
-        <div class="modal-content pos-modal-content" style="width: 500px;">
-            <div class="close-modal hover-target" onclick="closeModal()">×</div>
-            <h2 class="modal-title">ADMIN DASHBOARD</h2>
-            <div class="admin-summary-box">
-                <div class="summary-item"><small>Total Omzet</small><strong id="admTotalRevenue" style="color:#2ed573;">Rp 0</strong></div>
-                <div class="summary-item"><small>Cash In</small><strong id="admTotalCash">Rp 0</strong></div>
-                <div class="summary-item"><small>Digital</small><strong id="admTotalDigital">Rp 0</strong></div>
+    <div class="modal-content pos-modal-content" style="width: 500px;">
+        <div class="close-modal hover-target" onclick="closeModal()">×</div>
+        
+        <h2 class="modal-title">ADMIN DASHBOARD</h2>
+        
+        <div class="admin-summary-box">
+            <div class="summary-item">
+                <small>Total Omzet</small>
+                <strong id="admTotalRevenue" style="color:#2ed573;">Rp 0</strong>
             </div>
-            <div class="admin-tabs">
-                <button class="tab-btn active" onclick="switchAdminTab('history')">RIWAYAT</button>
-                <button class="tab-btn" onclick="switchAdminTab('settings')">BACKUP & RESET</button>
+            <div class="summary-item">
+                <small>Cash In</small>
+                <strong id="admTotalCash">Rp 0</strong>
             </div>
-            <div id="historyTab" class="tab-content" style="display:block;">
-                <div class="history-list" id="transactionList"></div>
-            </div>
-            <div id="settingsTab" class="tab-content" style="display:none; text-align:center;">
-                <div style="padding: 20px; border: 1px dashed #333; border-radius: 10px; margin-bottom: 20px;">
-                    <h4 style="color:#fff;">BACKUP DATA</h4>
-                    <p style="color:#888; font-size:12px;">Unduh rekap penjualan (.csv)</p>
-                    <button class="pay-btn hover-target" onclick="downloadExcel()" style="border-color:#2ed573; color:#2ed573; margin-top:10px;">DOWNLOAD EXCEL</button>
-                </div>
-                <div style="padding: 20px; border: 1px dashed #333; border-radius: 10px;">
-                    <h4 style="color:#ff4757;">DANGER ZONE</h4>
-                    <button class="clear-btn" onclick="resetHistoryData()" style="width:100%; padding:10px; border-color:#ff4757; color:#ff4757;">RESET SEMUA DATA</button>
-                </div>
+            <div class="summary-item">
+                <small>Digital (QRIS/Trf)</small>
+                <strong id="admTotalDigital">Rp 0</strong>
             </div>
         </div>
+
+        <div class="admin-tabs">
+            <button class="tab-btn active" onclick="switchAdminTab('history')">RIWAYAT TRANSAKSI</button>
+            <button class="tab-btn" onclick="switchAdminTab('settings')">PENGATURAN</button>
+        </div>
+
+        <div id="historyTab" class="tab-content" style="display:block;">
+            <div class="history-list" id="transactionList">
+                </div>
+            <button class="clear-btn" onclick="resetHistoryData()" style="width:100%; margin-top:15px; border-color:#ff4757; color:#ff4757; padding:10px;">RESET SEMUA DATA KEUANGAN</button>
+        </div>
+
+        <div id="settingsTab" class="tab-content" style="display:none; text-align:center; color:#888;">
+            <p>Fitur Export Excel akan segera hadir.</p>
+        </div>
+
     </div>
+</div>
 
     <script src="js/data.js"></script>
     <script src="js/main.js"></script>
