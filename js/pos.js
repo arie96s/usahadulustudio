@@ -1,6 +1,6 @@
-// js/pos.js - FINAL CLEAN & FIXED VERSION
+// js/pos.js - Final Version (With Email Receipt Feature)
 
-// --- 1. DATA & VARIABLES ---
+// --- 1. DATA PRODUK ---
 const products = [
     { id: 1, name: "LOGO BASIC PACKAGE", price: 250000, category: "service", img: "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?auto=format&fit=crop&w=300&q=60" },
     { id: 2, name: "METAL FONT BUNDLE", price: 150000, category: "asset", img: "https://images.unsplash.com/photo-1571120038865-c35012e1284a?auto=format&fit=crop&w=300&q=60" },
@@ -15,61 +15,86 @@ const products = [
 let cart = [];
 let currentFilter = 'all';
 let paymentMethod = 'cash';
-let isDpMode = false;
-const ADMIN_PIN = "692196"; 
-let transactionHistory = JSON.parse(localStorage.getItem('usahadulu_sales')) || [];
 
-const fmtIDR = (num) => "Rp " + num.toLocaleString('id-ID');
+// Helper Format Rupiah
+const fmtIDR = (num) => {
+    return "Rp " + num.toLocaleString('id-ID');
+}
 
-// --- 2. INIT SYSTEM ---
+// --- 2. FUNGSI JAM ---
 function startClock() {
     function update() {
         const now = new Date();
-        const el = document.getElementById('clockDisplay');
-        if(el) el.innerText = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute:'2-digit' });
+        const timeString = now.toLocaleTimeString('id-ID', {
+            hour: '2-digit', 
+            minute:'2-digit'
+        });
+        const clockEl = document.getElementById('clockDisplay');
+        if(clockEl) clockEl.innerText = timeString;
     }
-    update(); setInterval(update, 1000); 
+    update(); 
+    setInterval(update, 1000); 
 }
 
+// --- 3. INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', () => {
     startClock();
     filterProducts('all'); 
+    
     const searchInput = document.getElementById('searchProduct');
     if(searchInput) {
         searchInput.addEventListener('input', (e) => {
             const keyword = e.target.value.toLowerCase();
-            renderGrid(products.filter(p => p.name.toLowerCase().includes(keyword)));
+            const filtered = products.filter(p => p.name.toLowerCase().includes(keyword));
+            renderGrid(filtered);
         });
     }
 });
 
-// --- 3. PRODUCTS & CART ---
+// --- 4. LOGIKA PRODUK & CART ---
 function filterProducts(cat) {
     currentFilter = cat;
     document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
     if(event && event.target) event.target.classList.add('active');
-    renderGrid(cat === 'all' ? products : products.filter(p => p.category === cat));
+
+    if(cat === 'all') renderGrid(products);
+    else renderGrid(products.filter(p => p.category === cat));
 }
 
 function renderGrid(items) {
     const grid = document.getElementById('productGrid');
-    if(!grid) return; grid.innerHTML = '';
+    if(!grid) return;
+    grid.innerHTML = '';
+
     if(items.length === 0) {
-        grid.innerHTML = '<p style="color:#666; width:100%; text-align:center;">Produk tidak ditemukan.</p>'; return;
+        grid.innerHTML = '<p style="color:#666; width:100%; text-align:center; margin-top:20px;">Produk tidak ditemukan.</p>';
+        return;
     }
+
     items.forEach(p => {
         const card = document.createElement('div');
         card.className = 'pos-card hover-target';
         card.onclick = () => addToCart(p.id);
-        card.innerHTML = `<img src="${p.img}" class="pos-img"><div class="pos-info"><div class="pos-title">${p.name}</div><div class="pos-price">${fmtIDR(p.price)}</div></div>`;
+        card.innerHTML = `
+            <img src="${p.img}" class="pos-img" alt="${p.name}">
+            <div class="pos-info">
+                <div>
+                    <div class="pos-title">${p.name}</div>
+                    <div class="pos-price">${fmtIDR(p.price)}</div>
+                </div>
+                <div class="pos-stock">STOCK: ∞</div>
+            </div>
+        `;
         grid.appendChild(card);
     });
+    if(typeof bindHoverEvents === 'function') bindHoverEvents(); 
 }
 
 function addToCart(id) {
-    const item = cart.find(i => i.id === id);
-    if(item) item.qty++;
-    else cart.push({ ...products.find(p => p.id === id), qty: 1 });
+    const product = products.find(p => p.id === id);
+    const existingItem = cart.find(item => item.id === id);
+    if(existingItem) existingItem.qty++;
+    else cart.push({ ...product, qty: 1 });
     updateCartUI();
 }
 
@@ -82,61 +107,66 @@ function updateCartQty(id, change) {
     updateCartUI();
 }
 
-function clearCart() { cart = []; updateCartUI(); }
+function clearCart() {
+    cart = [];
+    updateCartUI();
+}
 
 function updateCartUI() {
     const container = document.getElementById('cartContainer');
-    if(!container) return; container.innerHTML = '';
+    if(!container) return;
+    container.innerHTML = '';
     let subtotal = 0;
-    
-    if(cart.length === 0) container.innerHTML = '<div class="empty-cart-state"><p>Keranjang Kosong</p></div>';
-    else {
+
+    if(cart.length === 0) {
+        container.innerHTML = '<div class="empty-cart-state"><p style="text-align:center; margin-top:50px; color:#444;">Keranjang Kosong.<br>Pilih produk di sebelah kiri.</p></div>';
+    } else {
         cart.forEach(item => {
             subtotal += item.price * item.qty;
-            container.innerHTML += `<div class="cart-item"><div class="cart-info"><h4>${item.name}</h4><span class="cart-meta">${fmtIDR(item.price)} x ${item.qty}</span></div><div class="cart-controls"><button class="qty-btn" onclick="updateCartQty(${item.id}, -1)">-</button><span>${item.qty}</span><button class="qty-btn" onclick="updateCartQty(${item.id}, 1)">+</button></div></div>`;
+            const div = document.createElement('div');
+            div.className = 'cart-item';
+            div.innerHTML = `
+                <div class="cart-info">
+                    <h4>${item.name}</h4>
+                    <span class="cart-meta">${fmtIDR(item.price)} x ${item.qty}</span>
+                </div>
+                <div class="cart-controls">
+                    <button class="qty-btn hover-target" onclick="updateCartQty(${item.id}, -1)">-</button>
+                    <span style="color:#fff; font-size:12px; font-weight:bold;">${item.qty}</span>
+                    <button class="qty-btn hover-target" onclick="updateCartQty(${item.id}, 1)">+</button>
+                </div>
+            `;
+            container.appendChild(div);
         });
     }
 
-    const tax = subtotal * 0.11;
+    const tax = subtotal * 0.11; 
     const total = subtotal + tax;
-    
-    ['totalDisplay', 'subtotalDisplay', 'taxDisplay', 'modalTotalDisplay'].forEach(id => {
-        const el = document.getElementById(id);
-        if(el) el.innerText = fmtIDR(id === 'subtotalDisplay' ? subtotal : (id === 'taxDisplay' ? tax : total));
-    });
+
+    if(document.getElementById('subtotalDisplay')) document.getElementById('subtotalDisplay').innerText = fmtIDR(subtotal);
+    if(document.getElementById('taxDisplay')) document.getElementById('taxDisplay').innerText = fmtIDR(tax);
+    if(document.getElementById('totalDisplay')) document.getElementById('totalDisplay').innerText = fmtIDR(total);
+    if(document.getElementById('modalTotalDisplay')) document.getElementById('modalTotalDisplay').innerText = fmtIDR(total);
+
+    if(typeof bindHoverEvents === 'function') bindHoverEvents();
 }
 
-// --- 4. PEMBAYARAN & DP ---
+// --- 5. LOGIKA PEMBAYARAN ---
 function openPaymentModal() {
     if(cart.length === 0) { alert("Keranjang kosong!"); return; }
-    setPaymentType('full'); 
-    document.getElementById('paymentModal').classList.add('show');
+    const modal = document.getElementById('paymentModal');
+    if(modal) {
+        modal.classList.add('show');
+        const cashInput = document.getElementById('cashInput');
+        if(cashInput) cashInput.value = '';
+        const changeDisplay = document.getElementById('changeDisplay');
+        if(changeDisplay) changeDisplay.innerText = 'Rp 0';
+        selectMethod('cash');
+    }
 }
 
-function closeModal() { document.querySelectorAll('.modal').forEach(m => m.classList.remove('show')); }
-
-function setPaymentType(type) {
-    isDpMode = (type === 'dp');
-    const btnFull = document.getElementById('btnFull');
-    const btnDp = document.getElementById('btnDp');
-    if(btnFull && btnDp) {
-        btnFull.className = isDpMode ? 'type-btn' : 'type-btn active';
-        btnDp.className = isDpMode ? 'type-btn active' : 'type-btn';
-    }
-
-    const label = document.getElementById('inputLabel');
-    if(label) label.innerText = isDpMode ? "Nominal DP (Masuk)" : "Nominal Diterima";
-    
-    const cashInput = document.getElementById('cashInput');
-    if(cashInput) {
-        cashInput.value = '';
-        cashInput.placeholder = isDpMode ? "Masukkan DP..." : "Rp 0";
-    }
-    
-    const cashGroup = document.getElementById('cashInputGroup');
-    if(cashGroup) cashGroup.style.display = (isDpMode || paymentMethod === 'cash') ? 'block' : 'none';
-
-    calculateChange();
+function closeModal() {
+    document.querySelectorAll('.modal').forEach(m => m.classList.remove('show'));
 }
 
 function selectMethod(method) {
@@ -145,18 +175,16 @@ function selectMethod(method) {
     if(event && event.target) event.target.classList.add('active');
 
     const cashGroup = document.getElementById('cashInputGroup');
-    const cashInput = document.getElementById('cashInput');
-
-    if(isDpMode || method === 'cash') {
-        if(cashGroup) cashGroup.style.display = 'block';
-        if(cashInput && method === 'cash' && !isDpMode) cashInput.focus();
-    } else {
-        if(cashGroup) cashGroup.style.display = 'none';
-        const totalText = document.getElementById('totalDisplay').innerText;
-        const total = parseInt(totalText.replace(/[^0-9]/g, ''));
-        if(cashInput) cashInput.value = total;
+    const changeDisplay = document.getElementById('changeDisplay');
+    
+    if(cashGroup) {
+        if(method === 'cash') {
+            cashGroup.style.display = 'block';
+        } else {
+            cashGroup.style.display = 'none';
+            if(changeDisplay) changeDisplay.innerText = '-';
+        }
     }
-    calculateChange();
 }
 
 function calculateChange() {
@@ -165,24 +193,8 @@ function calculateChange() {
     const cashInput = document.getElementById('cashInput');
     const cash = cashInput ? (parseInt(cashInput.value) || 0) : 0;
     const changeDisplay = document.getElementById('changeDisplay');
-    const changeLabel = document.getElementById('changeLabel');
 
-    if(!changeDisplay) return;
-
-    if(isDpMode) {
-        const sisa = total - cash;
-        changeLabel.innerText = "SISA TAGIHAN (HUTANG):";
-        changeLabel.style.color = "#ff4757";
-        if(sisa > 0) {
-            changeDisplay.innerText = fmtIDR(sisa);
-            changeDisplay.style.color = '#ff4757';
-        } else {
-            changeDisplay.innerText = "LUNAS (DP 100%)";
-            changeDisplay.style.color = '#2ed573';
-        }
-    } else {
-        changeLabel.innerText = "Kembalian:";
-        changeLabel.style.color = "#ccc";
+    if(changeDisplay) {
         if(cash >= total) {
             changeDisplay.innerText = fmtIDR(cash - total);
             changeDisplay.style.color = '#2ed573';
@@ -196,134 +208,56 @@ function calculateChange() {
 function processTransaction() {
     const totalText = document.getElementById('totalDisplay').innerText;
     const total = parseInt(totalText.replace(/[^0-9]/g, ''));
-    const cashInput = document.getElementById('cashInput');
-    const cash = cashInput ? (parseInt(cashInput.value) || 0) : 0;
-    const clientInput = document.getElementById('clientNameInput');
-    const clientName = (clientInput && clientInput.value) ? clientInput.value : "Guest";
-
-    if(isDpMode) {
-        if(cash <= 0) { alert("Nominal DP minimal 1 rupiah."); return; }
-        if(cash >= total && !confirm("Nominal DP lunas. Ubah jadi Transaksi LUNAS?")) return;
-    } else {
-        if(cash < total) { alert("Uang kurang! Gunakan fitur DP jika ingin hutang."); return; }
+    if(paymentMethod === 'cash') {
+        const cashInput = document.getElementById('cashInput');
+        const cash = cashInput ? (parseInt(cashInput.value) || 0) : 0;
+        if(cash < total) { alert("Uang Cash Kurang!"); return; }
     }
+    
+    // --- TAMBAHKAN BARIS INI (WAJIB) ---
+    saveTransactionToHistory(); 
+    // -----------------------------------
 
-    saveTransactionToHistory(total, cash, clientName);
     closeModal();
-    showReceiptModal(total, cash, clientName);
+    showReceiptModal();
 }
 
-// --- 5. DATA & EXCEL ---
-function saveTransactionToHistory(total, paid, client) {
-    let status = (paid < total) ? 'DP / PARTIAL' : 'LUNAS';
-    let debt = (paid < total) ? (total - paid) : 0;
-    const newTrx = {
-        id: "TRX-" + Date.now().toString().slice(-6),
-        date: new Date().toISOString(),
-        items: [...cart], total: total, paid: paid, debt: debt,
-        status: status, client: client, method: paymentMethod
-    };
-    transactionHistory.push(newTrx);
-    localStorage.setItem('usahadulu_sales', JSON.stringify(transactionHistory));
-}
+// --- 6. RECEIPT & EMAIL LOGIC (UPDATED) ---
 
-function openAdminPanel() {
-    if(prompt("MASUKKAN PIN ADMIN:") === ADMIN_PIN) {
-        updateAdminUI();
-        document.getElementById('adminModal').classList.add('show');
-    } else { alert("PIN SALAH!"); }
-}
-
-function updateAdminUI() {
-    const list = document.getElementById('transactionList');
-    list.innerHTML = '';
-    let rev = 0, cash = 0, digi = 0;
-    
-    [...transactionHistory].reverse().forEach(trx => {
-        rev += trx.paid;
-        if(trx.method === 'cash') cash += trx.paid; else digi += trx.paid;
-        const d = new Date(trx.date);
-        list.innerHTML += `<div class="history-item" onclick='alertDetail(${JSON.stringify(trx)})'><div><span class="h-id">#${trx.id} (${trx.status})</span><span class="h-date">${d.toLocaleDateString()} | ${trx.client}</span></div><div><span class="h-total">${fmtIDR(trx.paid)}</span></div></div>`;
-    });
-    
-    document.getElementById('admTotalRevenue').innerText = fmtIDR(rev);
-    document.getElementById('admTotalCash').innerText = fmtIDR(cash);
-    document.getElementById('admTotalDigital').innerText = fmtIDR(digi);
-}
-
-function alertDetail(trx) {
-    let items = trx.items.map(i => `- ${i.name} (x${i.qty})`).join('\n');
-    alert(`DETAIL #${trx.id}\nStatus: ${trx.status}\nKlien: ${trx.client}\n\n${items}\n\nTagihan: ${fmtIDR(trx.total)}\nBayar: ${fmtIDR(trx.paid)}\nHutang: ${fmtIDR(trx.debt)}`);
-}
-
-function resetHistoryData() {
-    if(confirm("HAPUS SEMUA DATA?")) {
-        if(prompt("Ketik 'DELETE':") === 'DELETE') {
-            transactionHistory = []; localStorage.removeItem('usahadulu_sales');
-            updateAdminUI(); alert("Data Terhapus.");
-        }
-    }
-}
-
-function switchAdminTab(tabName) {
-    document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    document.getElementById(tabName+'Tab').style.display = 'block';
-    if(event) event.target.classList.add('active');
-}
-
-function downloadExcel() {
-    if(transactionHistory.length===0) return alert("Data kosong.");
-    let csv = "ID,TANGGAL,KLIEN,STATUS,TOTAL,BAYAR,HUTANG,METODE\n";
-    transactionHistory.forEach(trx => {
-        csv += `${trx.id},${new Date(trx.date).toLocaleDateString()},"${trx.client}",${trx.status},${trx.total},${trx.paid},${trx.debt},${trx.method}\n`;
-    });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(new Blob([csv], {type: "text/csv"}));
-    link.download = `Laporan_${Date.now()}.csv`;
-    link.click();
-}
-
-// --- 6. STRUK (EMAIL & LOGIKA HUTANG FIXED) ---
-function showReceiptModal(total, paid, client) {
+function showReceiptModal() {
     const modal = document.getElementById('receiptModal');
     const preview = document.getElementById('receiptPreview');
     if(!modal || !preview) return;
+    
+    const now = new Date();
+    const dateStr = now.toLocaleDateString() + " " + now.toLocaleTimeString();
+    
+    let itemsHtml = cart.map(item => `
+        <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+            <span>${item.name} <span style="font-size:10px; color:#666;">(x${item.qty})</span></span>
+            <span>${fmtIDR(item.price * item.qty)}</span>
+        </div>
+    `).join('');
 
-    // LOGIKA LABEL DINAMIS YANG DIPERBAIKI
-    const debt = total - paid;
-    const statusLabel = debt > 0 ? "BELUM LUNAS (DP)" : "LUNAS";
-    const sisaLabel = debt > 0 ? "SISA HUTANG" : "KEMBALIAN";
-    const sisaValue = debt > 0 ? debt : Math.abs(debt);
-    const sisaColor = debt > 0 ? '#ff4757' : '#2ed573';
-
-    let itemsHtml = cart.map(item => `<div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>${item.name} <span style="font-size:10px;">(x${item.qty})</span></span><span>${fmtIDR(item.price * item.qty)}</span></div>`).join('');
-
+    // Update isi modal struk dengan tombol EMAIL
     preview.innerHTML = `
         <div style="text-align:center; border-bottom:1px dashed #000; padding-bottom:10px; margin-bottom:10px;">
             <strong>USAHADULU STUDIO</strong><br>
             Citimall Dumai, Riau<br>
-            <span style="font-size:10px;">${new Date().toLocaleString('id-ID')}</span><br>
-            <span style="font-size:10px;">Klien: ${client.toUpperCase()}</span>
+            <span style="font-size:10px;">${dateStr}</span>
         </div>
         ${itemsHtml}
-        <div style="border-top:1px dashed #000; margin-top:10px; padding-top:10px;">
-            <div style="display:flex; justify-content:space-between; font-weight:bold;">
-                <span>TOTAL TAGIHAN</span><span>${fmtIDR(total)}</span>
-            </div>
-            <div style="display:flex; justify-content:space-between; font-size:11px; margin-top:5px;">
-                <span>BAYAR (${paymentMethod.toUpperCase()})</span><span>${fmtIDR(paid)}</span>
-            </div>
-            <div style="display:flex; justify-content:space-between; font-size:11px; margin-top:5px; color:${sisaColor}; font-weight:bold;">
-                <span>${sisaLabel}</span><span>${fmtIDR(sisaValue)}</span>
-            </div>
-            <div style="text-align:center; margin-top:10px; border:1px solid #000; padding:2px; font-weight:bold; font-size:10px;">
-                STATUS: ${statusLabel}
-            </div>
+        <div style="border-top:1px dashed #000; margin-top:10px; padding-top:10px; display:flex; justify-content:space-between; font-weight:bold;">
+            <span>TOTAL</span>
+            <span>${document.getElementById('totalDisplay').innerText}</span>
         </div>
-        <div style="text-align:center; margin-top:20px; font-size:10px;">TERIMA KASIH!<br>KEEP THE RECEIPTS.</div>
+        <div style="text-align:center; margin-top:20px; font-size:10px;">
+            TERIMA KASIH!<br>KEEP THE RECEIPTS.
+        </div>
     `;
-
+    
+    // INJECT TOMBOL TAMBAHAN DI BAGIAN ACTION
+    // Cari elemen receipt-actions di pos.html, jika tidak ada, kita inject di modal content
     const actionsDiv = modal.querySelector('.receipt-actions');
     if(actionsDiv) {
         actionsDiv.innerHTML = `
@@ -332,87 +266,220 @@ function showReceiptModal(total, paid, client) {
             <button class="filter-btn hover-target" onclick="newTransaction()">NEW ORDER</button>
         `;
     }
+
     modal.classList.add('show');
 }
 
+// Fungsi Buka Modal Email
 function openEmailModal() {
-    const modal = document.getElementById('emailModal');
-    if(modal) { modal.classList.add('show'); document.getElementById('clientEmailInput').focus(); }
+    // Tutup modal receipt dulu (opsional, biar gak numpuk)
+    // document.getElementById('receiptModal').classList.remove('show');
+    
+    const emailModal = document.getElementById('emailModal');
+    if(emailModal) {
+        emailModal.classList.add('show');
+        document.getElementById('clientEmailInput').focus();
+    }
 }
 
+// Fungsi Kirim Email (Simulasi)
 function processEmailSend() {
-    const email = document.getElementById('clientEmailInput').value;
-    if(!email.includes('@')) return alert("Email invalid");
-    alert(`Email terkirim ke ${email}`);
-    closeModal(); clearCart();
+    const emailInput = document.getElementById('clientEmailInput');
+    const email = emailInput.value;
+    const btn = document.querySelector('#emailModal .pay-btn'); // Tombol kirim
+
+    if(!email || !email.includes('@')) {
+        alert("Harap masukkan alamat email yang valid!");
+        return;
+    }
+
+    // Efek Loading
+    const originalText = btn.innerText;
+    btn.innerText = "SENDING...";
+    btn.disabled = true;
+
+    // Simulasi Delay Pengiriman
+    setTimeout(() => {
+        alert(`SUKSES!\nStruk digital telah dikirim ke: ${email}\nPengirim: usahadulustudio@gmail.com`);
+        
+        btn.innerText = originalText;
+        btn.disabled = false;
+        emailInput.value = ''; // Reset input
+        closeModal(); // Tutup semua modal
+        clearCart(); // Bersihkan keranjang karena transaksi selesai
+    }, 1500);
 }
 
-function newTransaction() { closeModal(); clearCart(); }
+function newTransaction() {
+    closeModal();
+    clearCart();
+}
 
-// --- 7. PRINT PDF PROFESSIONAL (80mm + Smart Debt) ---
+// Fungsi Print PDF
 window.printReceipt = function() {
-    if (!window.jspdf) { alert("Library PDF error."); return; }
+    if (!window.jspdf) { alert("Library PDF belum termuat."); return; }
     const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: [80, 250] });
+    const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: [80, 150] });
     doc.setFont("courier", "normal");
     
-    let y = 10; const centerX = 40; const lineSpacing = 5;
-
-    doc.setFontSize(12); doc.setFont(undefined, 'bold');
-    doc.text("USAHADULU STUDIO", centerX, y, { align: "center" }); y += lineSpacing;
+    let y = 10;
+    doc.setFontSize(10); doc.setFont(undefined, 'bold');
+    doc.text("USAHADULU STUDIO", 40, y, { align: "center" }); y += 4;
     doc.setFontSize(8); doc.setFont(undefined, 'normal');
-    doc.text("Design & Creative Services", centerX, y, { align: "center" }); y += 4;
-    doc.text("Dumai, Riau - Indonesia", centerX, y, { align: "center" }); y += lineSpacing + 2;
-    doc.text("------------------------------------------", centerX, y, { align: "center" }); y += lineSpacing;
-
+    doc.text("ONLINE / IRL", 40, y, { align: "center" }); y += 4;
     const now = new Date();
-    const client = document.getElementById('clientNameInput').value || "Guest";
-    doc.text(`Tgl : ${now.toLocaleDateString('id-ID')}`, 5, y); y += 4;
-    doc.text(`Jam : ${now.toLocaleTimeString('id-ID')}`, 5, y); y += 4;
-    doc.text(`Kli : ${client.substring(0,25)}`, 5, y); y += 4;
-    doc.text("------------------------------------------", centerX, y, { align: "center" }); y += lineSpacing;
+    doc.text(now.toLocaleDateString('id-ID') + " " + now.toLocaleTimeString('id-ID'), 40, y, { align: "center" }); y += 6;
+    doc.text("--------------------------------", 40, y, { align: "center" }); y += 5;
 
     doc.setFontSize(9);
     cart.forEach(item => {
-        let name = item.name.length > 22 ? item.name.substring(0, 22) + ".." : item.name;
+        let name = item.name.length > 18 ? item.name.substring(0, 18) + ".." : item.name;
         doc.text(name, 5, y);
-        doc.text(fmtIDR(item.price*item.qty), 75, y, { align: "right" }); y += 4;
-        doc.setFontSize(7); doc.text(`(x${item.qty} @ ${fmtIDR(item.price)})`, 5, y);
-        doc.setFontSize(9); y += 5; 
+        doc.text(fmtIDR(item.price * item.qty), 75, y, { align: "right" }); 
+        y += 4;
+        doc.setFontSize(7);
+        doc.text(`(${item.qty} x ${fmtIDR(item.price)})`, 5, y);
+        doc.setFontSize(9); 
+        y += 5; 
     });
-    doc.text("------------------------------------------", centerX, y, { align: "center" }); y += lineSpacing;
 
-    const totalText = document.getElementById('totalDisplay').innerText;
-    const totalVal = parseInt(totalText.replace(/[^0-9]/g, ''));
-    const cashVal = document.getElementById('cashInput') ? (parseInt(document.getElementById('cashInput').value)||0) : 0;
-    const debt = totalVal - cashVal;
-    
-    doc.setFont(undefined, 'bold');
-    doc.text("TOTAL TAGIHAN", 5, y); doc.text(totalText, 75, y, { align: "right" }); y += lineSpacing + 2;
-    doc.setFont(undefined, 'normal');
-    doc.text(`Bayar (${paymentMethod.toUpperCase()})`, 5, y); doc.text(fmtIDR(cashVal), 75, y, { align: "right" }); y += lineSpacing;
-
-    if(debt > 0) {
-        doc.setFont(undefined, 'bold'); doc.text("SISA HUTANG", 5, y); doc.text(fmtIDR(debt), 75, y, { align: "right" });
-    } else {
-        doc.text("KEMBALIAN", 5, y); doc.text(fmtIDR(Math.abs(debt)), 75, y, { align: "right" });
-    }
-    y += lineSpacing + 2;
-    
+    doc.text("--------------------------------", 40, y, { align: "center" }); y += 5;
     doc.setFontSize(10); doc.setFont(undefined, 'bold');
-    doc.text(`STATUS: ${debt > 0 ? "BELUM LUNAS" : "LUNAS"}`, centerX, y, { align: "center" }); y += lineSpacing * 2;
-
+    doc.text("TOTAL", 5, y);
+    doc.text(document.getElementById('totalDisplay').innerText, 75, y, { align: "right" }); y += 6;
+    
     doc.setFontSize(8); doc.setFont(undefined, 'normal');
-    doc.text("Terima Kasih!", centerX, y, { align: "center" });
-    doc.save(`Struk_Usahadulu_${now.getTime()}.pdf`);
+    doc.text(`Metode: ${paymentMethod.toUpperCase()}`, 5, y); y += 4;
+    
+    if(paymentMethod === 'cash') {
+        const cashVal = document.getElementById('cashInput') ? parseInt(document.getElementById('cashInput').value) : 0;
+        doc.text(`Tunai : Rp ${cashVal.toLocaleString('id-ID')}`, 5, y); y += 4;
+        doc.text(`Kembali: ${document.getElementById('changeDisplay').innerText}`, 5, y);
+    }
+    
+    y += 10;
+    doc.text("TERIMA KASIH!", 40, y, { align: "center" }); y += 4;
+    doc.text("KEEP THE RECEIPTS.", 40, y, { align: "center" });
+    
+    doc.save(`Struk_Usahadulu_${Date.now()}.pdf`);
 }
 
-// TOGGLE MENU BUTTON
-const menuBtn = document.getElementById('menuBtn');
-const navOverlay = document.getElementById('navOverlay');
-if(menuBtn && navOverlay) {
-    menuBtn.addEventListener('click', () => {
-        menuBtn.classList.toggle('active');
-        navOverlay.classList.toggle('open');
+// --- 7. HISTORY & SECURITY LOGIC (NEW) ---
+
+const ADMIN_PIN = "692196"; // GANTI PIN INI UNTUK KEAMANAN
+let transactionHistory = JSON.parse(localStorage.getItem('usahadulu_sales')) || [];
+
+// Modifikasi fungsi 'processTransaction' yang lama
+// Tambahkan baris ini SEBELUM 'showReceiptModal()' di dalam fungsi processTransaction:
+/*
+    saveTransactionToHistory(); // <--- Tambahkan ini
+    showReceiptModal();
+*/
+
+function saveTransactionToHistory() {
+    const totalText = document.getElementById('totalDisplay').innerText;
+    const totalVal = parseInt(totalText.replace(/[^0-9]/g, ''));
+    
+    const newTrx = {
+        id: "TRX-" + Date.now().toString().slice(-6),
+        date: new Date().toISOString(),
+        items: [...cart], // Copy cart
+        total: totalVal,
+        method: paymentMethod
+    };
+
+    transactionHistory.push(newTrx);
+    // Simpan ke LocalStorage Browser
+    localStorage.setItem('usahadulu_sales', JSON.stringify(transactionHistory));
+}
+
+// Fungsi Buka Admin Panel dengan PIN
+function openAdminPanel() {
+    const inputPin = prompt("MASUKKAN PIN ADMIN UNTUK AKSES DATA KEUANGAN:");
+    
+    if (inputPin === ADMIN_PIN) {
+        updateAdminUI();
+        document.getElementById('adminModal').classList.add('show');
+    } else if (inputPin !== null) {
+        alert("PIN SALAH! AKSES DITOLAK.");
+    }
+}
+
+function updateAdminUI() {
+    const listContainer = document.getElementById('transactionList');
+    listContainer.innerHTML = '';
+    
+    let totalRevenue = 0;
+    let cashIn = 0;
+    let digitalIn = 0;
+
+    // Urutkan dari yang terbaru
+    const reversedHistory = [...transactionHistory].reverse();
+
+    if(reversedHistory.length === 0) {
+        listContainer.innerHTML = '<div style="text-align:center; color:#444; padding:20px;">Belum ada data transaksi.</div>';
+    }
+
+    reversedHistory.forEach(trx => {
+        // Hitung Recap
+        totalRevenue += trx.total;
+        if(trx.method === 'cash') cashIn += trx.total;
+        else digitalIn += trx.total;
+
+        // Render List HTML
+        const dateObj = new Date(trx.date);
+        const dateStr = dateObj.toLocaleDateString('id-ID') + ' ' + dateObj.toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'});
+
+        const div = document.createElement('div');
+        div.className = 'history-item';
+        div.onclick = () => alertDetail(trx); // Klik untuk lihat detail
+        div.innerHTML = `
+            <div>
+                <span class="h-id">#${trx.id}</span>
+                <span class="h-date">${dateStr}</span>
+            </div>
+            <div style="display:flex; align-items:center;">
+                <span class="h-total">${fmtIDR(trx.total)}</span>
+                <span class="h-method">${trx.method.toUpperCase()}</span>
+            </div>
+        `;
+        listContainer.appendChild(div);
     });
+
+    // Update Angka di Box Summary
+    document.getElementById('admTotalRevenue').innerText = fmtIDR(totalRevenue);
+    document.getElementById('admTotalCash').innerText = fmtIDR(cashIn);
+    document.getElementById('admTotalDigital').innerText = fmtIDR(digitalIn);
+}
+
+// Fitur Klik item history untuk lihat detail (Simple Alert dulu)
+function alertDetail(trx) {
+    let itemDetails = trx.items.map(i => `- ${i.name} (x${i.qty})`).join('\n');
+    alert(`DETAIL TRANSAKSI #${trx.id}\n\nItem:\n${itemDetails}\n\nTotal: ${fmtIDR(trx.total)}\nMetode: ${trx.method.toUpperCase()}`);
+}
+
+function resetHistoryData() {
+    const confirmReset = confirm("PERINGATAN KERAS!\n\nApakah anda yakin ingin MENGHAPUS SEMUA DATA penjualan selamanya?\nData tidak bisa dikembalikan.");
+    if(confirmReset) {
+        const doubleCheck = prompt("Ketik 'DELETE' untuk konfirmasi penghapusan:");
+        if(doubleCheck === 'DELETE') {
+            transactionHistory = [];
+            localStorage.removeItem('usahadulu_sales');
+            updateAdminUI();
+            alert("Data Keuangan telah di-reset menjadi 0.");
+        }
+    }
+}
+
+function switchAdminTab(tabName) {
+    document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    
+    if(tabName === 'history') {
+        document.getElementById('historyTab').style.display = 'block';
+        event.target.classList.add('active');
+    } else {
+        document.getElementById('settingsTab').style.display = 'block';
+        event.target.classList.add('active');
+    }
 }
