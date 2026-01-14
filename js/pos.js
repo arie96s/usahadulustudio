@@ -38,9 +38,19 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Jam Digital
-function updateClock() {
-    const now = new Date();
-    document.getElementById('clockDisplay').innerText = now.toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'});
+function startClock() {
+    function update() {
+        const now = new Date();
+        // Format jam:menit (24 jam)
+        const timeString = now.toLocaleTimeString('id-ID', {
+            hour: '2-digit', 
+            minute:'2-digit'
+        });
+        const clockEl = document.getElementById('clockDisplay');
+        if(clockEl) clockEl.innerText = timeString;
+    }
+    update(); // Jalankan langsung
+    setInterval(update, 1000); // Update tiap detik
 }
 
 // 3. RENDER PRODUCTS
