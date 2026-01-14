@@ -541,3 +541,42 @@ window.addEventListener('load', () => {
         }, 500);
     }
 });
+
+// --- 9. CUSTOM CURSOR LOGIC ---
+document.addEventListener('DOMContentLoaded', () => {
+    const cursor = document.getElementById('cursor');
+    const hoverTargets = document.querySelectorAll('a, button, .hover-target, .pos-card, input, .history-item');
+
+    // 1. Gerakkan Kursor
+    document.addEventListener('mousemove', (e) => {
+        // Menggunakan requestAnimationFrame agar gerakan lebih halus
+        requestAnimationFrame(() => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+        });
+    });
+
+    // 2. Efek Hover (Membesar saat kena link/tombol)
+    hoverTargets.forEach(el => {
+        el.addEventListener('mouseenter', () => {
+            cursor.classList.add('active');
+        });
+        el.addEventListener('mouseleave', () => {
+            cursor.classList.remove('active');
+        });
+    });
+
+    // Tambahan: Handle elemen dinamis (seperti cart item baru)
+    // Menggunakan MutationObserver untuk elemen yang muncul belakangan
+    const observer = new MutationObserver((mutations) => {
+        const newTargets = document.querySelectorAll('button, .hover-target');
+        newTargets.forEach(el => {
+            // Cek apakah event listener sudah ada agar tidak duplikat
+            // (Cara simpel: remove dulu baru add, atau biarkan CSS handle hover state statis)
+            el.addEventListener('mouseenter', () => cursor.classList.add('active'));
+            el.addEventListener('mouseleave', () => cursor.classList.remove('active'));
+        });
+    });
+    
+    observer.observe(document.body, { childList: true, subtree: true });
+});
