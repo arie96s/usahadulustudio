@@ -483,3 +483,47 @@ function switchAdminTab(tabName) {
         event.target.classList.add('active');
     }
 }
+// --- 8. EXPORT TO EXCEL FEATURE (NEW) ---
+
+function downloadExcel() {
+    if (transactionHistory.length === 0) {
+        alert("Belum ada data transaksi untuk di-download.");
+        return;
+    }
+
+    // 1. Buat Header Kolom Excel
+    let csvContent = "ID TRANSAKSI,TANGGAL,JAM,ITEM DIBELI,TOTAL RUPIAH,METODE BAYAR\n";
+
+    // 2. Loop semua data history
+    transactionHistory.forEach(trx => {
+        const dateObj = new Date(trx.date);
+        const dateStr = dateObj.toLocaleDateString('id-ID'); // Format: 14/01/2026
+        const timeStr = dateObj.toLocaleTimeString('id-ID'); // Format: 20:30
+
+        // Gabungkan nama item jadi satu string (misal: "Logo (x1) | Kaos (x2)")
+        // Kita ganti koma dengan garis tegak (|) agar tidak merusak kolom CSV
+        let itemString = trx.items.map(i => `${i.name} (x${i.qty})`).join(" | ");
+        
+        // Bersihkan tanda koma di nama item jika ada, ganti spasi
+        itemString = itemString.replace(/,/g, " ");
+
+        // 3. Susun Baris CSV
+        // Format: ID, TANGGAL, JAM, "ITEMS", TOTAL, METODE
+        let row = `${trx.id},${dateStr},${timeStr},"${itemString}",${trx.total},${trx.method.toUpperCase()}`;
+        csvContent += row + "\n";
+    });
+
+    // 4. Proses Download File
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    
+    // Nama file otomatis ada tanggal hari ini
+    const today = new Date().toISOString().slice(0,10);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `Laporan_Usahadulu_${today}.csv`);
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
