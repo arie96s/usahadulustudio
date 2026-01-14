@@ -1,4 +1,4 @@
-// js/pos.js - FINAL CLEAN & FIXED VERSION
+// js/pos.js - FIXED & CLEAN VERSION
 
 // --- 1. DATA & VARIABLES ---
 const products = [
@@ -33,7 +33,10 @@ function startClock() {
 
 document.addEventListener('DOMContentLoaded', () => {
     startClock();
-    filterProducts('all'); 
+    // Render awal semua produk
+    renderGrid(products); 
+    
+    // Search Listener
     const searchInput = document.getElementById('searchProduct');
     if(searchInput) {
         searchInput.addEventListener('input', (e) => {
@@ -41,27 +44,49 @@ document.addEventListener('DOMContentLoaded', () => {
             renderGrid(products.filter(p => p.name.toLowerCase().includes(keyword)));
         });
     }
+
+    // Toggle Menu Logic
+    const menuBtn = document.getElementById('menuBtn');
+    const navOverlay = document.getElementById('navOverlay');
+    if(menuBtn && navOverlay) {
+        menuBtn.addEventListener('click', () => {
+            menuBtn.classList.toggle('active');
+            navOverlay.classList.toggle('open');
+        });
+    }
 });
 
 // --- 3. PRODUCTS & CART ---
-function filterProducts(cat) {
+function filterProducts(cat, el) {
     currentFilter = cat;
+    // Remove active from all buttons
     document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-    if(event && event.target) event.target.classList.add('active');
+    // Add active to clicked button (safe method)
+    if(el) el.classList.add('active');
+    
     renderGrid(cat === 'all' ? products : products.filter(p => p.category === cat));
 }
 
 function renderGrid(items) {
     const grid = document.getElementById('productGrid');
-    if(!grid) return; grid.innerHTML = '';
+    if(!grid) return; 
+    grid.innerHTML = '';
+    
     if(items.length === 0) {
-        grid.innerHTML = '<p style="color:#666; width:100%; text-align:center;">Produk tidak ditemukan.</p>'; return;
+        grid.innerHTML = '<p style="color:#666; width:100%; text-align:center; grid-column:1/-1; padding-top:20px;">Produk tidak ditemukan.</p>'; 
+        return;
     }
+    
     items.forEach(p => {
         const card = document.createElement('div');
         card.className = 'pos-card hover-target';
         card.onclick = () => addToCart(p.id);
-        card.innerHTML = `<img src="${p.img}" class="pos-img"><div class="pos-info"><div class="pos-title">${p.name}</div><div class="pos-price">${fmtIDR(p.price)}</div></div>`;
+        card.innerHTML = `
+            <img src="${p.img}" class="pos-img" onerror="this.style.display='none'">
+            <div class="pos-info">
+                <div class="pos-title">${p.name}</div>
+                <div class="pos-price">${fmtIDR(p.price)}</div>
+            </div>`;
         grid.appendChild(card);
     });
 }
@@ -69,7 +94,10 @@ function renderGrid(items) {
 function addToCart(id) {
     const item = cart.find(i => i.id === id);
     if(item) item.qty++;
-    else cart.push({ ...products.find(p => p.id === id), qty: 1 });
+    else {
+        const prod = products.find(p => p.id === id);
+        if(prod) cart.push({ ...prod, qty: 1 });
+    }
     updateCartUI();
 }
 
@@ -82,78 +110,131 @@ function updateCartQty(id, change) {
     updateCartUI();
 }
 
-function clearCart() { cart = []; updateCartUI(); }
+function clearCart() { 
+    cart = []; 
+    updateCartUI(); 
+}
 
 function updateCartUI() {
     const container = document.getElementById('cartContainer');
-    if(!container) return; container.innerHTML = '';
+    if(!container) return; 
+    container.innerHTML = '';
+    
     let subtotal = 0;
     
-    if(cart.length === 0) container.innerHTML = '<div class="empty-cart-state"><p>Keranjang Kosong</p></div>';
-    else {
+    if(cart.length === 0) {
+        container.innerHTML = '<div class="empty-cart-state"><p>Keranjang Kosong</p></div>';
+    } else {
         cart.forEach(item => {
             subtotal += item.price * item.qty;
-            container.innerHTML += `<div class="cart-item"><div class="cart-info"><h4>${item.name}</h4><span class="cart-meta">${fmtIDR(item.price)} x ${item.qty}</span></div><div class="cart-controls"><button class="qty-btn" onclick="updateCartQty(${item.id}, -1)">-</button><span>${item.qty}</span><button class="qty-btn" onclick="updateCartQty(${item.id}, 1)">+</button></div></div>`;
+            container.innerHTML += `
+                <div class="cart-item">
+                    <div class="cart-info">
+                        <h4>${item.name}</h4>
+                        <span class="cart-meta">${fmtIDR(item.price)} x ${item.qty}</span>
+                    </div>
+                    <div class="cart-controls">
+                        <button class="qty-btn" onclick="updateCartQty(${item.id}, -1)">-</button>
+                        <span>${item.qty}</span>
+                        <button class="qty-btn" onclick="updateCartQty(${item.id}, 1)">+</button>
+                    </div>
+                </div>`;
         });
     }
 
     const tax = subtotal * 0.11;
     const total = subtotal + tax;
     
-    ['totalDisplay', 'subtotalDisplay', 'taxDisplay', 'modalTotalDisplay'].forEach(id => {
-        const el = document.getElementById(id);
-        if(el) el.innerText = fmtIDR(id === 'subtotalDisplay' ? subtotal : (id === 'taxDisplay' ? tax : total));
-    });
+    // Update displays safely
+    const setTxt = (id, val) => { const el = document.getElementById(id); if(el) el.innerText = val; };
+    setTxt('subtotalDisplay', fmtIDR(subtotal));
+    setTxt('taxDisplay', fmtIDR(tax));
+    setTxt('totalDisplay', fmtIDR(total));
+    setTxt('modalTotalDisplay', fmtIDR(total));
 }
 
 // --- 4. PEMBAYARAN & DP ---
 function openPaymentModal() {
     if(cart.length === 0) { alert("Keranjang kosong!"); return; }
+    
+    // Default to Full Payment logic
     setPaymentType('full'); 
     document.getElementById('paymentModal').classList.add('show');
+    
+    // Auto fill if cash
+    const totalText = document.getElementById('totalDisplay').innerText;
+    const total = parseInt(totalText.replace(/[^0-9]/g, ''));
+    
+    if(paymentMethod === 'cash') {
+        const cashInput = document.getElementById('cashInput');
+        if(cashInput && !isDpMode) cashInput.value = total;
+    }
+    calculateChange();
 }
 
-function closeModal() { document.querySelectorAll('.modal').forEach(m => m.classList.remove('show')); }
+function closeModal() { 
+    document.querySelectorAll('.modal').forEach(m => m.classList.remove('show')); 
+}
 
 function setPaymentType(type) {
     isDpMode = (type === 'dp');
+    
     const btnFull = document.getElementById('btnFull');
     const btnDp = document.getElementById('btnDp');
-    if(btnFull && btnDp) {
-        btnFull.className = isDpMode ? 'type-btn' : 'type-btn active';
-        btnDp.className = isDpMode ? 'type-btn active' : 'type-btn';
+    
+    if(isDpMode) {
+        btnFull.className = 'type-btn';
+        btnDp.className = 'type-btn active';
+    } else {
+        btnFull.className = 'type-btn active';
+        btnDp.className = 'type-btn';
     }
 
     const label = document.getElementById('inputLabel');
     if(label) label.innerText = isDpMode ? "Nominal DP (Masuk)" : "Nominal Diterima";
     
     const cashInput = document.getElementById('cashInput');
+    const cashGroup = document.getElementById('cashInputGroup');
+    
     if(cashInput) {
         cashInput.value = '';
         cashInput.placeholder = isDpMode ? "Masukkan DP..." : "Rp 0";
     }
     
-    const cashGroup = document.getElementById('cashInputGroup');
-    if(cashGroup) cashGroup.style.display = (isDpMode || paymentMethod === 'cash') ? 'block' : 'none';
-
+    // Kalau DP, input manual wajib. Kalau Full & Cash, input manual. Kalau Full & Transfer, hide input.
+    if(cashGroup) {
+        if(isDpMode || paymentMethod === 'cash') {
+            cashGroup.style.display = 'block';
+            if(!isDpMode && paymentMethod === 'cash') {
+                 // Auto fill total for easier usage
+                 const totalText = document.getElementById('totalDisplay').innerText;
+                 const total = parseInt(totalText.replace(/[^0-9]/g, ''));
+                 if(cashInput) cashInput.value = total;
+            }
+        } else {
+            cashGroup.style.display = 'none';
+        }
+    }
+    
     calculateChange();
 }
 
-function selectMethod(method) {
+function selectMethod(method, el) {
     paymentMethod = method;
     document.querySelectorAll('.method-btn').forEach(btn => btn.classList.remove('active'));
-    if(event && event.target) event.target.classList.add('active');
+    if(el) el.classList.add('active');
 
     const cashGroup = document.getElementById('cashInputGroup');
     const cashInput = document.getElementById('cashInput');
+    const totalText = document.getElementById('totalDisplay').innerText;
+    const total = parseInt(totalText.replace(/[^0-9]/g, ''));
 
     if(isDpMode || method === 'cash') {
         if(cashGroup) cashGroup.style.display = 'block';
-        if(cashInput && method === 'cash' && !isDpMode) cashInput.focus();
+        if(method === 'cash' && !isDpMode && cashInput) cashInput.value = total;
     } else {
         if(cashGroup) cashGroup.style.display = 'none';
-        const totalText = document.getElementById('totalDisplay').innerText;
-        const total = parseInt(totalText.replace(/[^0-9]/g, ''));
+        // For logic purposes, treat non-cash full payment as exact amount
         if(cashInput) cashInput.value = total;
     }
     calculateChange();
@@ -161,9 +242,16 @@ function selectMethod(method) {
 
 function calculateChange() {
     const totalText = document.getElementById('totalDisplay').innerText;
-    const total = parseInt(totalText.replace(/[^0-9]/g, ''));
+    const total = parseInt(totalText.replace(/[^0-9]/g, '')) || 0;
+    
     const cashInput = document.getElementById('cashInput');
-    const cash = cashInput ? (parseInt(cashInput.value) || 0) : 0;
+    let cash = cashInput ? (parseInt(cashInput.value) || 0) : 0;
+    
+    // If hidden and not DP, assume exact payment
+    if(document.getElementById('cashInputGroup').style.display === 'none') {
+        cash = total;
+    }
+
     const changeDisplay = document.getElementById('changeDisplay');
     const changeLabel = document.getElementById('changeLabel');
 
@@ -195,15 +283,25 @@ function calculateChange() {
 
 function processTransaction() {
     const totalText = document.getElementById('totalDisplay').innerText;
-    const total = parseInt(totalText.replace(/[^0-9]/g, ''));
+    const total = parseInt(totalText.replace(/[^0-9]/g, '')) || 0;
+    
+    let cash = 0;
     const cashInput = document.getElementById('cashInput');
-    const cash = cashInput ? (parseInt(cashInput.value) || 0) : 0;
+    if(document.getElementById('cashInputGroup').style.display === 'none') {
+        cash = total;
+    } else {
+        cash = cashInput ? (parseInt(cashInput.value) || 0) : 0;
+    }
+
     const clientInput = document.getElementById('clientNameInput');
-    const clientName = (clientInput && clientInput.value) ? clientInput.value : "Guest";
+    const clientName = (clientInput && clientInput.value.trim() !== "") ? clientInput.value : "Guest";
 
     if(isDpMode) {
         if(cash <= 0) { alert("Nominal DP minimal 1 rupiah."); return; }
-        if(cash >= total && !confirm("Nominal DP lunas. Ubah jadi Transaksi LUNAS?")) return;
+        // Safe check
+        if(cash >= total) {
+            if(!confirm("Nominal DP melunasi tagihan. Ubah jadi Transaksi LUNAS?")) return;
+        }
     } else {
         if(cash < total) { alert("Uang kurang! Gunakan fitur DP jika ingin hutang."); return; }
     }
@@ -217,89 +315,131 @@ function processTransaction() {
 function saveTransactionToHistory(total, paid, client) {
     let status = (paid < total) ? 'DP / PARTIAL' : 'LUNAS';
     let debt = (paid < total) ? (total - paid) : 0;
+    
+    // Fix floating point issues roughly
+    if(debt < 0) debt = 0;
+
     const newTrx = {
         id: "TRX-" + Date.now().toString().slice(-6),
         date: new Date().toISOString(),
-        items: [...cart], total: total, paid: paid, debt: debt,
-        status: status, client: client, method: paymentMethod
+        items: [...cart], 
+        total: total, 
+        paid: paid, 
+        debt: debt,
+        status: status, 
+        client: client, 
+        method: paymentMethod
     };
+    
     transactionHistory.push(newTrx);
     localStorage.setItem('usahadulu_sales', JSON.stringify(transactionHistory));
 }
 
 function openAdminPanel() {
-    if(prompt("MASUKKAN PIN ADMIN:") === ADMIN_PIN) {
+    const pin = prompt("MASUKKAN PIN ADMIN:");
+    if(pin === ADMIN_PIN) {
         updateAdminUI();
         document.getElementById('adminModal').classList.add('show');
-    } else { alert("PIN SALAH!"); }
+    } else { 
+        if(pin !== null) alert("PIN SALAH!"); 
+    }
 }
 
 function updateAdminUI() {
     const list = document.getElementById('transactionList');
+    if(!list) return;
     list.innerHTML = '';
-    let rev = 0, cash = 0, digi = 0;
     
+    let rev = 0, cashIn = 0, digi = 0;
+    
+    // Copy array to reverse without mutating original
     [...transactionHistory].reverse().forEach(trx => {
+        // Revenue is what is PAID, not Total Bill
         rev += trx.paid;
-        if(trx.method === 'cash') cash += trx.paid; else digi += trx.paid;
+        
+        if(trx.method === 'cash') cashIn += trx.paid; 
+        else digi += trx.paid;
+        
         const d = new Date(trx.date);
-        list.innerHTML += `<div class="history-item" onclick='alertDetail(${JSON.stringify(trx)})'><div><span class="h-id">#${trx.id} (${trx.status})</span><span class="h-date">${d.toLocaleDateString()} | ${trx.client}</span></div><div><span class="h-total">${fmtIDR(trx.paid)}</span></div></div>`;
+        list.innerHTML += `
+            <div class="history-item" onclick='alertDetail(${JSON.stringify(trx)})'>
+                <div>
+                    <span class="h-id">#${trx.id} (${trx.status})</span>
+                    <span class="h-date">${d.toLocaleDateString('id-ID')} | ${trx.client}</span>
+                </div>
+                <div>
+                    <span class="h-total">${fmtIDR(trx.paid)}</span>
+                    <span class="h-method" style="display:block; text-align:right; margin-top:2px;">${trx.method}</span>
+                </div>
+            </div>`;
     });
     
-    document.getElementById('admTotalRevenue').innerText = fmtIDR(rev);
-    document.getElementById('admTotalCash').innerText = fmtIDR(cash);
-    document.getElementById('admTotalDigital').innerText = fmtIDR(digi);
+    const elRev = document.getElementById('admTotalRevenue');
+    const elCash = document.getElementById('admTotalCash');
+    const elDigi = document.getElementById('admTotalDigital');
+    
+    if(elRev) elRev.innerText = fmtIDR(rev);
+    if(elCash) elCash.innerText = fmtIDR(cashIn);
+    if(elDigi) elDigi.innerText = fmtIDR(digi);
 }
 
 function alertDetail(trx) {
     let items = trx.items.map(i => `- ${i.name} (x${i.qty})`).join('\n');
-    alert(`DETAIL #${trx.id}\nStatus: ${trx.status}\nKlien: ${trx.client}\n\n${items}\n\nTagihan: ${fmtIDR(trx.total)}\nBayar: ${fmtIDR(trx.paid)}\nHutang: ${fmtIDR(trx.debt)}`);
+    alert(`DETAIL #${trx.id}\n----------------\nStatus: ${trx.status}\nKlien: ${trx.client}\nTanggal: ${new Date(trx.date).toLocaleString()}\n\nITEM:\n${items}\n\nTagihan: ${fmtIDR(trx.total)}\nBayar: ${fmtIDR(trx.paid)}\nHutang: ${fmtIDR(trx.debt)}`);
 }
 
 function resetHistoryData() {
-    if(confirm("HAPUS SEMUA DATA?")) {
-        if(prompt("Ketik 'DELETE':") === 'DELETE') {
-            transactionHistory = []; localStorage.removeItem('usahadulu_sales');
-            updateAdminUI(); alert("Data Terhapus.");
+    if(confirm("HAPUS SEMUA DATA PENJUALAN?")) {
+        if(prompt("Ketik 'DELETE' untuk konfirmasi:") === 'DELETE') {
+            transactionHistory = []; 
+            localStorage.removeItem('usahadulu_sales');
+            updateAdminUI(); 
+            alert("Database Reset Berhasil.");
         }
     }
 }
 
-function switchAdminTab(tabName) {
-    document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+function switchAdminTab(tabName, el) {
+    document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    
     document.getElementById(tabName+'Tab').style.display = 'block';
-    if(event) event.target.classList.add('active');
+    if(el) el.classList.add('active');
 }
 
 function downloadExcel() {
-    if(transactionHistory.length===0) return alert("Data kosong.");
-    let csv = "ID,TANGGAL,KLIEN,STATUS,TOTAL,BAYAR,HUTANG,METODE\n";
+    if(transactionHistory.length === 0) return alert("Data kosong.");
+    let csv = "ID,TANGGAL,KLIEN,STATUS,TOTAL TAGIHAN,SUDAH BAYAR,SISA HUTANG,METODE\n";
+    
     transactionHistory.forEach(trx => {
-        csv += `${trx.id},${new Date(trx.date).toLocaleDateString()},"${trx.client}",${trx.status},${trx.total},${trx.paid},${trx.debt},${trx.method}\n`;
+        const d = new Date(trx.date).toLocaleDateString('id-ID');
+        csv += `${trx.id},${d},"${trx.client}",${trx.status},${trx.total},${trx.paid},${trx.debt},${trx.method}\n`;
     });
+    
     const link = document.createElement("a");
     link.href = URL.createObjectURL(new Blob([csv], {type: "text/csv"}));
-    link.download = `Laporan_${Date.now()}.csv`;
+    link.download = `Laporan_Usahadulu_${Date.now()}.csv`;
     link.click();
 }
 
-// --- 6. STRUK (EMAIL & LOGIKA HUTANG FIXED) ---
+// --- 6. STRUK & PRINTING ---
 function showReceiptModal(total, paid, client) {
     const modal = document.getElementById('receiptModal');
     const preview = document.getElementById('receiptPreview');
     if(!modal || !preview) return;
 
-    // Hitung logika dulu (JANGAN DI DALAM STRING HTML)
     const debt = total - paid;
     const statusLabel = debt > 0 ? "BELUM LUNAS (DP)" : "LUNAS";
     const sisaLabel = debt > 0 ? "SISA HUTANG" : "KEMBALIAN";
     const sisaValue = debt > 0 ? debt : Math.abs(debt);
     const sisaColor = debt > 0 ? '#ff4757' : '#2ed573';
 
-    let itemsHtml = cart.map(item => `<div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>${item.name} <span style="font-size:10px;">(x${item.qty})</span></span><span>${fmtIDR(item.price * item.qty)}</span></div>`).join('');
+    let itemsHtml = cart.map(item => `
+        <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+            <span>${item.name} <span style="font-size:10px;">(x${item.qty})</span></span>
+            <span>${fmtIDR(item.price * item.qty)}</span>
+        </div>`).join('');
 
-    // Baru masukkan ke HTML
     preview.innerHTML = `
         <div style="text-align:center; border-bottom:1px dashed #000; padding-bottom:10px; margin-bottom:10px;">
             <strong>USAHADULU STUDIO</strong><br>
@@ -310,7 +450,7 @@ function showReceiptModal(total, paid, client) {
         ${itemsHtml}
         <div style="border-top:1px dashed #000; margin-top:10px; padding-top:10px;">
             <div style="display:flex; justify-content:space-between; font-weight:bold;">
-                <span>TOTAL TAGIHAN</span><span>${fmtIDR(total)}</span>
+                <span>TOTAL</span><span>${fmtIDR(total)}</span>
             </div>
             <div style="display:flex; justify-content:space-between; font-size:11px; margin-top:5px;">
                 <span>BAYAR (${paymentMethod.toUpperCase()})</span><span>${fmtIDR(paid)}</span>
@@ -322,52 +462,46 @@ function showReceiptModal(total, paid, client) {
                 STATUS: ${statusLabel}
             </div>
         </div>
-        <div style="text-align:center; margin-top:20px; font-size:10px;">TERIMA KASIH!<br>KEEP THE RECEIPTS.</div>
+        <div style="text-align:center; margin-top:20px; font-size:10px;">TERIMA KASIH!<br>IG: @arie96s | @magos.co</div>
     `;
 
-    const actionsDiv = modal.querySelector('.receipt-actions');
-    if(actionsDiv) {
-        actionsDiv.innerHTML = `
-            <button class="filter-btn hover-target" onclick="printReceipt()">PRINT / PDF</button>
-            <button class="filter-btn hover-target" onclick="openEmailModal()" style="border-color:#2ed573; color:#2ed573;">RECEIPT TO EMAIL</button>
-            <button class="filter-btn hover-target" onclick="newTransaction()">NEW ORDER</button>
-        `;
-    }
     modal.classList.add('show');
 }
 
-function openEmailModal() {
-    const modal = document.getElementById('emailModal');
-    if(modal) { modal.classList.add('show'); document.getElementById('clientEmailInput').focus(); }
+function newTransaction() { 
+    closeModal(); 
+    clearCart(); 
 }
 
-function processEmailSend() {
-    const email = document.getElementById('clientEmailInput').value;
-    if(!email.includes('@')) return alert("Email invalid");
-    alert(`Email terkirim ke ${email}`);
-    closeModal(); clearCart();
-}
-
-function newTransaction() { closeModal(); clearCart(); }
-
-// --- 7. PRINT PDF PROFESSIONAL (80mm + Smart Debt) ---
+// Print PDF Handler
 window.printReceipt = function() {
-    if (!window.jspdf) { alert("Library PDF error."); return; }
+    if (!window.jspdf) { 
+        alert("Gagal memuat library PDF. Pastikan internet aktif (CDN)."); 
+        return; 
+    }
+    
     const { jsPDF } = window.jspdf;
+    // 80mm width, dynamic height roughly
     const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: [80, 250] });
+    
     doc.setFont("courier", "normal");
     
-    let y = 10; const centerX = 40; const lineSpacing = 5;
+    let y = 10; 
+    const centerX = 40; 
+    const lineSpacing = 4;
 
+    // Header
     doc.setFontSize(12); doc.setFont(undefined, 'bold');
     doc.text("USAHADULU STUDIO", centerX, y, { align: "center" }); y += lineSpacing;
     doc.setFontSize(8); doc.setFont(undefined, 'normal');
     doc.text("Design & Creative Services", centerX, y, { align: "center" }); y += 4;
-    doc.text("Dumai, Riau - Indonesia", centerX, y, { align: "center" }); y += lineSpacing + 2;
+    doc.text("Dumai, Riau", centerX, y, { align: "center" }); y += lineSpacing + 2;
     doc.text("------------------------------------------", centerX, y, { align: "center" }); y += lineSpacing;
 
+    // Meta
     const now = new Date();
-    const client = document.getElementById('clientNameInput').value || "Guest";
+    const clientInput = document.getElementById('clientNameInput');
+    const client = clientInput ? (clientInput.value || "Guest") : "Guest";
     const trxId = "TRX-" + now.getTime().toString().slice(-6);
 
     doc.text(`Tgl   : ${now.toLocaleDateString('id-ID')}`, 5, y); y += 4;
@@ -377,19 +511,30 @@ window.printReceipt = function() {
 
     doc.text("------------------------------------------", centerX, y, { align: "center" }); y += lineSpacing;
 
+    // Items
     doc.setFontSize(9);
     cart.forEach(item => {
-        let name = item.name.length > 22 ? item.name.substring(0, 22) + ".." : item.name;
+        let name = item.name.length > 20 ? item.name.substring(0, 20) + ".." : item.name;
         doc.text(name, 5, y);
         doc.text(fmtIDR(item.price*item.qty), 75, y, { align: "right" }); y += 4;
-        doc.setFontSize(7); doc.text(`(x${item.qty} @ ${fmtIDR(item.price)})`, 5, y);
+        doc.setFontSize(7); 
+        doc.text(`(x${item.qty} @ ${fmtIDR(item.price)})`, 5, y);
         doc.setFontSize(9); y += 5; 
     });
     doc.text("------------------------------------------", centerX, y, { align: "center" }); y += lineSpacing;
 
+    // Calc
     const totalText = document.getElementById('totalDisplay').innerText;
     const totalVal = parseInt(totalText.replace(/[^0-9]/g, ''));
-    const cashVal = document.getElementById('cashInput') ? (parseInt(document.getElementById('cashInput').value)||0) : 0;
+    
+    // Recalculate paid logic for printing
+    let cashVal = 0;
+    if(document.getElementById('cashInputGroup').style.display === 'none') {
+        cashVal = totalVal; // Full non-cash payment
+    } else {
+        cashVal = document.getElementById('cashInput') ? (parseInt(document.getElementById('cashInput').value)||0) : 0;
+    }
+    
     const debt = totalVal - cashVal;
     
     doc.setFont(undefined, 'bold');
@@ -398,26 +543,20 @@ window.printReceipt = function() {
     doc.text(`Bayar (${paymentMethod.toUpperCase()})`, 5, y); doc.text(fmtIDR(cashVal), 75, y, { align: "right" }); y += lineSpacing;
 
     if(debt > 0) {
-        doc.setFont(undefined, 'bold'); doc.text("SISA HUTANG", 5, y); doc.text(fmtIDR(debt), 75, y, { align: "right" });
+        doc.setFont(undefined, 'bold'); 
+        doc.text("SISA HUTANG", 5, y); doc.text(fmtIDR(debt), 75, y, { align: "right" });
     } else {
         doc.text("KEMBALIAN", 5, y); doc.text(fmtIDR(Math.abs(debt)), 75, y, { align: "right" });
     }
-    y += lineSpacing + 2;
+    y += lineSpacing + 4;
     
+    // Status
     doc.setFontSize(10); doc.setFont(undefined, 'bold');
     doc.text(`STATUS: ${debt > 0 ? "BELUM LUNAS" : "LUNAS"}`, centerX, y, { align: "center" }); y += lineSpacing * 2;
 
     doc.setFontSize(8); doc.setFont(undefined, 'normal');
-    doc.text("Terima Kasih!", centerX, y, { align: "center" });
+    doc.text("Simpan struk ini sebagai bukti.", centerX, y, { align: "center" });
+    
+    // Auto download
     doc.save(`Struk_Usahadulu_${now.getTime()}.pdf`);
-}
-
-// TOGGLE MENU BUTTON
-const menuBtn = document.getElementById('menuBtn');
-const navOverlay = document.getElementById('navOverlay');
-if(menuBtn && navOverlay) {
-    menuBtn.addEventListener('click', () => {
-        menuBtn.classList.toggle('active');
-        navOverlay.classList.toggle('open');
-    });
-}
+};
