@@ -1,4 +1,4 @@
-// js/pos.js - Final Fixed Version (Clock & Modal)
+// js/pos.js - Final Version (With Email Receipt Feature)
 
 // --- 1. DATA PRODUK ---
 const products = [
@@ -21,9 +21,8 @@ const fmtIDR = (num) => {
     return "Rp " + num.toLocaleString('id-ID');
 }
 
-// --- 2. FUNGSI JAM (Dipindah ke atas agar terbaca duluan) ---
+// --- 2. FUNGSI JAM ---
 function startClock() {
-    console.log("Memulai Jam..."); // Cek Console browser jika jam tidak muncul
     function update() {
         const now = new Date();
         const timeString = now.toLocaleTimeString('id-ID', {
@@ -31,11 +30,7 @@ function startClock() {
             minute:'2-digit'
         });
         const clockEl = document.getElementById('clockDisplay');
-        if(clockEl) {
-            clockEl.innerText = timeString;
-        } else {
-            console.warn("Element #clockDisplay tidak ditemukan di HTML!");
-        }
+        if(clockEl) clockEl.innerText = timeString;
     }
     update(); 
     setInterval(update, 1000); 
@@ -43,13 +38,9 @@ function startClock() {
 
 // --- 3. INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Jalankan Jam
     startClock();
-
-    // 2. Load Produk
     filterProducts('all'); 
     
-    // 3. Listener Search
     const searchInput = document.getElementById('searchProduct');
     if(searchInput) {
         searchInput.addEventListener('input', (e) => {
@@ -226,7 +217,8 @@ function processTransaction() {
     showReceiptModal();
 }
 
-// --- 6. PRINT RECEIPT ---
+// --- 6. RECEIPT & EMAIL LOGIC (UPDATED) ---
+
 function showReceiptModal() {
     const modal = document.getElementById('receiptModal');
     const preview = document.getElementById('receiptPreview');
@@ -242,6 +234,7 @@ function showReceiptModal() {
         </div>
     `).join('');
 
+    // Update isi modal struk dengan tombol EMAIL
     preview.innerHTML = `
         <div style="text-align:center; border-bottom:1px dashed #000; padding-bottom:10px; margin-bottom:10px;">
             <strong>USAHADULU STUDIO</strong><br>
@@ -254,12 +247,70 @@ function showReceiptModal() {
             <span>${document.getElementById('totalDisplay').innerText}</span>
         </div>
         <div style="text-align:center; margin-top:20px; font-size:10px;">
-            TERIMA KASIH!<br>#SupportLocalCreative
+            TERIMA KASIH!<br>KEEP THE RECEIPTS.
         </div>
     `;
+    
+    // INJECT TOMBOL TAMBAHAN DI BAGIAN ACTION
+    // Cari elemen receipt-actions di pos.html, jika tidak ada, kita inject di modal content
+    const actionsDiv = modal.querySelector('.receipt-actions');
+    if(actionsDiv) {
+        actionsDiv.innerHTML = `
+            <button class="filter-btn hover-target" onclick="printReceipt()">PRINT / PDF</button>
+            <button class="filter-btn hover-target" onclick="openEmailModal()" style="border-color:#2ed573; color:#2ed573;">RECEIPT TO EMAIL</button>
+            <button class="filter-btn hover-target" onclick="newTransaction()">NEW ORDER</button>
+        `;
+    }
+
     modal.classList.add('show');
 }
 
+// Fungsi Buka Modal Email
+function openEmailModal() {
+    // Tutup modal receipt dulu (opsional, biar gak numpuk)
+    // document.getElementById('receiptModal').classList.remove('show');
+    
+    const emailModal = document.getElementById('emailModal');
+    if(emailModal) {
+        emailModal.classList.add('show');
+        document.getElementById('clientEmailInput').focus();
+    }
+}
+
+// Fungsi Kirim Email (Simulasi)
+function processEmailSend() {
+    const emailInput = document.getElementById('clientEmailInput');
+    const email = emailInput.value;
+    const btn = document.querySelector('#emailModal .pay-btn'); // Tombol kirim
+
+    if(!email || !email.includes('@')) {
+        alert("Harap masukkan alamat email yang valid!");
+        return;
+    }
+
+    // Efek Loading
+    const originalText = btn.innerText;
+    btn.innerText = "SENDING...";
+    btn.disabled = true;
+
+    // Simulasi Delay Pengiriman
+    setTimeout(() => {
+        alert(`SUKSES!\nStruk digital telah dikirim ke: ${email}\nPengirim: usahadulustudio@gmail.com`);
+        
+        btn.innerText = originalText;
+        btn.disabled = false;
+        emailInput.value = ''; // Reset input
+        closeModal(); // Tutup semua modal
+        clearCart(); // Bersihkan keranjang karena transaksi selesai
+    }, 1500);
+}
+
+function newTransaction() {
+    closeModal();
+    clearCart();
+}
+
+// Fungsi Print PDF
 window.printReceipt = function() {
     if (!window.jspdf) { alert("Library PDF belum termuat."); return; }
     const { jsPDF } = window.jspdf;
@@ -302,8 +353,8 @@ window.printReceipt = function() {
     }
     
     y += 10;
-    doc.text("KEEP THE RECEIPTS", 40, y, { align: "center" }); y += 4;
-    doc.text("#SupportLocalCreative", 40, y, { align: "center" });
+    doc.text("TERIMA KASIH!", 40, y, { align: "center" }); y += 4;
+    doc.text("KEEP THE RECEIPTS.", 40, y, { align: "center" });
     
     doc.save(`Struk_Usahadulu_${Date.now()}.pdf`);
 }
