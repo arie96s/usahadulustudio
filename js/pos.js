@@ -363,19 +363,113 @@ function processEmailSend() {
 
 function newTransaction() { closeModal(); clearCart(); }
 
+// --- 7. FUNGSI PRINT PDF (VERSI RAPI & DETAIL) ---
 window.printReceipt = function() {
-    if (!window.jspdf) { alert("Library PDF error."); return; }
-    const doc = new window.jspdf.jsPDF({ orientation: "portrait", unit: "mm", format: [80, 150] });
-    doc.setFont("courier"); doc.setFontSize(10);
-    doc.text("USAHADULU STUDIO", 40, 10, { align: "center" });
-    doc.setFontSize(8);
-    let y = 20;
+    if (!window.jspdf) { 
+        alert("Library PDF belum termuat. Cek koneksi internet."); 
+        return; 
+    }
+    
+    const { jsPDF } = window.jspdf;
+    // Ukuran kertas 80mm x Auto Height (kita set panjang 200mm dulu, nanti bisa auto)
+    const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: [80, 200] });
+    
+    // Config Font
+    doc.setFont("courier", "normal");
+    
+    let y = 10; // Posisi vertikal awal
+    const lineSpacing = 5;
+    const centerX = 40; // Tengah kertas 80mm
+    
+    // --- HEADER ---
+    doc.setFontSize(12); doc.setFont(undefined, 'bold');
+    doc.text("USAHADULU STUDIO", centerX, y, { align: "center" }); 
+    y += lineSpacing;
+    
+    doc.setFontSize(8); doc.setFont(undefined, 'normal');
+    doc.text("Digital & Creative Services", centerX, y, { align: "center" });
+    y += lineSpacing + 2;
+    
+    doc.text("------------------------------------------", centerX, y, { align: "center" });
+    y += lineSpacing;
+
+    // --- INFO DATA ---
+    const now = new Date();
+    const clientInput = document.getElementById('clientNameInput');
+    const clientName = (clientInput && clientInput.value) ? clientInput.value : "Guest";
+    
+    doc.text(`Tgl   : ${now.toLocaleDateString('id-ID')}`, 5, y); y += 4;
+    doc.text(`Jam   : ${now.toLocaleTimeString('id-ID')}`, 5, y); y += 4;
+    doc.text(`Klien : ${clientName.substring(0,25)}`, 5, y); y += 4;
+    
+    doc.text("------------------------------------------", centerX, y, { align: "center" });
+    y += lineSpacing;
+
+    // --- LIST ITEM ---
+    doc.setFontSize(9);
     cart.forEach(item => {
-        doc.text(item.name.substring(0,18), 5, y);
-        doc.text(fmtIDR(item.price*item.qty), 75, y, {align:"right"});
-        y+=5;
+        // Nama barang
+        let name = item.name;
+        if(name.length > 20) name = name.substring(0, 20) + "..";
+        
+        doc.text(name, 5, y);
+        
+        // Harga Total per Item (Kanan)
+        doc.text(fmtIDR(item.price * item.qty), 75, y, { align: "right" }); 
+        y += 4;
+        
+        // Detail Qty di bawah nama
+        doc.setFontSize(7);
+        doc.text(`(x${item.qty} @ ${fmtIDR(item.price)})`, 5, y);
+        doc.setFontSize(9); 
+        y += 5; 
     });
-    doc.text("----------------", 40, y, {align:"center"}); y+=5;
-    doc.text("TOTAL: " + document.getElementById('totalDisplay').innerText, 5, y);
-    doc.save(`Struk_${Date.now()}.pdf`);
+
+    doc.text("------------------------------------------", centerX, y, { align: "center" });
+    y += lineSpacing;
+
+    // --- KALKULASI TOTAL ---
+    // Ambil nilai real dari HTML
+    const totalText = document.getElementById('totalDisplay').innerText;
+    const totalVal = parseInt(totalText.replace(/[^0-9]/g, ''));
+    
+    const cashInput = document.getElementById('cashInput');
+    const cashVal = cashInput ? (parseInt(cashInput.value) || 0) : 0;
+    
+    const debt = totalVal - cashVal;
+    let status = "LUNAS";
+    if(debt > 0) status = "BELUM LUNAS (DP)";
+
+    doc.setFont(undefined, 'bold');
+    doc.text("TOTAL", 5, y);
+    doc.text(totalText, 75, y, { align: "right" }); 
+    y += lineSpacing + 2;
+
+    doc.setFont(undefined, 'normal');
+    doc.text(`Bayar (${paymentMethod.toUpperCase()})`, 5, y);
+    doc.text(fmtIDR(cashVal), 75, y, { align: "right" });
+    y += lineSpacing;
+
+    // Tampilkan Sisa / Kembalian
+    if(debt > 0) {
+        doc.text("SISA HUTANG", 5, y);
+        doc.text(fmtIDR(debt), 75, y, { align: "right" });
+    } else {
+        doc.text("KEMBALIAN", 5, y);
+        doc.text(fmtIDR(Math.abs(debt)), 75, y, { align: "right" });
+    }
+    y += lineSpacing + 2;
+
+    // Status Pembayaran
+    doc.setFontSize(10); doc.setFont(undefined, 'bold');
+    doc.text(`STATUS: ${status}`, centerX, y, { align: "center" });
+    y += lineSpacing * 2;
+
+    // --- FOOTER ---
+    doc.setFontSize(8); doc.setFont(undefined, 'normal');
+    doc.text("Terima Kasih!", centerX, y, { align: "center" }); y += 4;
+    doc.text("Simpan struk ini sebagai bukti.", centerX, y, { align: "center" });
+    
+    // Save File
+    doc.save(`Struk_Usahadulu_${Date.now()}.pdf`);
 }
