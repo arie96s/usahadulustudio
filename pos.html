@@ -32,8 +32,9 @@
     <div class="nav-overlay" id="navOverlay">
         <ul class="menu-list">
             <li class="menu-item"><a href="index.html" class="menu-title hover-target">HOME</a></li>
-            <li class="menu-item"><a href="pos.html" class="menu-title hover-target" style="color:#fff;">CASHIER / POS</a></li>
+            <li class="menu-item"><a href="pos.html" class="menu-title hover-target" style="color:#2ed573;">CASHIER / POS</a></li>
             <li class="menu-item"><a href="services.html" class="menu-title hover-target">SERVICES</a></li>
+            <li class="menu-item"><a href="shop.html" class="menu-title hover-target">ASSET STORE</a></li>
         </ul>
     </div>
 
@@ -42,6 +43,7 @@
         <div class="pos-products-area">
             <div class="pos-filter-bar">
                 <input type="text" id="searchProduct" class="pos-search hover-target" placeholder="CARI PRODUK / SCAN BARCODE...">
+                
                 <div class="pos-categories" id="categoryFilters">
                     <button class="filter-btn active hover-target" onclick="filterProducts('all')">SEMUA</button>
                     <button class="filter-btn hover-target" onclick="filterProducts('service')">JASA</button>
@@ -96,7 +98,8 @@
     <div id="paymentModal" class="modal">
         <div class="modal-content pos-modal-content">
             <div class="close-modal hover-target" onclick="closeModal()">×</div>
-            <h2 class="modal-title">PEMBAYARAN</h2>
+            
+            <h2 class="modal-title">DIGITAL / HARD CASH</h2>
             
             <div class="payment-summary">
                 <small>Total Tagihan</small>
@@ -122,7 +125,7 @@
                 <strong id="changeDisplay">Rp 0</strong>
             </div>
 
-            <button class="service-action-btn hover-target" style="width:100%; margin-top:20px;" onclick="processTransaction()">
+            <button class="pay-btn hover-target" style="width:100%; margin-top:20px;" onclick="processTransaction()">
                 SELESAIKAN TRANSAKSI
             </button>
         </div>
@@ -130,6 +133,8 @@
 
     <div id="receiptModal" class="modal">
         <div class="modal-content pos-modal-content" style="text-align:center;">
+            <div class="close-modal hover-target" onclick="closeModal()">×</div>
+
             <div class="check-icon">✓</div>
             <h2 class="modal-title">TRANSAKSI BERHASIL</h2>
             <p style="color:#888; margin-bottom:20px;">Struk transaksi telah dibuat.</p>
@@ -139,10 +144,16 @@
 
             <div class="receipt-actions">
                 <button class="filter-btn hover-target" onclick="printReceipt()">PRINT / PDF</button>
-                <button class="filter-btn hover-target" onclick="newTransaction()">TRANSAKSI BARU</button>
-                    <div id="emailModal" class="modal">
+                <button class="filter-btn hover-target" onclick="openEmailModal()" style="border-color:#2ed573; color:#2ed573;">RECEIPT TO EMAIL</button>
+                <button class="filter-btn hover-target" onclick="newTransaction()">NEW ORDER</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="emailModal" class="modal">
         <div class="modal-content pos-modal-content">
             <div class="close-modal hover-target" onclick="closeModal()">×</div>
+            
             <h2 class="modal-title">KIRIM STRUK DIGITAL</h2>
             
             <p style="color:#888; font-size:12px; margin-bottom:20px;">
@@ -157,10 +168,6 @@
             <button class="pay-btn hover-target" onclick="processEmailSend()">
                 KIRIM SEKARANG ➜
             </button>
-        </div>
-    </div>
-
-            </div>
         </div>
     </div>
 
