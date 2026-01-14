@@ -1,4 +1,4 @@
-/* css/pos.css - Styling Khusus Kasir USAHADULU */
+/* css/pos.css - FULL VERSION (Updated) */
 
 :root {
     --pos-bg: #050505;
@@ -25,6 +25,15 @@ body {
 }
 .status-dot { width: 8px; height: 8px; background: var(--accent-green); border-radius: 50%; box-shadow: 0 0 5px var(--accent-green); }
 .header-right { display: flex; align-items: center; gap: 20px; color: #fff; font-family: monospace; font-size: 14px;}
+
+/* PERBAIKAN TOMBOL MENU (Agar X terlihat dan bisa diklik) */
+#posHeader .menu-btn {
+    z-index: 2000 !important;
+    position: relative;
+}
+.menu-btn.active span {
+    background-color: #ffffff !important;
+}
 
 /* Container Utama */
 .pos-container {
@@ -68,7 +77,7 @@ body {
     background: var(--pos-panel);
     border: 1px solid var(--pos-border);
     border-radius: 8px;
-    cursor: none; /* Ikuti style cursor custom */
+    cursor: none;
     transition: all 0.2s;
     overflow: hidden;
     position: relative;
@@ -130,17 +139,14 @@ body {
 
 .powered-by { text-align: center; font-size: 9px; color: #444; margin-top: 15px; text-transform: uppercase; }
 
-/* PERBAIKAN TOMBOL BAYAR (Style Outline Sesuai Tema) */
+/* TOMBOL BAYAR (Sesuai Tema & Tidak Mengembang) */
 .pay-btn {
     width: 100%; 
     padding: 15px; 
-    
-    /* Style Dasar mengikuti tema .service-action-btn */
     background: transparent; 
     border: 1px solid #fff; 
     color: #fff;
     border-radius: 50px; 
-    
     font-weight: bold; 
     margin-top: 20px; 
     font-size: 14px;
@@ -158,18 +164,35 @@ body {
     letter-spacing: 2px;
 }
 
-/* Style Modal Khusus POS */
+/* MODAL PEMBAYARAN (Sudut Tumpul) */
 .pos-modal-content {
-    background: #111; border: 1px solid #fff; width: 400px; padding: 30px;
+    background: #111; 
+    border: 1px solid #fff; 
+    width: 400px; 
+    padding: 30px;
+    border-radius: 20px; /* Sudut Tumpul */
+    box-shadow: 0 10px 40px rgba(0,0,0,0.8);
 }
+
 .big-total { font-size: 32px; font-weight: 900; color: #fff; margin: 10px 0 20px 0; }
 .payment-methods { display: flex; gap: 10px; margin-bottom: 20px; }
-.method-btn { flex: 1; background: #000; border: 1px solid #333; color: #888; padding: 10px; font-size: 12px; font-weight: bold; }
+.method-btn { flex: 1; background: #000; border: 1px solid #333; color: #888; padding: 10px; font-size: 12px; font-weight: bold; border-radius: 8px; }
 .method-btn.active, .method-btn:hover { background: #fff; color: #000; }
+
+.form-group { margin-bottom: 15px; }
+.form-group label { display: block; color: #888; font-size: 12px; margin-bottom: 5px; }
+/* Input Field Sudut Tumpul */
+.pos-modal-content input {
+    width: 100%; background: #000; border: 1px solid #333; color: #fff;
+    padding: 12px; border-radius: 10px; font-size: 16px;
+}
+.pos-modal-content input:focus { border-color: #fff; outline: none; }
+
+.change-display { display: flex; justify-content: space-between; margin-top: 15px; font-size: 14px; color: #ccc; }
 
 .check-icon { font-size: 50px; color: var(--accent-green); margin-bottom: 10px; }
 
-/* PREVIEW STRUK (SUDUT TUMPUL) */
+/* PREVIEW STRUK (Sudut Tumpul) */
 .receipt-preview {
     background: #fff;
     color: #000;
@@ -180,39 +203,22 @@ body {
     margin: 20px 0;
     max-height: 200px;
     overflow-y: auto;
-    
-    /* FIX: Sudut Tumpul */
-    border-radius: 8px; 
+    border-radius: 10px; 
     border: 1px solid #ddd; 
 }
 
-/* PERBAIKAN TOMBOL MENU */
-#posHeader .menu-btn {
-    z-index: 2000 !important; /* Memaksa tombol di atas segalanya */
-    position: relative;
-}
+.receipt-actions { display: flex; gap: 10px; justify-content: center; }
 
-.menu-btn.active span {
-    background-color: #ffffff !important;
-}
-
-/* =========================================
-   TAMPILAN MOBILE / RESPONSIVE (BARU)
-   ========================================= */
+/* === MOBILE RESPONSIVE === */
 @media (max-width: 768px) {
-    /* 1. Aktifkan Scroll di Body HP */
-    body { 
-        overflow: auto; 
-    }
-
-    /* 2. Container jadi Susunan Vertikal (Atas-Bawah) */
+    body { overflow: auto; }
+    
     .pos-container { 
         flex-direction: column; 
         height: auto; 
         overflow-x: hidden;
     }
 
-    /* 3. Area Produk (Di Atas) */
     .pos-products-area { 
         width: 100%; 
         height: auto; 
@@ -220,38 +226,29 @@ body {
         padding-bottom: 20px;
     }
 
-    /* 4. Grid Produk HP (2 Kolom) */
     .pos-grid {
         grid-template-columns: repeat(2, 1fr); 
         gap: 10px;
     }
     
-    /* Perkecil Font di Kartu Produk */
     .pos-card .pos-title { font-size: 10px; }
     .pos-card .pos-price { font-size: 12px; }
     .pos-img { height: 100px; }
 
-    /* 5. Area Sidebar/Keranjang (Di Bawah) */
     .pos-sidebar { 
         width: 100%; 
         height: auto; 
-        border-top: 2px solid #333; /* Pemisah jelas */
+        border-top: 2px solid #333; 
         border-left: none;
         padding: 20px;
         background: #0a0a0a; 
-        order: 2; /* Pastikan dia di urutan kedua */
+        order: 2; 
     }
 
-    /* Penyesuaian Header Mobile */
-    #posHeader {
-        padding: 0 15px; 
-    }
-    .pos-status { display: none; } /* Sembunyikan status biar muat */
-    
-    /* Jam sedikit dikecilkan */
+    #posHeader { padding: 0 15px; }
+    .pos-status { display: none; } 
     #clockDisplay { font-size: 12px; } 
 
-    /* Modal Pembayaran agar tidak melebar keluar layar */
     .pos-modal-content {
         width: 90%; 
         padding: 20px;
