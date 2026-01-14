@@ -364,61 +364,69 @@ function processEmailSend() {
 function newTransaction() { closeModal(); clearCart(); }
 
 // --- 7. FUNGSI PRINT PDF (VERSI RAPI & DETAIL) ---
+// --- 7. FUNGSI PRINT PDF (VERSI FINAL & PROFESSIONAL) ---
 window.printReceipt = function() {
+    // Cek Library PDF
     if (!window.jspdf) { 
         alert("Library PDF belum termuat. Cek koneksi internet."); 
         return; 
     }
     
     const { jsPDF } = window.jspdf;
-    // Ukuran kertas 80mm x Auto Height (kita set panjang 200mm dulu, nanti bisa auto)
-    const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: [80, 200] });
+    // Setup Kertas Thermal 80mm
+    const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: [80, 250] });
     
-    // Config Font
+    // Config Font Monospace (Agar Rata)
     doc.setFont("courier", "normal");
     
-    let y = 10; // Posisi vertikal awal
+    let y = 10; // Posisi Y Awal
+    const centerX = 40; // Tengah Kertas
     const lineSpacing = 5;
-    const centerX = 40; // Tengah kertas 80mm
-    
-    // --- HEADER ---
+
+    // --- 1. HEADER ---
     doc.setFontSize(12); doc.setFont(undefined, 'bold');
     doc.text("USAHADULU STUDIO", centerX, y, { align: "center" }); 
     y += lineSpacing;
     
     doc.setFontSize(8); doc.setFont(undefined, 'normal');
-    doc.text("Digital & Creative Services", centerX, y, { align: "center" });
+    doc.text("Design & Creative Services", centerX, y, { align: "center" });
+    y += 4;
+    doc.text("Dumai, Riau - Indonesia", centerX, y, { align: "center" });
     y += lineSpacing + 2;
-    
+
     doc.text("------------------------------------------", centerX, y, { align: "center" });
     y += lineSpacing;
 
-    // --- INFO DATA ---
+    // --- 2. INFO TRANSAKSI ---
     const now = new Date();
+    // Ambil Nama Klien
     const clientInput = document.getElementById('clientNameInput');
-    const clientName = (clientInput && clientInput.value) ? clientInput.value : "Guest";
-    
+    let clientName = (clientInput && clientInput.value) ? clientInput.value : "Guest";
+    // Ambil ID Transaksi (Generate random pendek kalau belum ada)
+    const trxId = "TRX-" + now.getTime().toString().slice(-6);
+
     doc.text(`Tgl   : ${now.toLocaleDateString('id-ID')}`, 5, y); y += 4;
     doc.text(`Jam   : ${now.toLocaleTimeString('id-ID')}`, 5, y); y += 4;
+    doc.text(`ID    : ${trxId}`, 5, y); y += 4;
     doc.text(`Klien : ${clientName.substring(0,25)}`, 5, y); y += 4;
-    
+
     doc.text("------------------------------------------", centerX, y, { align: "center" });
     y += lineSpacing;
 
-    // --- LIST ITEM ---
+    // --- 3. LIST ITEM ---
     doc.setFontSize(9);
     cart.forEach(item => {
-        // Nama barang
+        // Nama Barang (Potong jika kepanjangan biar rapi)
         let name = item.name;
-        if(name.length > 20) name = name.substring(0, 20) + "..";
+        if(name.length > 22) name = name.substring(0, 22) + "..";
         
         doc.text(name, 5, y);
         
-        // Harga Total per Item (Kanan)
+        // Harga Total per Item (Rata Kanan)
         doc.text(fmtIDR(item.price * item.qty), 75, y, { align: "right" }); 
         y += 4;
         
-        // Detail Qty di bawah nama
+        // Detail Qty di bawah nama (Kecil)
         doc.setFontSize(7);
         doc.text(`(x${item.qty} @ ${fmtIDR(item.price)})`, 5, y);
         doc.setFontSize(9); 
@@ -428,48 +436,61 @@ window.printReceipt = function() {
     doc.text("------------------------------------------", centerX, y, { align: "center" });
     y += lineSpacing;
 
-    // --- KALKULASI TOTAL ---
-    // Ambil nilai real dari HTML
+    // --- 4. KALKULASI TOTAL & KEUANGAN ---
+    // Ambil Angka Asli dari HTML
     const totalText = document.getElementById('totalDisplay').innerText;
     const totalVal = parseInt(totalText.replace(/[^0-9]/g, ''));
     
     const cashInput = document.getElementById('cashInput');
     const cashVal = cashInput ? (parseInt(cashInput.value) || 0) : 0;
     
+    // Hitung Sisa / Hutang
     const debt = totalVal - cashVal;
+    
+    // Tentukan Status
     let status = "LUNAS";
     if(debt > 0) status = "BELUM LUNAS (DP)";
 
+    doc.setFontSize(9);
+
+    // TOTAL TAGIHAN
     doc.setFont(undefined, 'bold');
-    doc.text("TOTAL", 5, y);
+    doc.text("TOTAL TAGIHAN", 5, y);
     doc.text(totalText, 75, y, { align: "right" }); 
     y += lineSpacing + 2;
 
+    // PEMBAYARAN
     doc.setFont(undefined, 'normal');
     doc.text(`Bayar (${paymentMethod.toUpperCase()})`, 5, y);
     doc.text(fmtIDR(cashVal), 75, y, { align: "right" });
     y += lineSpacing;
 
-    // Tampilkan Sisa / Kembalian
+    // SISA / KEMBALIAN (Logika Pintar)
     if(debt > 0) {
+        // Jika Hutang
+        doc.setFont(undefined, 'bold');
         doc.text("SISA HUTANG", 5, y);
         doc.text(fmtIDR(debt), 75, y, { align: "right" });
     } else {
+        // Jika Lunas/Kembali
         doc.text("KEMBALIAN", 5, y);
         doc.text(fmtIDR(Math.abs(debt)), 75, y, { align: "right" });
     }
     y += lineSpacing + 2;
 
-    // Status Pembayaran
+    // STATUS
     doc.setFontSize(10); doc.setFont(undefined, 'bold');
     doc.text(`STATUS: ${status}`, centerX, y, { align: "center" });
     y += lineSpacing * 2;
 
-    // --- FOOTER ---
+    // --- 5. FOOTER ---
     doc.setFontSize(8); doc.setFont(undefined, 'normal');
     doc.text("Terima Kasih!", centerX, y, { align: "center" }); y += 4;
-    doc.text("Simpan struk ini sebagai bukti.", centerX, y, { align: "center" });
+    doc.text("Barang yang dibeli tidak dapat ditukar.", centerX, y, { align: "center" });
+    y += 4;
+    doc.text("www.usahadulustudio.com", centerX, y, { align: "center" });
     
-    // Save File
-    doc.save(`Struk_Usahadulu_${Date.now()}.pdf`);
+    // --- 6. SAVE FILE ---
+    // Nama file unik berdasarkan waktu
+    doc.save(`Struk_Usahadulu_${now.getTime()}.pdf`);
 }
