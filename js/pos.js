@@ -737,6 +737,18 @@ window.showReceiptModal = function(total, paid, client) {
         </div>
     `;
 
+    const actionsDiv = modal.querySelector('.receipt-actions');
+    if(actionsDiv) {
+        actionsDiv.innerHTML = `
+            <button class="filter-btn hover-target" onclick="printReceipt()">PRINT / PDF</button>
+            <button class="filter-btn hover-target" onclick="openEmailModal()" style="border-color:#2ed573; color:#2ed573;">RECEIPT TO EMAIL</button>
+            <button class="filter-btn hover-target" onclick="newTransaction()">NEW ORDER</button>
+        `;
+    }
+
+    modal.classList.add('show');
+}
+
     // Pastikan tombol-tombol action ada
     const actionsDiv = modal.querySelector('.receipt-actions');
     if(actionsDiv) {
