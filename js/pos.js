@@ -21,28 +21,39 @@ let transactionHistory = JSON.parse(localStorage.getItem('usahadulu_sales')) || 
 
 const fmtIDR = (num) => "Rp " + num.toLocaleString('id-ID');
 
-// --- 2. JAM & INIT ---
+// --- 2. JAM & INIT (UPDATED) ---
 function startClock() {
     function update() {
         const now = new Date();
+        
+        // 1. Update Jam Kecil di Header
         const timeString = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute:'2-digit' });
         const clockEl = document.getElementById('clockDisplay');
         if(clockEl) clockEl.innerText = timeString;
+
+        // 2. Update Jam Besar di Modal (Dengan Detik)
+        const bigTimeEl = document.getElementById('modalBigTime');
+        const fullDateEl = document.getElementById('modalFullDate');
+        
+        if(bigTimeEl) {
+            // Format: 10:30:45
+            bigTimeEl.innerText = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute:'2-digit', second:'2-digit' }).replace(/\./g, ':');
+        }
+        
+        if(fullDateEl) {
+            // Format: KAMIS, 15 JANUARI 2026
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            fullDateEl.innerText = now.toLocaleDateString('id-ID', options).toUpperCase();
+        }
     }
     update(); setInterval(update, 1000); 
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    startClock();
-    filterProducts('all'); 
-    const searchInput = document.getElementById('searchProduct');
-    if(searchInput) {
-        searchInput.addEventListener('input', (e) => {
-            const keyword = e.target.value.toLowerCase();
-            renderGrid(products.filter(p => p.name.toLowerCase().includes(keyword)));
-        });
-    }
-});
+// Tambahkan fungsi ini di bawah startClock atau di area fungsi modal lainnya
+function openClockModal() {
+    const modal = document.getElementById('clockModal');
+    if(modal) modal.classList.add('show');
+}
 
 // --- 3. LOGIKA PRODUK & CART ---
 function filterProducts(cat) {
