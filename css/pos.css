@@ -35,17 +35,18 @@ body {
 .status-dot { width: 8px; height: 8px; background: var(--accent-green); border-radius: 50%; box-shadow: 0 0 5px var(--accent-green); }
 .header-right { display: flex; align-items: center; gap: 20px; color: #fff; font-family: monospace; font-size: 14px;}
 
-/* Tambahkan ini di bagian HEADER KHUSUS POS atau di paling bawah css */
-
+/* STYLE JAM DI HEADER (HOVER EFFECT) */
 #clockDisplay {
-    transition: color 0.3s ease;
+    transition: all 0.3s ease;
     padding: 5px 10px;
-    border-radius: 5px;
+    border-radius: 8px;
+    font-weight: bold;
 }
 
 #clockDisplay:hover {
     background-color: rgba(255, 255, 255, 0.1);
-    color: var(--accent-green); /* Warna hijau tema */
+    color: var(--accent-green); 
+    box-shadow: 0 0 10px rgba(46, 213, 115, 0.2);
 }
 
 /* --- LAYOUT UTAMA --- */
@@ -177,7 +178,7 @@ body {
     letter-spacing: 2px;
 }
 
-/* --- MODAL PEMBAYARAN (FIX SUDUT TUMPUL & TOMBOL X) --- */
+/* --- MODAL PEMBAYARAN & LAINNYA --- */
 .pos-modal-content {
     background: #111; 
     border: 1px solid #fff; 
