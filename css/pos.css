@@ -363,7 +363,7 @@ body {
     border-radius: 50%;
     position: fixed;
     pointer-events: none; 
-    z-index: 9999;
+    z-index: 10000;
     
     /* PENTING: Gunakan transform hanya untuk posisi (translate) agar ringan */
     transform: translate(-50%, -50%);
@@ -397,4 +397,44 @@ body {
 @media (max-width: 768px) {
     #cursor { display: none !important; }
     body, a, button, input { cursor: auto !important; }
+}
+
+/* --- SECURITY OVERLAY STYLES --- */
+.security-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(5, 5, 5, 0.85); /* Latar gelap transparan */
+    backdrop-filter: blur(15px);      /* Efek Blur Kuat */
+    z-index: 9999;                    /* Paling Depan */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+    /* Animasi Smooth */
+    opacity: 1;
+    visibility: visible;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Class untuk menyembunyikan overlay saat sukses */
+.security-overlay.unlocked {
+    opacity: 0;
+    visibility: hidden;
+    backdrop-filter: blur(0px); /* Blur hilang perlahan */
+    transform: scale(1.1);      /* Efek zoom sedikit saat hilang */
+}
+
+/* Animasi Guncang (Shake) saat salah password */
+.shake-anim {
+    animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+@keyframes shake {
+    10%, 90% { transform: translate3d(-1px, 0, 0); }
+    20%, 80% { transform: translate3d(2px, 0, 0); }
+    30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+    40%, 60% { transform: translate3d(4px, 0, 0); }
 }
