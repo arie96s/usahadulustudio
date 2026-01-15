@@ -340,48 +340,47 @@ body {
     transform: translateY(-7px) rotate(-45deg);
 }
 
-/* --- CUSTOM CURSOR STYLES --- */
+/* --- CUSTOM CURSOR STYLES (FIXED SHARPNESS) --- */
 #cursor {
     width: 20px;
     height: 20px;
-    border: 1px solid #fff; /* Warna lingkaran kursor */
-    background-color: rgba(255, 255, 255, 0.1); /* Sedikit transparan di tengah */
+    border: 1px solid #fff; 
+    background-color: rgba(255, 255, 255, 0.1); 
     border-radius: 50%;
     position: fixed;
-    pointer-events: none; /* PENTING: Agar klik tembus ke tombol di bawahnya */
+    pointer-events: none; 
     z-index: 9999;
+    
+    /* PENTING: Gunakan transform hanya untuk posisi (translate) agar ringan */
     transform: translate(-50%, -50%);
-    transition: transform 0.1s ease, background-color 0.2s;
-    mix-blend-mode: difference; /* Efek keren agar kontras dengan background */
-    display: none; /* Sembunyikan dulu secara default */
+    
+    /* FIX: Transisi width/height agar membesar halus, bukan scale */
+    transition: 
+        width 0.3s cubic-bezier(0.19, 1, 0.22, 1), 
+        height 0.3s cubic-bezier(0.19, 1, 0.22, 1),
+        background-color 0.2s;
+        
+    mix-blend-mode: difference; 
+    display: none; 
 }
 
-/* Efek saat hover elemen yang bisa diklik */
+/* Efek saat hover: Membesar dengan mengubah dimensi asli (bukan scale) */
 #cursor.active {
-    transform: translate(-50%, -50%) scale(2.5);
-    background-color: rgba(255, 255, 255, 1);
-    border-color: transparent;
+    width: 50px;  /* Ubah ukuran fisik agar border tetap tajam 1px */
+    height: 50px;
+    background-color: rgba(255, 255, 255, 1); /* Jadi putih solid */
+    border-color: transparent; /* Hilangkan border saat mode solid */
     mix-blend-mode: normal;
     opacity: 0.5;
 }
 
-/* Tampilkan hanya di Desktop (Layar > 768px) */
+/* Tampilkan hanya di Desktop */
 @media (min-width: 769px) {
-    #cursor {
-        display: block;
-    }
-    /* Sembunyikan kursor bawaan sistem */
-    body, a, button, input, .pos-card, .hover-target {
-        cursor: none !important;
-    }
+    #cursor { display: block; }
+    body, a, button, input, .pos-card, .hover-target { cursor: none !important; }
 }
 
-/* Sembunyikan custom cursor di HP agar tidak mengganggu */
 @media (max-width: 768px) {
-    #cursor {
-        display: none !important;
-    }
-    body, a, button, input {
-        cursor: auto !important;
-    }
+    #cursor { display: none !important; }
+    body, a, button, input { cursor: auto !important; }
 }
