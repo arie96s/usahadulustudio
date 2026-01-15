@@ -21,27 +21,18 @@ let transactionHistory = JSON.parse(localStorage.getItem('usahadulu_sales')) || 
 let globalDiscount = 0; // Variabel Wajib untuk fitur Diskon
 const fmtIDR = (num) => "Rp " + num.toLocaleString('id-ID');
 
-// --- 2. JAM & MODAL WAKTU (UPDATED) ---
+// --- 2. JAM & MODAL WAKTU ---
 function startClock() {
     function update() {
         const now = new Date();
-        
-        // 1. Update Jam Kecil di Header
-        const timeString = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute:'2-digit' });
         const clockEl = document.getElementById('clockDisplay');
-        if(clockEl) clockEl.innerText = timeString;
+        if(clockEl) clockEl.innerText = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute:'2-digit' });
 
-        // 2. Update Jam Besar di Modal (Dengan Detik)
         const bigTimeEl = document.getElementById('modalBigTime');
         const fullDateEl = document.getElementById('modalFullDate');
         
-        if(bigTimeEl) {
-            // Format: 10:30:45
-            bigTimeEl.innerText = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute:'2-digit', second:'2-digit' }).replace(/\./g, ':');
-        }
-        
+        if(bigTimeEl) bigTimeEl.innerText = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute:'2-digit', second:'2-digit' }).replace(/\./g, ':');
         if(fullDateEl) {
-            // Format: KAMIS, 15 JANUARI 2026
             const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
             fullDateEl.innerText = now.toLocaleDateString('id-ID', options).toUpperCase();
         }
@@ -49,7 +40,6 @@ function startClock() {
     update(); setInterval(update, 1000); 
 }
 
-// Fungsi Buka Modal Jam
 function openClockModal() {
     const modal = document.getElementById('clockModal');
     if(modal) modal.classList.add('show');
@@ -102,17 +92,13 @@ function updateCartUI() {
     if(!container) return; container.innerHTML = '';
     let subtotal = 0;
     
-    // 1. Render List Item
     if(cart.length === 0) {
         container.innerHTML = '<div class="empty-cart-state"><p>Keranjang Kosong</p></div>';
-        globalDiscount = 0; // Reset diskon jika keranjang kosong
+        globalDiscount = 0; 
     } else {
         cart.forEach(item => {
             subtotal += item.price * item.qty;
-            
-            // Cek note (jika nanti dipakai)
             let noteHtml = item.note ? `<div style="font-size:9px; color:#2ed573; font-style:italic;">✎ ${item.note}</div>` : '';
-
             container.innerHTML += `
             <div class="cart-item">
                 <div class="cart-info">
@@ -129,24 +115,18 @@ function updateCartUI() {
         });
     }
 
-    // 2. Logika Hitungan (Pajak 0% & Diskon)
-    const tax = 0; // PAJAK MATI (0%)
-    
-    // Validasi: Diskon tidak boleh lebih besar dari subtotal
+    const tax = 0; // PAJAK 0%
     if(globalDiscount > subtotal) globalDiscount = subtotal;
-    
     const total = (subtotal + tax) - globalDiscount;
     
-    // 3. Update Tampilan Angka
     const elSub = document.getElementById('subtotalDisplay');
     const elDisc = document.getElementById('discountDisplay');
     const elTot = document.getElementById('totalDisplay');
-    const elModTot = document.getElementById('modalTotalDisplay'); // Total di modal bayar
+    const elModTot = document.getElementById('modalTotalDisplay');
     const rowDisc = document.getElementById('discountRow');
 
     if(elSub) elSub.innerText = fmtIDR(subtotal);
     
-    // Tampilkan baris diskon HANYA jika ada diskon
     if(globalDiscount > 0) {
         if(rowDisc) rowDisc.style.display = 'flex';
         if(elDisc) elDisc.innerText = "- " + fmtIDR(globalDiscount);
@@ -159,39 +139,27 @@ function updateCartUI() {
 }
 
 // --- UPDATE FITUR DISKON DENGAN PASSWORD ---
-
-// 1. Definisikan Sandinya (Taruh di luar fungsi atau di bagian atas file)
 const DISCOUNT_PIN = "HH666"; 
 
 function inputGlobalDiscount() {
-    // Cek keranjang dulu
-    if(cart.length === 0) return alert("Keranjang kosong, mau diskon apa?");
-
-    // 2. Minta Password Dulu
+    if(cart.length === 0) return alert("Keranjang kosong!");
     const pin = prompt("SECURE ACCESS REQUIRED.\nMasukkan Sandi Otoritas:");
 
-    // 3. Cek apakah sandi benar?
-    if (pin !== DISCOUNT_PIN) {
-        // Kalau salah, tolak dengan tegas (Suara "Bip" Error kalau bisa)
-        return alert("ACCESS DENIED! Sandi Salah.");
-    }
+    if (pin !== DISCOUNT_PIN) return alert("ACCESS DENIED! Sandi Salah.");
 
-    // 4. Kalau Benar (HH666), Lanjut Input Nominal
     const input = prompt("ACCESS GRANTED: HOMIE HOOKUP.\nMasukkan Nominal Potongan (Rp):", globalDiscount || 0);
     
     if(input !== null) {
         const val = parseInt(input.replace(/[^0-9]/g, ''));
-        
         if(!isNaN(val)) {
             globalDiscount = val;
-            updateCartUI(); // Refresh hitungan
+            updateCartUI(); 
         } else {
-            alert("Input angka woy!");
+            alert("Input harus angka!");
         }
     }
 }
 
-// Fungsi dummy untuk note (agar tidak error jika diklik)
 function addItemNote(id) {
     const item = cart.find(i => i.id === id);
     if(item) {
@@ -200,11 +168,10 @@ function addItemNote(id) {
     }
 }
 
-// --- 4. LOGIKA PEMBAYARAN (DP & LUNAS) ---
-
+// --- 4. LOGIKA PEMBAYARAN ---
 function openPaymentModal() {
     if(cart.length === 0) { alert("Keranjang kosong!"); return; }
-    setPaymentType('full'); // Default ke Lunas saat dibuka
+    setPaymentType('full'); 
     document.getElementById('paymentModal').classList.add('show');
 }
 
@@ -212,8 +179,6 @@ function closeModal() { document.querySelectorAll('.modal').forEach(m => m.class
 
 function setPaymentType(type) {
     isDpMode = (type === 'dp');
-    
-    // Update UI Tombol
     const btnFull = document.getElementById('btnFull');
     const btnDp = document.getElementById('btnDp');
     if(btnFull && btnDp) {
@@ -221,7 +186,6 @@ function setPaymentType(type) {
         btnDp.className = isDpMode ? 'type-btn active' : 'type-btn';
     }
 
-    // Update Label & Input
     const label = document.getElementById('inputLabel');
     if(label) label.innerText = isDpMode ? "Nominal DP (Masuk)" : "Nominal Diterima";
     
@@ -231,7 +195,6 @@ function setPaymentType(type) {
         cashInput.placeholder = isDpMode ? "Masukkan DP..." : "Rp 0";
     }
     
-    // Update Visibility Input
     const cashGroup = document.getElementById('cashInputGroup');
     if(cashGroup) cashGroup.style.display = (isDpMode || paymentMethod === 'cash') ? 'block' : 'none';
 
@@ -246,13 +209,11 @@ function selectMethod(method) {
     const cashGroup = document.getElementById('cashInputGroup');
     const cashInput = document.getElementById('cashInput');
 
-    // Logika Tampilan Input
     if(isDpMode || method === 'cash') {
         if(cashGroup) cashGroup.style.display = 'block';
         if(cashInput && method === 'cash' && !isDpMode) cashInput.focus();
     } else {
         if(cashGroup) cashGroup.style.display = 'none';
-        // Auto fill jika transfer lunas
         const totalText = document.getElementById('totalDisplay').innerText;
         const total = parseInt(totalText.replace(/[^0-9]/g, ''));
         if(cashInput) cashInput.value = total;
@@ -302,7 +263,6 @@ function processTransaction() {
     const clientInput = document.getElementById('clientNameInput');
     const clientName = (clientInput && clientInput.value) ? clientInput.value : "Guest";
 
-    // Validasi
     if(isDpMode) {
         if(cash <= 0) { alert("Nominal DP minimal 1 rupiah."); return; }
         if(cash >= total && !confirm("Nominal DP lunas. Ubah jadi Transaksi LUNAS?")) return;
@@ -316,7 +276,6 @@ function processTransaction() {
 }
 
 // --- 5. HISTORY & EXCEL ---
-
 function saveTransactionToHistory(total, paid, client) {
     let status = (paid < total) ? 'DP / PARTIAL' : 'LUNAS';
     let debt = (paid < total) ? (total - paid) : 0;
@@ -344,9 +303,8 @@ function updateAdminUI() {
     list.innerHTML = '';
     let rev = 0, cash = 0, digi = 0;
     
-    // Loop history dari belakang (terbaru)
     [...transactionHistory].reverse().forEach(trx => {
-        rev += trx.paid; // Omzet berdasarkan uang masuk
+        rev += trx.paid;
         if(trx.method === 'cash') cash += trx.paid; else digi += trx.paid;
         
         const d = new Date(trx.date);
@@ -398,21 +356,36 @@ function downloadExcel() {
     link.click();
 }
 
-// --- 6. STRUK (EMAIL, PRINT, RESET) ---
+// --- KEMBALI KE VERSI STRUK TEKS DIGITAL (AUTO GENERATE) ---
 
 function showReceiptModal(total, paid, client) {
     const modal = document.getElementById('receiptModal');
     const preview = document.getElementById('receiptPreview');
     if(!modal || !preview) return;
 
+    // 1. Hitung Status Pembayaran
     const debt = total - paid;
     const statusLabel = debt > 0 ? "BELUM LUNAS (DP)" : "LUNAS";
     const sisaLabel = debt > 0 ? "SISA HUTANG" : "KEMBALIAN";
     const sisaValue = debt > 0 ? debt : Math.abs(debt);
     const sisaColor = debt > 0 ? '#ff4757' : '#2ed573';
     
-    let itemsHtml = cart.map(item => `<div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>${item.name} <span style="font-size:10px;">(x${item.qty})</span></span><span>${fmtIDR(item.price * item.qty)}</span></div>`).join('');
+    // 2. Buat Daftar Item (HTML)
+    let itemsHtml = cart.map(item => `
+        <div style="border-bottom: 1px dashed #ddd; padding: 5px 0; margin-bottom: 5px;">
+            <div style="display:flex; justify-content:space-between;">
+                <span>${item.name} <span style="font-size:10px;">(x${item.qty})</span></span>
+                <span>${fmtIDR(item.price * item.qty)}</span>
+            </div>
+            ${item.note ? `<div style="font-size:9px; color:#666; font-style:italic;">Note: ${item.note}</div>` : ''}
+        </div>
+    `).join('');
 
+    // 3. Hitung Subtotal Asli (Sebelum Diskon)
+    // Ingat: 'total' yang masuk ke sini adalah total akhir setelah diskon
+    const subtotalAsli = total + globalDiscount;
+
+    // 4. Render HTML Struk
     preview.innerHTML = `
         <div style="text-align:center; border-bottom:1px dashed #000; padding-bottom:10px; margin-bottom:10px;">
             <strong>USAHADULU STUDIO</strong><br>
@@ -420,12 +393,28 @@ function showReceiptModal(total, paid, client) {
             <span style="font-size:10px;">${new Date().toLocaleString('id-ID')}</span><br>
             <span style="font-size:10px;">Klien: ${client.toUpperCase()}</span>
         </div>
-        ${itemsHtml}
+        
+        <div style="text-align:left; font-family:'Courier New', monospace; font-size:12px;">
+            ${itemsHtml}
+        </div>
+
         <div style="border-top:1px dashed #000; margin-top:10px; padding-top:10px;">
-            <div style="display:flex; justify-content:space-between; font-weight:bold;">
+            <div style="display:flex; justify-content:space-between; font-size:11px;">
+                <span>Subtotal</span>
+                <span>${fmtIDR(subtotalAsli)}</span>
+            </div>
+
+            ${globalDiscount > 0 ? `
+            <div style="display:flex; justify-content:space-between; font-size:11px; color:#ff4757;">
+                <span>HOMIE HOOKUP (Disc)</span>
+                <span>-${fmtIDR(globalDiscount)}</span>
+            </div>` : ''}
+
+            <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:14px; margin-top:5px; border-top:1px solid #eee; padding-top:5px;">
                 <span>TOTAL TAGIHAN</span>
                 <span>${fmtIDR(total)}</span>
             </div>
+
             <div style="display:flex; justify-content:space-between; font-size:11px; margin-top:5px;">
                 <span>BAYAR (${paymentMethod.toUpperCase()})</span>
                 <span>${fmtIDR(paid)}</span>
@@ -440,12 +429,13 @@ function showReceiptModal(total, paid, client) {
                 STATUS: ${statusLabel}
             </div>
         </div>
+        
         <div style="text-align:center; margin-top:20px; font-size:10px;">
             TERIMA KASIH!<br>KEEP THE RECEIPTS.
         </div>
     `;
 
-    // INJECT TOMBOL EMAIL & PDF
+    // 5. Inject Tombol Aksi
     const actionsDiv = modal.querySelector('.receipt-actions');
     if(actionsDiv) {
         actionsDiv.innerHTML = `
@@ -472,35 +462,25 @@ function processEmailSend() {
 
 function newTransaction() { closeModal(); clearCart(); }
 
-// --- 7. FUNGSI PRINT PDF (VERSI FINAL & PROFESSIONAL) ---
+// --- 7. FUNGSI PRINT PDF (Dengan Diskon & Notes) ---
 window.printReceipt = function() {
-    if (!window.jspdf) { 
-        alert("Library PDF belum termuat. Cek koneksi internet."); 
-        return; 
-    }
+    if (!window.jspdf) { return alert("Library PDF belum termuat."); }
     
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: [80, 250] });
     
     doc.setFont("courier", "normal");
-    
     let y = 10; 
     const centerX = 40; 
     const lineSpacing = 5;
 
     // HEADER
     doc.setFontSize(12); doc.setFont(undefined, 'bold');
-    doc.text("USAHADULU STUDIO", centerX, y, { align: "center" }); 
-    y += lineSpacing;
-    
+    doc.text("USAHADULU STUDIO", centerX, y, { align: "center" }); y += lineSpacing;
     doc.setFontSize(8); doc.setFont(undefined, 'normal');
-    doc.text("Design & Creative Services", centerX, y, { align: "center" });
-    y += 4;
-    doc.text("Dumai, Riau - Indonesia", centerX, y, { align: "center" });
-    y += lineSpacing + 2;
-
-    doc.text("------------------------------------------", centerX, y, { align: "center" });
-    y += lineSpacing;
+    doc.text("Design & Creative Services", centerX, y, { align: "center" }); y += 4;
+    doc.text("Dumai, Riau - Indonesia", centerX, y, { align: "center" }); y += lineSpacing + 2;
+    doc.text("------------------------------------------", centerX, y, { align: "center" }); y += lineSpacing;
 
     // INFO
     const now = new Date();
@@ -512,9 +492,7 @@ window.printReceipt = function() {
     doc.text(`Jam   : ${now.toLocaleTimeString('id-ID')}`, 5, y); y += 4;
     doc.text(`ID    : ${trxId}`, 5, y); y += 4;
     doc.text(`Klien : ${clientName.substring(0,25)}`, 5, y); y += 4;
-
-    doc.text("------------------------------------------", centerX, y, { align: "center" });
-    y += lineSpacing;
+    doc.text("------------------------------------------", centerX, y, { align: "center" }); y += lineSpacing;
 
     // LIST ITEM
     doc.setFontSize(9);
@@ -524,62 +502,52 @@ window.printReceipt = function() {
         doc.text(name, 5, y);
         doc.text(fmtIDR(item.price * item.qty), 75, y, { align: "right" }); 
         y += 4;
+        
+        if(item.note) {
+            doc.setFont("courier", "italic"); doc.setFontSize(7);
+            doc.text(`Note: ${item.note.substring(0,35)}`, 5, y);
+            doc.setFont("courier", "normal"); doc.setFontSize(9);
+            y += 3;
+        }
+        
         doc.setFontSize(7);
         doc.text(`(x${item.qty} @ ${fmtIDR(item.price)})`, 5, y);
         doc.setFontSize(9); 
         y += 5; 
     });
 
-    doc.text("------------------------------------------", centerX, y, { align: "center" });
-    y += lineSpacing;
+    doc.text("------------------------------------------", centerX, y, { align: "center" }); y += lineSpacing;
 
-    // --- 1. Ambil Angka Total Akhir dari Layar ---
+    // CALCULATIONS
     const totalText = document.getElementById('totalDisplay').innerText;
-    const totalVal = parseInt(totalText.replace(/[^0-9]/g, '')); // Misal: 80000
-
-    // --- 2. Hitung Mundur Subtotal Asli ---
-    // (Total Akhir + Diskon = Harga Asli sebelum dipotong)
+    const totalVal = parseInt(totalText.replace(/[^0-9]/g, ''));
     const subtotalAsli = totalVal + globalDiscount; 
 
-    // --- 3. Tampilkan Subtotal Asli ---
-    doc.setFontSize(9);
-    doc.setFont(undefined, 'normal');
+    doc.setFontSize(9); doc.setFont(undefined, 'normal');
     doc.text("Subtotal", 5, y);
     doc.text(fmtIDR(subtotalAsli), 75, y, { align: "right" }); 
     y += lineSpacing;
 
-    // --- 4. Tampilkan HOMIE HOOKUP (Jika ada diskon) ---
     if(globalDiscount > 0) {
-        // Opsional: Bikin warna merah biar kelihatan jelas
-        // doc.setTextColor(255, 0, 0); 
-        
         doc.text("HOMIE HOOKUP (Disc)", 5, y);
         doc.text("-" + fmtIDR(globalDiscount), 75, y, { align: "right" });
-        
-        // doc.setTextColor(0, 0, 0); // Balikin warna hitam
         y += lineSpacing;
     }
 
-    y += 2; // Kasih jarak dikit
-
-    // --- 5. Tampilkan Total Tagihan (Final) ---
+    y += 2;
     doc.setFont(undefined, 'bold');
     doc.text("TOTAL TAGIHAN", 5, y);
     doc.text(totalText, 75, y, { align: "right" }); 
     y += lineSpacing + 2;
 
-    // --- 6. Info Pembayaran (Cash/Kembalian/Hutang) ---
     const cashInput = document.getElementById('cashInput');
     const cashVal = cashInput ? (parseInt(cashInput.value) || 0) : 0;
-    
-    // Hitung sisa/hutang berdasarkan Total Akhir (yg sudah didiskon)
     const debt = totalVal - cashVal;
     let status = (debt > 0) ? "BELUM LUNAS (DP)" : "LUNAS";
 
     doc.setFont(undefined, 'normal');
     doc.text(`Bayar (${paymentMethod.toUpperCase()})`, 5, y);
-    doc.text(fmtIDR(cashVal), 75, y, { align: "right" });
-    y += lineSpacing;
+    doc.text(fmtIDR(cashVal), 75, y, { align: "right" }); y += lineSpacing;
 
     if(debt > 0) {
         doc.setFont(undefined, 'bold');
@@ -598,17 +566,13 @@ window.printReceipt = function() {
     // FOOTER
     doc.setFontSize(8); doc.setFont(undefined, 'normal');
     doc.text("Terima Kasih!", centerX, y, { align: "center" }); y += 4;
-    doc.text("Barang yang dibeli tidak dapat ditukar.", centerX, y, { align: "center" });
-    y += 4;
     doc.text("www.usahadulustudio.com", centerX, y, { align: "center" });
-    
     doc.save(`Struk_Usahadulu_${now.getTime()}.pdf`);
 }
 
 // TOGGLE MENU
 const menuBtn = document.getElementById('menuBtn');
 const navOverlay = document.getElementById('navOverlay');
-
 if(menuBtn && navOverlay) {
     menuBtn.addEventListener('click', () => {
         menuBtn.classList.toggle('active');
@@ -616,7 +580,7 @@ if(menuBtn && navOverlay) {
     });
 }
 
-// FIX: PRELOADER FADE OUT
+// PRELOADER
 window.addEventListener('load', () => {
     const preloader = document.getElementById('preloader');
     if (preloader) {
@@ -626,9 +590,45 @@ window.addEventListener('load', () => {
     }
 });
 
-// --- 9. CUSTOM CURSOR & INIT ---
+// --- 8. GLOBAL SECURITY & INIT ---
+const ACCESS_PIN = "DMI666"; 
+
+function checkSecurityPin() {
+    const input = document.getElementById('securityPinInput');
+    const overlay = document.getElementById('securityOverlay');
+    if(!input || !overlay) return; 
+    
+    if (input.value === ACCESS_PIN) {
+        input.style.borderColor = "#2ed573";
+        input.style.color = "#2ed573";
+        overlay.classList.add('unlocked');
+    } else {
+        const modalContent = overlay.querySelector('.modal-content');
+        input.style.borderColor = "#ff4757";
+        input.value = "";
+        input.placeholder = "PIN SALAH!";
+        modalContent.classList.add('shake-anim');
+        setTimeout(() => {
+            modalContent.classList.remove('shake-anim');
+            input.placeholder = "Enter PIN";
+            input.style.borderColor = "#333";
+        }, 500);
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Init Custom Cursor
+    // Init Enter Key Security
+    const pinInput = document.getElementById('securityPinInput');
+    if(pinInput) {
+        pinInput.addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                checkSecurityPin();
+            }
+        });
+    }
+
+    // Init Custom Cursor
     const cursor = document.getElementById('cursor');
     const hoverTargets = document.querySelectorAll('a, button, .hover-target, .pos-card, input, .history-item');
 
@@ -645,58 +645,10 @@ document.addEventListener('DOMContentLoaded', () => {
             el.addEventListener('mouseleave', () => cursor.classList.remove('active'));
         });
 
-        // --- FITUR KEAMANAN (SECURITY PIN) ---
-    const ACCESS_PIN = "DMI666"; // Sandi Rahasia
-
-function checkSecurityPin() {
-    const input = document.getElementById('securityPinInput');
-    const overlay = document.getElementById('securityOverlay');
-    const modalContent = overlay.querySelector('.modal-content');
-
-    if (input.value === ACCESS_PIN) {
-        // JIKA BENAR:
-        // 1. Putar suara sukses (opsional, visual saja cukup)
-        input.style.borderColor = "#2ed573"; // Hijau
-        input.style.color = "#2ed573";
-        
-        // 2. Fade Out Overlay
-        overlay.classList.add('unlocked');
-        
-        // 3. Simpan sesi (opsional: agar tidak tanya lagi saat refresh)
-        // sessionStorage.setItem('is_logged_in', true); 
-
-    } else {
-        // JIKA SALAH:
-        // 1. Efek Merah & Guncang
-        input.style.borderColor = "#ff4757";
-        input.value = ""; // Kosongkan input
-        input.placeholder = "PIN SALAH!";
-        
-        // 2. Tambah animasi shake
-        modalContent.classList.add('shake-anim');
-        
-        // 3. Hapus kelas shake setelah animasi selesai agar bisa diguncang lagi
-        setTimeout(() => {
-            modalContent.classList.remove('shake-anim');
-            input.placeholder = "Enter PIN";
-            input.style.borderColor = "#333";
-        }, 500);
-    }
-}
-
-// Fitur Tekan Enter untuk Login
-document.getElementById('securityPinInput').addEventListener("keypress", function(event) {
-    if (event.key === "Enter") {
-        event.preventDefault();
-        checkSecurityPin();
-    }
-});
-
-        // Observer untuk elemen dinamis
         const observer = new MutationObserver((mutations) => {
             document.querySelectorAll('button, .hover-target').forEach(el => {
-                el.addEventListener('mouseenter', () => cursor.classList.add('active'));
-                el.addEventListener('mouseleave', () => cursor.classList.remove('active'));
+                el.onmouseenter = () => cursor.classList.add('active');
+                el.onmouseleave = () => cursor.classList.remove('active');
             });
         });
         observer.observe(document.body, { childList: true, subtree: true });
@@ -704,7 +656,7 @@ document.getElementById('securityPinInput').addEventListener("keypress", functio
         cursor.style.display = 'block';
     }
 
-    // 2. Init Main Functions
+    // Start App
     startClock();
     filterProducts('all');
     updateCartUI();
