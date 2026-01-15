@@ -1,4 +1,4 @@
-// js/pos.js - FINAL MERGED VERSION (All Features Active)
+// js/pos.js - FINAL FIXED VERSION (Clean & Working)
 
 // --- 1. DATA PRODUK & VARIABEL GLOBAL ---
 const products = [
@@ -21,7 +21,7 @@ let transactionHistory = JSON.parse(localStorage.getItem('usahadulu_sales')) || 
 
 const fmtIDR = (num) => "Rp " + num.toLocaleString('id-ID');
 
-// --- 2. JAM & INIT (UPDATED) ---
+// --- 2. JAM & MODAL WAKTU (UPDATED) ---
 function startClock() {
     function update() {
         const now = new Date();
@@ -49,7 +49,7 @@ function startClock() {
     update(); setInterval(update, 1000); 
 }
 
-// Tambahkan fungsi ini di bawah startClock atau di area fungsi modal lainnya
+// Fungsi Buka Modal Jam
 function openClockModal() {
     const modal = document.getElementById('clockModal');
     if(modal) modal.classList.add('show');
@@ -121,7 +121,6 @@ function updateCartUI() {
 
 // --- 4. LOGIKA PEMBAYARAN (DP & LUNAS) ---
 
-// Membuka Modal
 function openPaymentModal() {
     if(cart.length === 0) { alert("Keranjang kosong!"); return; }
     setPaymentType('full'); // Default ke Lunas saat dibuka
@@ -130,7 +129,6 @@ function openPaymentModal() {
 
 function closeModal() { document.querySelectorAll('.modal').forEach(m => m.classList.remove('show')); }
 
-// Ganti Mode Lunas / DP
 function setPaymentType(type) {
     isDpMode = (type === 'dp');
     
@@ -326,14 +324,11 @@ function showReceiptModal(total, paid, client) {
     const preview = document.getElementById('receiptPreview');
     if(!modal || !preview) return;
 
-    // LOGIKA LABEL DINAMIS (DIPERBAIKI)
     const debt = total - paid;
     const statusLabel = debt > 0 ? "BELUM LUNAS (DP)" : "LUNAS";
-    
-    // Jika ada hutang, labelnya "SISA HUTANG". Jika lunas/kembali, labelnya "KEMBALIAN"
     const sisaLabel = debt > 0 ? "SISA HUTANG" : "KEMBALIAN";
-    const sisaValue = debt > 0 ? debt : Math.abs(debt); // Hilangkan tanda minus untuk kembalian
-    const sisaColor = debt > 0 ? '#ff4757' : '#2ed573'; // Merah jika hutang, Hijau jika lunas
+    const sisaValue = debt > 0 ? debt : Math.abs(debt);
+    const sisaColor = debt > 0 ? '#ff4757' : '#2ed573';
     
     let itemsHtml = cart.map(item => `<div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>${item.name} <span style="font-size:10px;">(x${item.qty})</span></span><span>${fmtIDR(item.price * item.qty)}</span></div>`).join('');
 
@@ -398,24 +393,21 @@ function newTransaction() { closeModal(); clearCart(); }
 
 // --- 7. FUNGSI PRINT PDF (VERSI FINAL & PROFESSIONAL) ---
 window.printReceipt = function() {
-    // Cek Library PDF
     if (!window.jspdf) { 
         alert("Library PDF belum termuat. Cek koneksi internet."); 
         return; 
     }
     
     const { jsPDF } = window.jspdf;
-    // Setup Kertas Thermal 80mm
     const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: [80, 250] });
     
-    // Config Font Monospace (Agar Rata)
     doc.setFont("courier", "normal");
     
-    let y = 10; // Posisi Y Awal
-    const centerX = 40; // Tengah Kertas
+    let y = 10; 
+    const centerX = 40; 
     const lineSpacing = 5;
 
-    // --- 1. HEADER ---
+    // HEADER
     doc.setFontSize(12); doc.setFont(undefined, 'bold');
     doc.text("USAHADULU STUDIO", centerX, y, { align: "center" }); 
     y += lineSpacing;
@@ -429,12 +421,10 @@ window.printReceipt = function() {
     doc.text("------------------------------------------", centerX, y, { align: "center" });
     y += lineSpacing;
 
-    // --- 2. INFO TRANSAKSI ---
+    // INFO
     const now = new Date();
-    // Ambil Nama Klien
     const clientInput = document.getElementById('clientNameInput');
     let clientName = (clientInput && clientInput.value) ? clientInput.value : "Guest";
-    // Ambil ID Transaksi (Generate random pendek kalau belum ada)
     const trxId = "TRX-" + now.getTime().toString().slice(-6);
 
     doc.text(`Tgl   : ${now.toLocaleDateString('id-ID')}`, 5, y); y += 4;
@@ -445,20 +435,14 @@ window.printReceipt = function() {
     doc.text("------------------------------------------", centerX, y, { align: "center" });
     y += lineSpacing;
 
-    // --- 3. LIST ITEM ---
+    // LIST ITEM
     doc.setFontSize(9);
     cart.forEach(item => {
-        // Nama Barang (Potong jika kepanjangan biar rapi)
         let name = item.name;
         if(name.length > 22) name = name.substring(0, 22) + "..";
-        
         doc.text(name, 5, y);
-        
-        // Harga Total per Item (Rata Kanan)
         doc.text(fmtIDR(item.price * item.qty), 75, y, { align: "right" }); 
         y += 4;
-        
-        // Detail Qty di bawah nama (Kecil)
         doc.setFontSize(7);
         doc.text(`(x${item.qty} @ ${fmtIDR(item.price)})`, 5, y);
         doc.setFontSize(9); 
@@ -468,138 +452,103 @@ window.printReceipt = function() {
     doc.text("------------------------------------------", centerX, y, { align: "center" });
     y += lineSpacing;
 
-    // --- 4. KALKULASI TOTAL & KEUANGAN ---
-    // Ambil Angka Asli dari HTML
+    // TOTAL
     const totalText = document.getElementById('totalDisplay').innerText;
     const totalVal = parseInt(totalText.replace(/[^0-9]/g, ''));
-    
     const cashInput = document.getElementById('cashInput');
     const cashVal = cashInput ? (parseInt(cashInput.value) || 0) : 0;
-    
-    // Hitung Sisa / Hutang
     const debt = totalVal - cashVal;
-    
-    // Tentukan Status
-    let status = "LUNAS";
-    if(debt > 0) status = "BELUM LUNAS (DP)";
+    let status = (debt > 0) ? "BELUM LUNAS (DP)" : "LUNAS";
 
     doc.setFontSize(9);
-
-    // TOTAL TAGIHAN
     doc.setFont(undefined, 'bold');
     doc.text("TOTAL TAGIHAN", 5, y);
     doc.text(totalText, 75, y, { align: "right" }); 
     y += lineSpacing + 2;
 
-    // PEMBAYARAN
     doc.setFont(undefined, 'normal');
     doc.text(`Bayar (${paymentMethod.toUpperCase()})`, 5, y);
     doc.text(fmtIDR(cashVal), 75, y, { align: "right" });
     y += lineSpacing;
 
-    // SISA / KEMBALIAN (Logika Pintar)
     if(debt > 0) {
-        // Jika Hutang
         doc.setFont(undefined, 'bold');
         doc.text("SISA HUTANG", 5, y);
         doc.text(fmtIDR(debt), 75, y, { align: "right" });
     } else {
-        // Jika Lunas/Kembali
         doc.text("KEMBALIAN", 5, y);
         doc.text(fmtIDR(Math.abs(debt)), 75, y, { align: "right" });
     }
     y += lineSpacing + 2;
 
-    // STATUS
     doc.setFontSize(10); doc.setFont(undefined, 'bold');
     doc.text(`STATUS: ${status}`, centerX, y, { align: "center" });
     y += lineSpacing * 2;
 
-    // --- 5. FOOTER ---
+    // FOOTER
     doc.setFontSize(8); doc.setFont(undefined, 'normal');
     doc.text("Terima Kasih!", centerX, y, { align: "center" }); y += 4;
     doc.text("Barang yang dibeli tidak dapat ditukar.", centerX, y, { align: "center" });
     y += 4;
     doc.text("www.usahadulustudio.com", centerX, y, { align: "center" });
     
-    // --- 6. SAVE FILE ---
-    // Nama file unik berdasarkan waktu
     doc.save(`Struk_Usahadulu_${now.getTime()}.pdf`);
 }
 
-// TOGGLE MENU BUTTON
+// TOGGLE MENU
 const menuBtn = document.getElementById('menuBtn');
 const navOverlay = document.getElementById('navOverlay');
 
 if(menuBtn && navOverlay) {
     menuBtn.addEventListener('click', () => {
-        menuBtn.classList.toggle('active'); // Ini kunci animasinya
+        menuBtn.classList.toggle('active');
         navOverlay.classList.toggle('open');
     });
 }
 
-// --- 8. FIX: HAPUS PRELOADER SAAT HALAMAN SIAP ---
+// FIX: PRELOADER FADE OUT
 window.addEventListener('load', () => {
     const preloader = document.getElementById('preloader');
     if (preloader) {
-        // Efek fade-out agar halus
         preloader.style.transition = 'opacity 0.5s ease';
         preloader.style.opacity = '0';
-        
-        // Hapus elemen setelah animasi selesai (0.5 detik)
-        setTimeout(() => {
-            preloader.style.display = 'none';
-        }, 500);
+        setTimeout(() => { preloader.style.display = 'none'; }, 500);
     }
 });
 
-// --- 9. CUSTOM CURSOR LOGIC ---
+// --- 9. CUSTOM CURSOR & INIT ---
 document.addEventListener('DOMContentLoaded', () => {
+    // 1. Init Custom Cursor
     const cursor = document.getElementById('cursor');
     const hoverTargets = document.querySelectorAll('a, button, .hover-target, .pos-card, input, .history-item');
 
-    // 1. Gerakkan Kursor
-    document.addEventListener('mousemove', (e) => {
-        // Menggunakan requestAnimationFrame agar gerakan lebih halus
-        requestAnimationFrame(() => {
-            cursor.style.left = e.clientX + 'px';
-            cursor.style.top = e.clientY + 'px';
+    if(cursor) {
+        document.addEventListener('mousemove', (e) => {
+            requestAnimationFrame(() => {
+                cursor.style.left = e.clientX + 'px';
+                cursor.style.top = e.clientY + 'px';
+            });
         });
-    });
-
-    // 2. Efek Hover (Membesar saat kena link/tombol)
-    hoverTargets.forEach(el => {
-        el.addEventListener('mouseenter', () => {
-            cursor.classList.add('active');
-        });
-        el.addEventListener('mouseleave', () => {
-            cursor.classList.remove('active');
-        });
-    });
-
-    // Tambahan: Handle elemen dinamis (seperti cart item baru)
-    // Menggunakan MutationObserver untuk elemen yang muncul belakangan
-    const observer = new MutationObserver((mutations) => {
-        const newTargets = document.querySelectorAll('button, .hover-target');
-        newTargets.forEach(el => {
-            // Cek apakah event listener sudah ada agar tidak duplikat
-            // (Cara simpel: remove dulu baru add, atau biarkan CSS handle hover state statis)
+        
+        hoverTargets.forEach(el => {
             el.addEventListener('mouseenter', () => cursor.classList.add('active'));
             el.addEventListener('mouseleave', () => cursor.classList.remove('active'));
         });
-    });
-    
-    observer.observe(document.body, { childList: true, subtree: true });
-});
 
-// --- 10. INIT SYSTEM (WAJIB ADA DI PALING BAWAH) ---
-// Panggil fungsi-fungsi utama saat halaman selesai dimuat
-document.addEventListener('DOMContentLoaded', () => {
-    startClock();            // Jalankan Jam
-    filterProducts('all');   // Tampilkan Produk Awal
-    updateCartUI();          // Reset Cart UI
-    
-    // Pastikan cursor aktif
-    const cursor = document.getElementById('cursor');
-    if(cursor) cursor.style.display = 'block';
+        // Observer untuk elemen dinamis
+        const observer = new MutationObserver((mutations) => {
+            document.querySelectorAll('button, .hover-target').forEach(el => {
+                el.addEventListener('mouseenter', () => cursor.classList.add('active'));
+                el.addEventListener('mouseleave', () => cursor.classList.remove('active'));
+            });
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
+        
+        cursor.style.display = 'block';
+    }
+
+    // 2. Init Main Functions
+    startClock();
+    filterProducts('all');
+    updateCartUI();
 });
