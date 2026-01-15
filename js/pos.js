@@ -18,7 +18,7 @@ let paymentMethod = 'cash';
 let isDpMode = false; // Status Mode DP
 const ADMIN_PIN = "692196"; 
 let transactionHistory = JSON.parse(localStorage.getItem('usahadulu_sales')) || [];
-
+let globalDiscount = 0; // Variabel Wajib untuk fitur Diskon
 const fmtIDR = (num) => "Rp " + num.toLocaleString('id-ID');
 
 // --- 2. JAM & MODAL WAKTU (UPDATED) ---
@@ -96,27 +96,108 @@ function updateCartQty(id, change) {
 
 function clearCart() { cart = []; updateCartUI(); }
 
+// --- UPDATE UI KERANJANG & HITUNGAN DISKON ---
 function updateCartUI() {
     const container = document.getElementById('cartContainer');
     if(!container) return; container.innerHTML = '';
     let subtotal = 0;
     
-    if(cart.length === 0) container.innerHTML = '<div class="empty-cart-state"><p>Keranjang Kosong</p></div>';
-    else {
+    // 1. Render List Item
+    if(cart.length === 0) {
+        container.innerHTML = '<div class="empty-cart-state"><p>Keranjang Kosong</p></div>';
+        globalDiscount = 0; // Reset diskon jika keranjang kosong
+    } else {
         cart.forEach(item => {
             subtotal += item.price * item.qty;
-            container.innerHTML += `<div class="cart-item"><div class="cart-info"><h4>${item.name}</h4><span class="cart-meta">${fmtIDR(item.price)} x ${item.qty}</span></div><div class="cart-controls"><button class="qty-btn" onclick="updateCartQty(${item.id}, -1)">-</button><span>${item.qty}</span><button class="qty-btn" onclick="updateCartQty(${item.id}, 1)">+</button></div></div>`;
+            
+            // Cek note (jika nanti dipakai)
+            let noteHtml = item.note ? `<div style="font-size:9px; color:#2ed573; font-style:italic;">✎ ${item.note}</div>` : '';
+
+            container.innerHTML += `
+            <div class="cart-item">
+                <div class="cart-info">
+                    <h4 onclick="addItemNote(${item.id})" style="cursor:pointer;">${item.name}</h4>
+                    ${noteHtml}
+                    <span class="cart-meta">${fmtIDR(item.price)} x ${item.qty}</span>
+                </div>
+                <div class="cart-controls">
+                    <button class="qty-btn" onclick="updateCartQty(${item.id}, -1)">-</button>
+                    <span>${item.qty}</span>
+                    <button class="qty-btn" onclick="updateCartQty(${item.id}, 1)">+</button>
+                </div>
+            </div>`;
         });
     }
 
-    const tax = subtotal * 0.11;
-    const total = subtotal + tax;
+    // 2. Logika Hitungan (Pajak 0% & Diskon)
+    const tax = 0; // PAJAK MATI (0%)
     
-    // Update semua display harga
-    ['totalDisplay', 'subtotalDisplay', 'taxDisplay', 'modalTotalDisplay'].forEach(id => {
-        const el = document.getElementById(id);
-        if(el) el.innerText = fmtIDR(id === 'subtotalDisplay' ? subtotal : (id === 'taxDisplay' ? tax : total));
-    });
+    // Validasi: Diskon tidak boleh lebih besar dari subtotal
+    if(globalDiscount > subtotal) globalDiscount = subtotal;
+    
+    const total = (subtotal + tax) - globalDiscount;
+    
+    // 3. Update Tampilan Angka
+    const elSub = document.getElementById('subtotalDisplay');
+    const elDisc = document.getElementById('discountDisplay');
+    const elTot = document.getElementById('totalDisplay');
+    const elModTot = document.getElementById('modalTotalDisplay'); // Total di modal bayar
+    const rowDisc = document.getElementById('discountRow');
+
+    if(elSub) elSub.innerText = fmtIDR(subtotal);
+    
+    // Tampilkan baris diskon HANYA jika ada diskon
+    if(globalDiscount > 0) {
+        if(rowDisc) rowDisc.style.display = 'flex';
+        if(elDisc) elDisc.innerText = "- " + fmtIDR(globalDiscount);
+    } else {
+        if(rowDisc) rowDisc.style.display = 'none';
+    }
+
+    if(elTot) elTot.innerText = fmtIDR(total);
+    if(elModTot) elModTot.innerText = fmtIDR(total);
+}
+
+// --- UPDATE FITUR DISKON DENGAN PASSWORD ---
+
+// 1. Definisikan Sandinya (Taruh di luar fungsi atau di bagian atas file)
+const DISCOUNT_PIN = "HH666"; 
+
+function inputGlobalDiscount() {
+    // Cek keranjang dulu
+    if(cart.length === 0) return alert("Keranjang kosong, mau diskon apa?");
+
+    // 2. Minta Password Dulu
+    const pin = prompt("SECURE ACCESS REQUIRED.\nMasukkan Sandi Otoritas:");
+
+    // 3. Cek apakah sandi benar?
+    if (pin !== DISCOUNT_PIN) {
+        // Kalau salah, tolak dengan tegas (Suara "Bip" Error kalau bisa)
+        return alert("ACCESS DENIED! Sandi Salah.");
+    }
+
+    // 4. Kalau Benar (HH666), Lanjut Input Nominal
+    const input = prompt("ACCESS GRANTED: HOMIE HOOKUP.\nMasukkan Nominal Potongan (Rp):", globalDiscount || 0);
+    
+    if(input !== null) {
+        const val = parseInt(input.replace(/[^0-9]/g, ''));
+        
+        if(!isNaN(val)) {
+            globalDiscount = val;
+            updateCartUI(); // Refresh hitungan
+        } else {
+            alert("Input angka woy!");
+        }
+    }
+}
+
+// Fungsi dummy untuk note (agar tidak error jika diklik)
+function addItemNote(id) {
+    const item = cart.find(i => i.id === id);
+    if(item) {
+        let n = prompt("Catatan Item:", item.note || "");
+        if(n !== null) { item.note = n; updateCartUI(); }
+    }
 }
 
 // --- 4. LOGIKA PEMBAYARAN (DP & LUNAS) ---
@@ -335,7 +416,7 @@ function showReceiptModal(total, paid, client) {
     preview.innerHTML = `
         <div style="text-align:center; border-bottom:1px dashed #000; padding-bottom:10px; margin-bottom:10px;">
             <strong>USAHADULU STUDIO</strong><br>
-            Citimall Dumai, Riau<br>
+            ONLINE / IRL<br>
             <span style="font-size:10px;">${new Date().toLocaleString('id-ID')}</span><br>
             <span style="font-size:10px;">Klien: ${client.toUpperCase()}</span>
         </div>
@@ -452,19 +533,48 @@ window.printReceipt = function() {
     doc.text("------------------------------------------", centerX, y, { align: "center" });
     y += lineSpacing;
 
-    // TOTAL
+    // --- 1. Ambil Angka Total Akhir dari Layar ---
     const totalText = document.getElementById('totalDisplay').innerText;
-    const totalVal = parseInt(totalText.replace(/[^0-9]/g, ''));
-    const cashInput = document.getElementById('cashInput');
-    const cashVal = cashInput ? (parseInt(cashInput.value) || 0) : 0;
-    const debt = totalVal - cashVal;
-    let status = (debt > 0) ? "BELUM LUNAS (DP)" : "LUNAS";
+    const totalVal = parseInt(totalText.replace(/[^0-9]/g, '')); // Misal: 80000
 
+    // --- 2. Hitung Mundur Subtotal Asli ---
+    // (Total Akhir + Diskon = Harga Asli sebelum dipotong)
+    const subtotalAsli = totalVal + globalDiscount; 
+
+    // --- 3. Tampilkan Subtotal Asli ---
     doc.setFontSize(9);
+    doc.setFont(undefined, 'normal');
+    doc.text("Subtotal", 5, y);
+    doc.text(fmtIDR(subtotalAsli), 75, y, { align: "right" }); 
+    y += lineSpacing;
+
+    // --- 4. Tampilkan HOMIE HOOKUP (Jika ada diskon) ---
+    if(globalDiscount > 0) {
+        // Opsional: Bikin warna merah biar kelihatan jelas
+        // doc.setTextColor(255, 0, 0); 
+        
+        doc.text("HOMIE HOOKUP (Disc)", 5, y);
+        doc.text("-" + fmtIDR(globalDiscount), 75, y, { align: "right" });
+        
+        // doc.setTextColor(0, 0, 0); // Balikin warna hitam
+        y += lineSpacing;
+    }
+
+    y += 2; // Kasih jarak dikit
+
+    // --- 5. Tampilkan Total Tagihan (Final) ---
     doc.setFont(undefined, 'bold');
     doc.text("TOTAL TAGIHAN", 5, y);
     doc.text(totalText, 75, y, { align: "right" }); 
     y += lineSpacing + 2;
+
+    // --- 6. Info Pembayaran (Cash/Kembalian/Hutang) ---
+    const cashInput = document.getElementById('cashInput');
+    const cashVal = cashInput ? (parseInt(cashInput.value) || 0) : 0;
+    
+    // Hitung sisa/hutang berdasarkan Total Akhir (yg sudah didiskon)
+    const debt = totalVal - cashVal;
+    let status = (debt > 0) ? "BELUM LUNAS (DP)" : "LUNAS";
 
     doc.setFont(undefined, 'normal');
     doc.text(`Bayar (${paymentMethod.toUpperCase()})`, 5, y);
@@ -534,6 +644,53 @@ document.addEventListener('DOMContentLoaded', () => {
             el.addEventListener('mouseenter', () => cursor.classList.add('active'));
             el.addEventListener('mouseleave', () => cursor.classList.remove('active'));
         });
+
+        // --- FITUR KEAMANAN (SECURITY PIN) ---
+    const ACCESS_PIN = "DMI666"; // Sandi Rahasia
+
+function checkSecurityPin() {
+    const input = document.getElementById('securityPinInput');
+    const overlay = document.getElementById('securityOverlay');
+    const modalContent = overlay.querySelector('.modal-content');
+
+    if (input.value === ACCESS_PIN) {
+        // JIKA BENAR:
+        // 1. Putar suara sukses (opsional, visual saja cukup)
+        input.style.borderColor = "#2ed573"; // Hijau
+        input.style.color = "#2ed573";
+        
+        // 2. Fade Out Overlay
+        overlay.classList.add('unlocked');
+        
+        // 3. Simpan sesi (opsional: agar tidak tanya lagi saat refresh)
+        // sessionStorage.setItem('is_logged_in', true); 
+
+    } else {
+        // JIKA SALAH:
+        // 1. Efek Merah & Guncang
+        input.style.borderColor = "#ff4757";
+        input.value = ""; // Kosongkan input
+        input.placeholder = "PIN SALAH!";
+        
+        // 2. Tambah animasi shake
+        modalContent.classList.add('shake-anim');
+        
+        // 3. Hapus kelas shake setelah animasi selesai agar bisa diguncang lagi
+        setTimeout(() => {
+            modalContent.classList.remove('shake-anim');
+            input.placeholder = "Enter PIN";
+            input.style.borderColor = "#333";
+        }, 500);
+    }
+}
+
+// Fitur Tekan Enter untuk Login
+document.getElementById('securityPinInput').addEventListener("keypress", function(event) {
+    if (event.key === "Enter") {
+        event.preventDefault();
+        checkSecurityPin();
+    }
+});
 
         // Observer untuk elemen dinamis
         const observer = new MutationObserver((mutations) => {
