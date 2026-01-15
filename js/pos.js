@@ -591,3 +591,15 @@ document.addEventListener('DOMContentLoaded', () => {
     
     observer.observe(document.body, { childList: true, subtree: true });
 });
+
+// --- 10. INIT SYSTEM (WAJIB ADA DI PALING BAWAH) ---
+// Panggil fungsi-fungsi utama saat halaman selesai dimuat
+document.addEventListener('DOMContentLoaded', () => {
+    startClock();            // Jalankan Jam
+    filterProducts('all');   // Tampilkan Produk Awal
+    updateCartUI();          // Reset Cart UI
+    
+    // Pastikan cursor aktif
+    const cursor = document.getElementById('cursor');
+    if(cursor) cursor.style.display = 'block';
+});
