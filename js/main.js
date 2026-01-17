@@ -986,3 +986,25 @@ window.smoothNavigate = function(url) {
         window.location.href = url;
     }
 }
+
+/* -------------------------------------- */
+/* SCROLL REVEAL ANIMATION                */
+/* -------------------------------------- */
+document.addEventListener("DOMContentLoaded", () => {
+    const revealElements = document.querySelectorAll(".reveal-item");
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add("active");
+                // Optional: Stop observing once revealed
+                observer.unobserve(entry.target); 
+            }
+        });
+    }, {
+        threshold: 0.1, // Muncul ketika 10% elemen terlihat
+        rootMargin: "0px 0px -50px 0px" // Trigger sedikit sebelum bawah layar
+    });
+
+    revealElements.forEach((el) => observer.observe(el));
+});
