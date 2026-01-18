@@ -623,3 +623,24 @@ footer {
         100% { opacity: 0.9; transform: translateY(0); letter-spacing: 3px; }
     }
 }
+
+/* --- 13. TESTIMONIAL ADMIN STYLE (Tambahan Baru) --- */
+.delete-btn {
+    background-color: #D32F2F; /* Merah Gelap */
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 10px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    margin-top: 15px;
+    display: inline-block;
+    transition: background 0.3s;
+    text-transform: uppercase;
+}
+.delete-btn:hover {
+    background-color: #b71c1c;
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.4);
+}
