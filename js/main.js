@@ -1008,3 +1008,75 @@ document.addEventListener("DOMContentLoaded", () => {
 
     revealElements.forEach((el) => observer.observe(el));
 });
+
+/* -------------------------------------- */
+/* WA FLOATING BUTTON LOGIC (CYCLE)       */
+/* -------------------------------------- */
+document.addEventListener("DOMContentLoaded", () => {
+    
+    // 1. Konfigurasi Konten (Gambar, Teks, Link)
+    const waContent = [
+        {
+            // PHASE 1: CHAT (Gambar Lama - Tengkorak Pegang Logo WA)
+            img: "img/wa_sticker.png",
+            text: "Bingung Konsep?<br>Ngobrol Gratis Sini, Sob.",
+            link: "https://wa.me/6282283687565?text=Halo%20Admin,%20mau%20konsultasi%20desain."
+        },
+        {
+            // PHASE 2: CALL (Gambar Baru - Tengkorak Telpon)
+            img: "img/wa_sticker_2.png", 
+            text: "Jangan Takut...<br>Adminnya Manusia Kok.",
+            link: "https://wa.me/6282283687565?text=Halo%20Admin,%20saya%20butuh%20respon%20cepat%20(Deadline)."
+        }
+    ];
+
+    let currentIndex = 0; 
+    const floatBtn = document.getElementById('waFloatBtn');
+    const waImg = document.getElementById('waImg');
+    const waBubble = document.getElementById('waBubble');
+
+    // Cek apakah elemen ada (untuk menghindari error di halaman yg tidak ada tombol WA)
+    if(floatBtn && waImg && waBubble) {
+        
+        function runWACycle() {
+            // STEP A: TUNGGU 5 DETIK (Posisi Hilang/Sembunyi)
+            setTimeout(() => {
+                
+                // STEP B: GANTI KONTEN (Dilakukan saat tombol masih sembunyi)
+                const content = waContent[currentIndex];
+                
+                // Efek transisi halus saat ganti gambar
+                waImg.style.opacity = '0';
+                setTimeout(() => {
+                    waImg.src = content.img;
+                    waImg.style.opacity = '1';
+                }, 200);
+
+                waBubble.innerHTML = content.text;
+                floatBtn.href = content.link; 
+
+                // STEP C: MUNCULKAN TOMBOL (Add Class Show)
+                floatBtn.classList.add('show');
+
+                // STEP D: STAY MUNCUL SELAMA 30 DETIK
+                setTimeout(() => {
+                    
+                    // STEP E: HILANGKAN TOMBOL (Remove Class Show)
+                    floatBtn.classList.remove('show');
+
+                    // STEP F: PERSIAPAN LOOP BERIKUTNYA
+                    // Ganti index: kalau 0 jadi 1, kalau 1 balik ke 0
+                    currentIndex = (currentIndex + 1) % waContent.length;
+                    
+                    // Panggil fungsi ini lagi (Rekursif / Looping selamanya)
+                    runWACycle();
+
+                }, 30000); // Durasi Muncul (30.000ms = 30 Detik)
+
+            }, 5000); // Durasi Jeda/Hilang (5.000ms = 5 Detik)
+        }
+
+        // Jalankan siklus pertama kali
+        runWACycle();
+    }
+});
