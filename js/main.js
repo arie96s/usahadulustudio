@@ -1009,71 +1009,80 @@ document.addEventListener("DOMContentLoaded", () => {
     revealElements.forEach((el) => observer.observe(el));
 });
 
-/* -------------------------------------- */
-/* WA FLOATING BUTTON LOGIC (CYCLE)       */
+//* -------------------------------------- */
+/* WA FLOATING BUTTON LOGIC (FIXED & SMOOTH) */
 /* -------------------------------------- */
 document.addEventListener("DOMContentLoaded", () => {
     
-    // 1. Konfigurasi Konten (Gambar, Teks, Link)
+    // 1. Konfigurasi Konten
     const waContent = [
         {
-            // PHASE 1: CHAT (Gambar Lama - Tengkorak Pegang Logo WA)
+            // PHASE 1: CHAT
             img: "img/wa_sticker.png",
             text: "Bingung Konsep?<br>Ngobrol Gratis Sini, Sob.",
             link: "https://wa.me/6282283687565?text=Halo%20Admin,%20mau%20konsultasi%20desain."
         },
         {
-            // PHASE 2: CALL (Gambar Baru - Tengkorak Telpon)
+            // PHASE 2: CALL
             img: "img/wa_sticker_2.png", 
             text: "Jangan Takut...<br>Adminnya Manusia Kok.",
             link: "https://wa.me/6282283687565?text=Halo%20Admin,%20saya%20butuh%20respon%20cepat%20(Deadline)."
         }
     ];
 
+    // --- FITUR TAMBAHAN: PRE-LOAD GAMBAR ---
+    // Agar saat ganti gambar tidak kedip/loading (langsung ada)
+    waContent.forEach(item => {
+        const i = new Image();
+        i.src = item.img;
+    });
+
     let currentIndex = 0; 
     const floatBtn = document.getElementById('waFloatBtn');
     const waImg = document.getElementById('waImg');
     const waBubble = document.getElementById('waBubble');
 
-    // Cek apakah elemen ada (untuk menghindari error di halaman yg tidak ada tombol WA)
     if(floatBtn && waImg && waBubble) {
         
         function runWACycle() {
             // STEP A: TUNGGU 5 DETIK (Posisi Hilang/Sembunyi)
             setTimeout(() => {
                 
-                // STEP B: GANTI KONTEN (Dilakukan saat tombol masih sembunyi)
+                // STEP B: GANTI KONTEN DIAM-DIAM (Saat tombol masih di bawah/sembunyi)
                 const content = waContent[currentIndex];
                 
-                // Efek transisi halus saat ganti gambar
-                waImg.style.opacity = '0';
-                setTimeout(() => {
-                    waImg.src = content.img;
-                    waImg.style.opacity = '1';
-                }, 200);
-
+                // Ganti source gambar & teks
+                waImg.src = content.img;
                 waBubble.innerHTML = content.text;
                 floatBtn.href = content.link; 
 
-                // STEP C: MUNCULKAN TOMBOL (Add Class Show)
-                floatBtn.classList.add('show');
+                // Reset opacity gambar ke 1 (penuh) agar siap tampil
+                waImg.style.opacity = '1';
 
-                // STEP D: STAY MUNCUL SELAMA 30 DETIK
+                // STEP C: BERI JEDA KECIL (100ms)
+                // Memberi waktu browser merender gambar baru sebelum tombol naik
                 setTimeout(() => {
                     
-                    // STEP E: HILANGKAN TOMBOL (Remove Class Show)
-                    floatBtn.classList.remove('show');
+                    // STEP D: MUNCULKAN TOMBOL (Sekarang gambar sudah pasti baru)
+                    floatBtn.classList.add('show');
 
-                    // STEP F: PERSIAPAN LOOP BERIKUTNYA
-                    // Ganti index: kalau 0 jadi 1, kalau 1 balik ke 0
-                    currentIndex = (currentIndex + 1) % waContent.length;
-                    
-                    // Panggil fungsi ini lagi (Rekursif / Looping selamanya)
-                    runWACycle();
+                    // STEP E: TAHAN SELAMA 30 DETIK
+                    setTimeout(() => {
+                        
+                        // STEP F: HILANGKAN TOMBOL
+                        floatBtn.classList.remove('show');
 
-                }, 30000); // Durasi Muncul (30.000ms = 30 Detik)
+                        // STEP G: PERSIAPAN LOOP BERIKUTNYA
+                        currentIndex = (currentIndex + 1) % waContent.length;
+                        
+                        // Ulangi siklus
+                        runWACycle();
 
-            }, 5000); // Durasi Jeda/Hilang (5.000ms = 5 Detik)
+                    }, 30000); // Durasi Muncul (30 Detik)
+
+                }, 100); // Jeda render
+
+            }, 5000); // Durasi Sembunyi (5 Detik)
         }
 
         // Jalankan siklus pertama kali
