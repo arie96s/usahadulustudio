@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ISSUE 02 | MAGOS ARCHIVE</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/img/magos-icon.svg">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/magos.css">
+  
+  <style>
+      .issue-container { max-width: 1200px; margin: 140px auto 80px; padding: 0 40px; }
+
+      /* Layout Judul & Deskripsi TANPA Border Left */
+      .issue-header { margin-bottom: 60px; text-align: left; }
+      .issue-title { font-size: 42px; font-weight: 900; letter-spacing: -2px; text-transform: uppercase; margin: 0; line-height: 1; color: #fff; }
+      .issue-description { font-size: 12px; color: #888; margin-top: 15px; max-width: 600px; line-height: 1.6; letter-spacing: 0.5px; }
+
+      /* Grid Kompak */
+      .issue-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 15px; margin-top: 40px; }
+      .issue-item { position: relative; border-radius: 12px; overflow: hidden; aspect-ratio: 1/1; cursor: pointer; border: 1px solid #1a1a1a; transition: all 0.4s ease; }
+      .issue-item:hover { transform: scale(1.05); border-color: #00f2ff; z-index: 10; box-shadow: 0 0 20px rgba(0, 242, 255, 0.2); }
+      .issue-img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%); transition: 0.5s; }
+      .issue-item:hover .issue-img { filter: grayscale(0%); }
+
+      /* Popup Zoom */
+      .img-popup { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); display: none; justify-content: center; align-items: center; z-index: 20000; padding: 20px; }
+      .img-popup.active { display: flex; }
+      .img-popup img { max-width: 90%; max-height: 80vh; border-radius: 10px; border: 1px solid #333; }
+      .close-popup { position: absolute; top: 30px; right: 30px; color: #fff; font-size: 40px; cursor: pointer; }
+
+      @media (max-width: 1024px) { .issue-grid { grid-template-columns: repeat(4, 1fr); } }
+      @media (max-width: 768px) { .issue-grid { grid-template-columns: repeat(2, 1fr); } .issue-title { font-size: 32px; } }
+  </style>
+</head>
+<body>
+    <div id="cursor"></div>
+    <div id="preloader"><div class="preloader-content"><img src="../assets/img/logo-header.svg" class="logo-loader blink-img"><div class="loading-line"></div></div></div>
+
+    <header>
+        <a href="../../magos.html">
+            <img src="../assets/img/magos-icon.svg" alt="MAGOS" class="logo-header">
+        </a>
+        <nav>
+            <a href="../gallery.html" class="hover-target">BACK TO GALLERY</a>
+            <a href="../../magos.html" class="hover-target">STUDIO</a>
+            <div class="lang-switch hover-target" data-lang="en" id="langToggle" onclick="toggleLanguage()">
+                <div class="lang-circle"></div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="issue-container">
+        <div class="issue-header">
+            <h1 class="issue-title">VOL.2: NEON CITY</h1>
+            <p class="issue-description">Pendekatan futuristik pada pakaian jalanan. Terinspirasi oleh cahaya metropolis distopia, material reflektif, dan energi malam urban.</p>
+        </div>
+        <div class="issue-grid" id="issueGrid"></div>
+    </main>
+
+    <div class="img-popup" id="imgPopup" onclick="this.classList.remove('active')"><span class="close-popup">&times;</span><img id="popupImg" src=""></div>
+
+    <footer class="industrial-footer">
+        <div class="footer-divider"></div>
+        <div class="footer-grid">
+            <div class="f-col brand-col">
+                <img src="../assets/img/logo-header.svg" alt="MAGOS" class="f-logo">
+                <p class="f-desc">ESTETIKA GELAP & PAKAIAN INDUSTRIAL.</p>
+                <div class="f-status"><span class="dot"></span> SYSTEM ONLINE</div>
+            </div>
+            <div class="f-col link-col">
+                <h4 class="f-head">SITEMAP</h4>
+                <ul class="f-links">
+                    <li><a href="../../magos.html">STUDIO</a></li>
+                    <li><a href="../gallery.html">GALLERY</a></li>
+                    <li><a href="../contact.html">CONTACT</a></li>
+                </ul>
+            </div>
+            <div class="f-col link-col">
+                <h4 class="f-head">LEGAL</h4>
+                <ul class="f-links">
+                    <li><a href="../terms.html">TERMS & CONDITIONS</a></li>
+                    <li><a href="../privacy.html">PRIVACY POLICY</a></li>
+                </ul>
+            </div>
+            <div class="f-col link-col end-col">
+                <h4 class="f-head">CONNECT</h4>
+                <ul class="f-social">
+                    <li><a href="#">INSTAGRAM ↗</a></li>
+                    <li><a href="#">SOCIAL MEDIA <span class="arrow">↗</span></a></li>
+                    <li><a href="mailto:contact@magos.com">EMAIL ↗</a></li>
+                </ul>
+                <p class="f-copyright">©2026 | USAHADULU STUDIO</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../js/magos.js"></script>
+    <script>
+        const imageData = [
+            { url: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=800" },
+            { url: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800" },
+            { url: "https://images.unsplash.com/photo-1533972751724-91054464656d?w=800" },
+            { url: "https://images.unsplash.com/photo-1520103588273-77649557a2da?w=800" },
+            { url: "https://images.unsplash.com/photo-1522069394066-626005ff23b2?w=800" },
+            { url: "https://images.unsplash.com/photo-1492538368677-f6e0afe31dcc?w=800" }
+        ];
+        const grid = document.getElementById('issueGrid');
+        const popup = document.getElementById('imgPopup');
+        const popupImg = document.getElementById('popupImg');
+        imageData.forEach(img => {
+            const item = document.createElement('div');
+            item.className = 'issue-item hover-target';
+            item.onclick = () => { popupImg.src = img.url; popup.classList.add('active'); };
+            item.innerHTML = `<img src="${img.url}" class="issue-img" loading="lazy">`;
+            grid.appendChild(item);
+        });
+    </script>
+</body>
+</html>

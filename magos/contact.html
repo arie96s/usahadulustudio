@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MAGOS | TRANSMISSION</title>
+    <link rel="stylesheet" href="css/magos.css">
+</head>
+<body>
+
+    <div id="preloader">
+        <div class="preloader-content">
+            <img src="assets/img/logo-header.svg" alt="Loading" class="logo-loader blink-img">
+            <div class="loading-line"></div>
+        </div>
+    </div>
+
+    <header>
+        <a href="../magos.html">
+            <img src="assets/img/magos-icon.svg" alt="MAGOS" class="logo-header">
+        </a>
+        <nav>
+            <a href="../magos.html" class="hover-target">STUDIO</a>
+            <a href="../magos.html#shop" class="hover-target">ARCHIVE</a>
+            <a href="contact.html" class="hover-target" style="color:#fff;">CONTACT</a>
+            <div class="lang-switch hover-target" data-lang="en" id="langToggle" onclick="toggleLanguage()">
+                <div class="lang-circle"></div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="contact-grid-wrapper">
+        
+        <div class="contact-info-box">
+            <h3 data-i18n="cont_coord">COORDINATES</h3>
+            
+            <div class="contact-detail-item">
+                <span class="contact-label" data-i18n="cont_loc_lbl">LOCATION_HQ</span>
+                <span class="contact-value" data-i18n="cont_loc_val">PAYAKUMBUH, WEST SUMATRA<br>INDONESIA [ID]</span>
+            </div>
+
+            <div class="contact-detail-item">
+                <span class="contact-label" data-i18n="cont_sig_lbl">DIGITAL_SIGNAL</span>
+                <a href="mailto:contact@magos.com" class="contact-value hover-target">CONTACT@MAGOS.COM</a>
+            </div>
+
+            <div class="contact-detail-item">
+                <span class="contact-label" data-i18n="cont_line_lbl">DIRECT_LINE</span>
+                <a href="#" class="contact-value hover-target">+62 812 XXXX XXXX</a>
+            </div>
+
+            <div class="contact-detail-item">
+                <span class="contact-label" data-i18n="cont_hours_lbl">OPERATING_HOURS</span>
+                <span class="contact-value" data-i18n="cont_hours_val">MON - FRI : 0900 - 1700<br>SYSTEM ALWAYS ONLINE</span>
+            </div>
+        </div>
+
+        <div class="contact-form-box">
+            <h3 style="color:#fff; font-size:16px; margin-bottom:20px; font-weight:900;" data-i18n="cont_form_title">INITIATE TRANSMISSION</h3>
+            
+            <form action="#" method="POST">
+                <div class="form-group">
+                    <label data-i18n="cont_lbl_name">IDENTITY (NAME)</label>
+                    <input type="text" class="contact-input hover-target" placeholder="ENTER YOUR NAME..." required>
+                </div>
+
+                <div class="form-group">
+                    <label data-i18n="cont_lbl_email">SIGNAL BACK (EMAIL)</label>
+                    <input type="email" class="contact-input hover-target" placeholder="ENTER YOUR EMAIL..." required>
+                </div>
+
+                <div class="form-group">
+                    <label data-i18n="cont_lbl_msg">ENCRYPTED MESSAGE</label>
+                    <textarea class="contact-input hover-target" rows="5" placeholder="TYPE YOUR MESSAGE..." style="resize:none;" required></textarea>
+                </div>
+
+                <button type="submit" class="btn hover-target" style="width:100%; margin-top:10px;" data-i18n="cont_btn_send">TRANSMIT DATA ↗</button>
+            </form>
+        </div>
+
+    </div>
+
+    <footer class="industrial-footer">
+        <div class="footer-divider"></div>
+        <div class="footer-grid">
+            <div class="f-col brand-col">
+                <img src="assets/img/logo-header.svg" alt="MAGOS" class="f-logo">
+                <p class="f-desc" data-i18n="hero_sub">ESTETIKA GELAP & PAKAIAN INDUSTRIAL.</p>
+                <div class="f-status"><span class="dot"></span> SYSTEM ONLINE</div>
+            </div>
+            <div class="f-col link-col">
+                <h4 class="f-head">SITEMAP</h4>
+                <ul class="f-links">
+                    <li><a href="../magos.html">STUDIO</a></li>
+                    <li><a href="../magos.html#shop">ARCHIVE / SHOP</a></li>
+                    <li><a href="contact.html">CONTACT</a></li>
+                </ul>
+            </div>
+            <div class="f-col link-col">
+                <h4 class="f-head">LEGAL</h4>
+                <ul class="f-links">
+                    <li><a href="terms.html" data-i18n="terms_title">TERMS & CONDITIONS</a></li>
+                    <li><a href="privacy.html" data-i18n="priv_title">PRIVACY POLICY</a></li>
+                </ul>
+            </div>
+            <div class="f-col link-col end-col">
+                <h4 class="f-head">CONNECT</h4>
+                <ul class="f-social">
+                    <li><a href="#">INSTAGRAM <span class="arrow">↗</span></a></li>
+                    <li><a href="#">SOCIAL MEDIA <span class="arrow">↗</span></a></li>
+                    <li><a href="mailto:contact@magos.com">EMAIL <span class="arrow">↗</span></a></li>
+                </ul>
+                <p class="f-copyright" data-i18n="footer_copy">©2026 | USAHADULU STUDIO</p>
+            </div>
+        </div>
+    </footer>
+
+    <div id="cursor"></div>
+    
+    <script src="js/magos.js"></script>
+</body>
+</html>

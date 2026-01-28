@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MAGOS | PRIVACY PROTOCOL</title>
+    <link rel="stylesheet" href="css/magos.css">
+    <style>
+        .doc-meta {
+            font-family: monospace;
+            color: #666;
+            font-size: 10px;
+            margin-bottom: 20px;
+            border-bottom: 1px dashed #333;
+            padding-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="preloader">
+        <div class="preloader-content">
+            <img src="assets/img/logo-header.svg" alt="Loading" class="logo-loader blink-img">
+            <div class="loading-line"></div>
+        </div>
+    </div>
+
+    <header>
+        <a href="../magos.html">
+            <img src="assets/img/magos-icon.svg" alt="MAGOS" class="logo-header">
+        </a>
+        <nav>
+            <a href="../magos.html" class="hover-target">STUDIO</a>
+            <a href="../magos.html#shop" class="hover-target">ARCHIVE</a>
+            <a href="contact.html" class="hover-target">CONTACT</a>
+            <div class="lang-switch hover-target" data-lang="en" id="langToggle" onclick="toggleLanguage()">
+                <div class="lang-circle"></div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="terms-wrapper">
+        <div class="terms-header">
+            <h1 class="section-title" style="float:none; margin:0;" data-i18n="priv_title">PRIVACY PROTOCOL</h1>
+            <p style="color:#666; font-size:12px; margin-top:10px;" data-i18n="priv_sub">DATA PROTECTION & USER ANONYMITY</p>
+        </div>
+
+        <div class="terms-content">
+            <div class="doc-meta">
+                <span data-i18n="priv_doc_id">DOC_ID: PP-2026-X</span>
+                <span data-i18n="priv_status">STATUS: ENCRYPTED</span>
+                <span data-i18n="priv_updated">UPDATED: 24.01.2026</span>
+            </div>
+
+            <div class="terms-section">
+                <h3 data-i18n="priv_s1_title">01 / DATA COLLECTION</h3>
+                <p data-i18n="priv_s1_desc">We collect only the essential data required to process your transaction and improve the system interface. This includes name, shipping coordinates (address), and contact signals (email/phone). We do not store payment credentials directly on our servers.</p>
+            </div>
+
+            <div class="terms-section">
+                <h3 data-i18n="priv_s2_title">02 / COOKIES & TRACKING</h3>
+                <p data-i18n="priv_s2_desc">System uses "cookies" to maintain your session integrity (Cart & Wishlist data). By accessing the MAGOS Archive, you agree to the temporary storage of these data packets on your local device.</p>
+            </div>
+
+            <div class="terms-section">
+                <h3 data-i18n="priv_s3_title">03 / THIRD PARTY DISCLOSURE</h3>
+                <p data-i18n="priv_s3_desc">Your data is classified. We do not sell, trade, or transfer your personally identifiable information to outside parties, except for trusted third parties who assist us in operating our website (shipping logistics).</p>
+            </div>
+
+            <div class="terms-section">
+                <h3 data-i18n="priv_s4_title">04 / USER RIGHTS</h3>
+                <p data-i18n="priv_s4_desc">You have the right to request a complete purge of your data from our archives. Contact our system administrator via the Contact page to initiate a data deletion request.</p>
+            </div>
+            
+            <br>
+            <center>
+                <a href="../magos.html" class="back-btn hover-target" data-i18n="priv_back">← RETURN TO BASE</a>
+            </center>
+        </div>
+    </div>
+
+    <footer class="industrial-footer">
+        <div class="footer-divider"></div>
+        <div class="footer-grid">
+            <div class="f-col brand-col">
+                <img src="assets/img/logo-header.svg" alt="MAGOS" class="f-logo">
+                <p class="f-desc" data-i18n="hero_sub">ESTETIKA GELAP & PAKAIAN INDUSTRIAL.</p>
+                <div class="f-status"><span class="dot"></span> SYSTEM ONLINE</div>
+            </div>
+            <div class="f-col link-col">
+                <h4 class="f-head">SITEMAP</h4>
+                <ul class="f-links">
+                    <li><a href="../magos.html">STUDIO</a></li>
+                    <li><a href="../magos.html#shop">ARCHIVE / SHOP</a></li>
+                    <li><a href="contact.html">CONTACT</a></li>
+                </ul>
+            </div>
+            <div class="f-col link-col">
+                <h4 class="f-head">LEGAL</h4>
+                <ul class="f-links">
+                    <li><a href="terms.html" data-i18n="terms_title">TERMS & CONDITIONS</a></li>
+                    <li><a href="privacy.html" data-i18n="priv_title">PRIVACY POLICY</a></li>
+                </ul>
+            </div>
+            <div class="f-col link-col end-col">
+                <h4 class="f-head">CONNECT</h4>
+                <ul class="f-social">
+                    <li><a href="#">INSTAGRAM <span class="arrow">↗</span></a></li>
+                    <li><a href="#">SOCIAL MEDIA <span class="arrow">↗</span></a></li>
+                    <li><a href="mailto:contact@magos.com">EMAIL <span class="arrow">↗</span></a></li>
+                </ul>
+                <p class="f-copyright" data-i18n="footer_copy">©2026 | USAHADULU STUDIO</p>
+            </div>
+        </div>
+    </footer>
+
+    <div id="cursor"></div>
+    
+    <script src="js/magos.js"></script>
+</body>
+</html>

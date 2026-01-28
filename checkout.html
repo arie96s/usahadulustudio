@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>CHECKOUT | MAGOS Archive</title>
+  <link rel="icon" type="image/svg+xml" href="assets/img/magos-icon.svg">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="magos/css/magos.css">
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+  
+  <style>
+    :root { 
+        --accent: #fff; 
+        --bg-dark: #000; 
+        --border: #222; 
+        --radius: 16px; 
+        --magos-green: #25D366;
+    }
+
+    .checkout-main-container {
+        max-width: 850px;
+        margin: 0 auto;
+        padding: 140px 20px 80px;
+        min-height: 100vh;
+    }
+
+    .checkout-header-center { text-align: center; margin-bottom: 50px; }
+    .checkout-header-center h1 { font-size: 32px; font-weight: 900; letter-spacing: -1px; text-transform: uppercase; }
+
+    .step-indicator { display: flex; justify-content: center; gap: 15px; margin-top: 15px; }
+    .step-dot { width: 8px; height: 8px; border-radius: 50%; background: #222; transition: 0.3s; }
+    .step-dot.active { background: var(--accent); box-shadow: 0 0 10px var(--accent); }
+
+    .checkout-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 30px; }
+    .checkout-box { background: #0b0b0b; border: 1px solid var(--border); border-radius: var(--radius); padding: 30px; }
+
+    .step-section { display: none; }
+    .step-section.active { display: block; animation: fadeIn 0.5s ease forwards; }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; font-size: 10px; font-weight: 800; color: #666; margin-bottom: 8px; text-transform: uppercase; }
+    .form-control { width: 100%; background: #111; border: 1px solid #222; border-radius: 8px; padding: 12px 15px; color: #fff; font-size: 13px; transition: 0.3s; }
+    .form-control:focus { border-color: #555; outline: none; }
+
+    .summary-item { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 12px; color: #888; }
+    .summary-item.total { border-top: 1px solid #222; padding-top: 15px; margin-top: 15px; color: #fff; font-weight: 900; font-size: 16px; }
+
+    .pay-opt { border: 1px solid #222; border-radius: 10px; padding: 15px; margin-bottom: 10px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: 0.3s; }
+    .pay-opt:hover, .pay-opt.selected { border-color: var(--accent); background: #151515; }
+
+    #timerPop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+    .pop-content { background: #0b0b0b; padding: 40px; border-radius: 20px; border: 1px solid #333; text-align: center; max-width: 400px; }
+
+    .btn-checkout { width: 100%; padding: 15px; border-radius: 10px; font-weight: 900; font-size: 12px; text-transform: uppercase; cursor: pointer; border: none; transition: 0.3s; margin-top: 10px; }
+    .btn-primary { background: #fff; color: #000; }
+    .btn-primary:hover { background: #ccc; }
+    .btn-wa { background: var(--magos-green); color: #fff; }
+
+    @media (max-width: 768px) { .checkout-grid { grid-template-columns: 1fr; } .checkout-main-container { padding-top: 100px; } }
+  </style>
+</head>
+<body>
+
+    <div id="cursor"></div>
+
+    <div class="checkout-main-container">
+        
+        <div class="checkout-header-center">
+            <h1>Checkout System</h1>
+            <div class="step-indicator">
+                <div class="step-dot active" id="dot1"></div>
+                <div class="step-dot" id="dot2"></div>
+                <div class="step-dot" id="dot3"></div>
+            </div>
+        </div>
+
+        <div class="checkout-grid">
+            
+            <div class="checkout-left">
+                
+                <div class="checkout-box step-section active" id="step-1">
+                    <h3 style="margin-bottom:25px; font-size:14px; text-transform:uppercase;">01. Informasi Pengiriman</h3>
+                    
+                    <div class="form-group">
+                        <label>Nama Lengkap</label>
+                        <input type="text" class="form-control" id="coName" placeholder="Nama Anda">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" class="form-control" id="coEmail" placeholder="Email Anda">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Nomor WhatsApp</label>
+                        <input type="tel" class="form-control" id="coPhone" placeholder="08xxxxxx">
+                    </div>
+
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
+                        <div class="form-group">
+                            <label>Provinsi</label>
+                            <input type="text" class="form-control" id="coProv" placeholder="Contoh: Jakarta">
+                        </div>
+                        <div class="form-group">
+                            <label>Kota/Kabupaten</label>
+                            <input type="text" class="form-control" id="coCity" placeholder="Kota Anda">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Alamat Lengkap</label>
+                        <textarea class="form-control" id="coAddress" rows="3" placeholder="Nama Jalan, Blok, No. Rumah..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Ekspedisi</label>
+                        <select class="form-control" id="coCourier" onchange="updateSummary()">
+                            <option value="jne">JNE REG (Rp 30.000)</option>
+                            <option value="jnt">J&T Express (Rp 35.000)</option>
+                            <option value="dhl">DHL International (Rp 550.000)</option>
+                        </select>
+                    </div>
+
+                    <button class="btn-checkout btn-primary" onclick="goToStep(2)">Lanjut ke Pembayaran</button>
+                </div>
+
+                <div class="checkout-box step-section" id="step-2">
+                    <h3 style="margin-bottom:25px; font-size:14px; text-transform:uppercase;">02. Metode Pembayaran</h3>
+                    
+                    <div style="background:#111; padding:20px; border-radius:12px; border:1px solid #222; margin-bottom:20px; text-align:center;">
+                        <p style="font-size:11px; color:#666; margin-bottom:15px;">1. Metode QRIS</p>
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=MAGOS_ARCHIVE_PAYMENT" 
+                             alt="QRIS MAGOS" style="width:180px; border-radius:8px; margin-bottom:15px; border:5px solid #fff;">
+                        
+                        <div style="text-align:left; margin-top:20px; border-top:1px solid #222; padding-top:15px;">
+                            <p style="font-size:10px; color:#666;">TRANSFER BANK:</p>
+                            <p style="font-size:14px; font-weight:900; letter-spacing:1px; margin:5px 0;">BANK BCA</p>
+                            <p style="font-size:18px; font-weight:900; color:var(--magos-green);">123-456-7890</p>
+                            <p style="font-size:11px; color:#fff;">A/N MAGOS Archieve</p>
+                        </div>
+                    </div>
+
+                    <p style="font-size:10px; color:#666; margin-bottom:20px; line-height:1.5;">
+                        *Selesaikan pembayaran sebelum waktu habis. Foto bukti transfer untuk dikonfirmasi di tahap berikutnya.
+                    </p>
+
+                    <div style="display:flex; gap:10px;">
+                        <button class="btn-checkout" style="background:#222; color:#fff;" onclick="goToStep(1)">Kembali</button>
+                        <button class="btn-checkout btn-primary" onclick="processPayment()">Konfirmasi Pembayaran</button>
+                    </div>
+                </div>
+
+                <div class="checkout-box step-section" id="step-3">
+                    <div style="text-align:center;">
+                        <div style="width:60px; height:60px; background:var(--magos-green); border-radius:50%; display:inline-flex; align-items:center; justify-content:center; margin-bottom:20px;">
+                            <span style="font-size:30px; color:#000;">✓</span>
+                        </div>
+                        <h2 style="font-size:20px; margin-bottom:10px;">PESANAN DITERIMA</h2>
+                        <p style="font-size:12px; color:#888; margin-bottom:30px;">ID Transaksi: <span id="resID" style="color:#fff; font-family:monospace;">#MG-XXXX</span></p>
+                    </div>
+
+                    <div style="border-top:1px solid #222; padding-top:20px;">
+                        <div class="summary-item"><span>Nama</span><span id="resName" style="color:#fff;">-</span></div>
+                        <div class="summary-item"><span>WhatsApp</span><span id="resPhone" style="color:#fff;">-</span></div>
+                        <div class="summary-item"><span>Tujuan</span><span id="resAddr" style="color:#fff; text-align:right; max-width:200px;">-</span></div>
+                        <div class="summary-item"><span>Kurir</span><span id="resCour" style="color:#fff;">-</span></div>
+                        <div class="summary-item total"><span>Total Bayar</span><span id="resTotal" style="color:var(--magos-green);">Rp 0</span></div>
+                    </div>
+
+                    <div style="display:none;">
+                        <span id="resIDPDF"></span>
+                        <span id="resNamePDF"></span>
+                        <span id="resPhonePDF"></span>
+                        <span id="resAddrPDF"></span>
+                        <span id="resEmailPDF"></span>
+                    </div>
+
+                    <button class="btn-checkout btn-wa" onclick="sendWA()">Konfirmasi via WhatsApp</button>
+                    <button class="btn-checkout" style="background: #fff; color: #000; margin-top: 10px; font-weight: 900;" onclick="generateInvoicePDF()">
+                        <i class="fa-solid fa-file-pdf"></i> Download Invoice (PDF)
+                    </button>
+                    <button class="btn-checkout" style="background:transparent; border:1px solid #333; color:#666;" onclick="window.location.href='magos.html'">Kembali ke Toko</button>
+                </div>
+
+            </div>
+
+            <div class="checkout-right">
+                <div class="checkout-box">
+                    <h3 style="margin-bottom:20px; font-size:12px; text-transform:uppercase; letter-spacing:1px;">Ringkasan Pesanan</h3>
+                    
+                    <div id="checkoutProductList" style="max-height:200px; overflow-y:auto; margin-bottom:20px;"></div>
+
+                    <div class="voucher-box" style="margin-bottom: 20px; padding: 15px; background: #111; border: 1px dashed #333; border-radius: 8px;">
+                        <label style="font-size:9px; font-weight:900; color:#666; display:block; margin-bottom:8px;">PROMO CODE</label>
+                        <div style="display: flex; gap: 8px;">
+                            <input type="text" id="voucherCode" class="form-control" placeholder="Kode Promo" style="text-transform: uppercase; font-size: 11px;">
+                            <button class="btn-primary" onclick="applyVoucher()" style="padding: 0 15px; border-radius: 8px; font-size: 10px; font-weight: 900; cursor: pointer;">APPLY</button>
+                        </div>
+                        <p id="voucherMsg" style="font-size: 10px; margin-top: 8px; display: none; font-weight: 700;"></p>
+                    </div>
+
+                    <div style="border-top:1px solid #222; padding-top:15px;">
+                        <div class="summary-item"><span>Subtotal</span><span id="sumSubtotal">Rp 0</span></div>
+                        <div class="summary-item"><span>Pengiriman</span><span id="sumShippingCost">Rp 0</span></div>
+                        <div class="summary-item" id="rowDiscount" style="display:none; color:var(--magos-green);">
+                            <span>Diskon</span><span id="sumDiscount">- Rp 0</span>
+                        </div>
+                        <div class="summary-item total">
+                            <span>Total</span><span id="sumGrandTotal">Rp 0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="timerPop">
+        <div class="pop-content">
+            <h3 style="margin-bottom:10px;">MENUNGGU PEMBAYARAN</h3>
+            <p style="font-size:12px; color:#888; margin-bottom:20px;">Silahkan transfer sesuai nominal sebelum waktu habis.</p>
+            <div id="timer-clock" style="font-size:48px; font-weight:900; letter-spacing:2px; margin-bottom:20px; font-family:monospace;">10:00</div>
+            <button class="btn-checkout btn-primary" onclick="finishPay()">Saya Sudah Bayar</button>
+        </div>
+    </div>
+
+    <script src="magos/js/magos.js"></script>
+    <script>
+        let timeLeft = 600; 
+        let timerInterval;
+
+        window.onload = () => {
+            renderCheckoutProducts();
+            updateSummary();
+        };
+
+        function renderCheckoutProducts() {
+            const cart = JSON.parse(localStorage.getItem('magos_cart') || "[]");
+            const container = document.getElementById('checkoutProductList');
+            container.innerHTML = '';
+            if(cart.length === 0) {
+                container.innerHTML = '<p style="font-size:11px; color:#444;">Keranjang kosong.</p>';
+                return;
+            }
+            cart.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'summary-item';
+                div.style.color = "#eee";
+                div.innerHTML = `<span>${item.name} (x${item.qty})</span><span>${formatMoney(item.price * item.qty)}</span>`;
+                container.appendChild(div);
+            });
+        }
+
+        function updateSummary() {
+    const cart = JSON.parse(localStorage.getItem('magos_cart') || "[]");
+    let subtotal = cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
+    
+    // Ambil value dari dropdown kurir
+    const courier = document.getElementById('coCourier').value;
+    
+    // Daftar harga ongkir (sesuaikan dengan magos.js)
+    const shippingRates = { 
+        'jne': 30000, 
+        'jnt': 35000, 
+        'dhl': 550000 
+    };
+    
+    let shipping = shippingRates[courier] || 0;
+    let discount = parseFloat(localStorage.getItem('magos_applied_discount') || 0);
+    let grandTotal = (subtotal + shipping) - discount;
+
+    // Update tampilan layar
+    document.getElementById('sumSubtotal').innerText = formatMoney(subtotal);
+    document.getElementById('sumShippingCost').innerText = formatMoney(shipping); // ID Baru
+    document.getElementById('sumGrandTotal').innerText = formatMoney(grandTotal);
+
+    // Tampilkan baris diskon jika ada
+    const rowDisc = document.getElementById('rowDiscount');
+    if(discount > 0) {
+        rowDisc.style.display = 'flex';
+        document.getElementById('sumDiscount').innerText = "- " + formatMoney(discount);
+    } else {
+        rowDisc.style.display = 'none';
+    }
+}
+
+        function formatMoney(num) {
+            return "Rp " + num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
+
+        function goToStep(n) {
+            if(n === 2) {
+                if(!document.getElementById('coName').value || !document.getElementById('coAddress').value || !document.getElementById('coEmail').value) {
+                    alert("Mohon lengkapi data pengiriman dan email.");
+                    return;
+                }
+            }
+            document.querySelectorAll('.step-section').forEach(s => s.classList.remove('active'));
+            document.getElementById(`step-${n}`).classList.add('active');
+            document.querySelectorAll('.step-dot').forEach((d, idx) => {
+                if(idx < n) d.classList.add('active');
+                else d.classList.remove('active');
+            });
+            window.scrollTo(0,0);
+        }
+
+        function processPayment() {
+            document.getElementById('timerPop').style.display = 'flex';
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                let m = Math.floor(timeLeft/60); 
+                let s = timeLeft%60;
+                document.getElementById('timer-clock').innerText = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+                if(timeLeft <= 0) { clearInterval(timerInterval); location.reload(); }
+                timeLeft--;
+            }, 1000);
+        }
+
+        function finishPay() {
+    try {
+        // Hentikan timer pembayaran
+        clearInterval(timerInterval);
+        document.getElementById('timerPop').style.display = 'none';
+        
+        // Ambil data dari input form pengiriman
+        const name = document.getElementById('coName').value;
+        const phone = document.getElementById('coPhone').value;
+        const email = document.getElementById('coEmail').value;
+        const addr = document.getElementById('coAddress').value;
+        const city = document.getElementById('coCity').value;
+        const courierText = document.getElementById('coCourier').options[document.getElementById('coCourier').selectedIndex].text.toUpperCase();
+        const totalText = document.getElementById('sumGrandTotal').innerText;
+        
+        // Buat satu Order ID yang unik
+        const orderID = "#MG-" + Math.random().toString(36).substr(2, 4).toUpperCase();
+
+        // --- TAHAP 0: Catat ke Transaction Log Warehouse ---
+        // Ambil data keranjang sebelum dihapus untuk dicatat di log
+        const cart = JSON.parse(localStorage.getItem('magos_cart') || "[]");
+        let warehouseLogs = JSON.parse(localStorage.getItem('magos_warehouse_logs') || "[]");
+        const timeStamp = new Date().toLocaleTimeString();
+
+        cart.forEach(item => {
+            warehouseLogs.unshift({ 
+                time: timeStamp, 
+                msg: `SALE: ${item.name} [${item.size}] x${item.qty} - ${name.toUpperCase()}`, 
+                type: 'sale' // Memberikan warna hijau di warehouse.html
+            });
+        });
+
+        // Simpan log terbaru ke localStorage (maksimal 50 entri)
+        localStorage.setItem('magos_warehouse_logs', JSON.stringify(warehouseLogs.slice(0, 50)));
+
+        // --- TAHAP 1: Isi Data Tampilan Visual (Step 3) ---
+        document.getElementById('resID').innerText = orderID;
+        document.getElementById('resName').innerText = name.toUpperCase();
+        document.getElementById('resPhone').innerText = phone;
+        document.getElementById('resAddr').innerText = addr.toUpperCase() + ", " + city.toUpperCase();
+        document.getElementById('resCour').innerText = courierText;
+        document.getElementById('resTotal').innerText = totalText;
+
+        // --- TAHAP 2: Isi Data Tersembunyi untuk Keperluan PDF ---
+        document.getElementById('resIDPDF').innerText = orderID;
+        document.getElementById('resNamePDF').innerText = name;
+        document.getElementById('resPhonePDF').innerText = phone;
+        document.getElementById('resAddrPDF').innerText = addr + ", " + city;
+        document.getElementById('resEmailPDF').innerText = email;
+
+        // --- TAHAP 3: Eksekusi Pengurangan Stok ---
+        deductStock(); // Mengurangi stok di magos_products_data
+
+        // --- TAHAP 4: Finalisasi Sesi ---
+        goToStep(3);
+        
+        // Bersihkan keranjang dan diskon
+        localStorage.removeItem('magos_cart');
+        localStorage.removeItem('magos_applied_discount');
+
+    } catch (e) {
+        console.error("Terjadi kesalahan pada sistem pembayaran:", e);
+        goToStep(3); 
+    }
+}
+
+function deductStock() {
+    // Ambil data keranjang dan data gudang dari localStorage
+    const cart = JSON.parse(localStorage.getItem('magos_cart') || "[]");
+    const productData = JSON.parse(localStorage.getItem('magos_products_data') || "[]");
+
+    // Jika gudang kosong atau tidak ditemukan, hentikan proses
+    if (!productData || productData.length === 0) {
+        console.warn("Sistem Gudang: Data produk tidak ditemukan.");
+        return;
+    }
+
+    // Iterasi setiap item di keranjang untuk mengurangi stok di gudang
+    cart.forEach(cartItem => {
+        const warehouseItem = productData.find(p => p.id === cartItem.id);
+        if (warehouseItem) {
+            // Pastikan ukuran (size) tersedia di data stok produk tersebut
+            if (warehouseItem.stock && warehouseItem.stock[cartItem.size] !== undefined) {
+                // Kurangi stok sesuai jumlah yang dibeli (qty)
+                warehouseItem.stock[cartItem.size] -= cartItem.qty;
+                
+                // Pengamanan: Jangan biarkan stok menjadi angka negatif
+                if (warehouseItem.stock[cartItem.size] < 0) {
+                    warehouseItem.stock[cartItem.size] = 0;
+                }
+            }
+        }
+    });
+
+    // Simpan kembali data stok terbaru ke localStorage (Gudang Utama)
+    localStorage.setItem('magos_products_data', JSON.stringify(productData));
+    console.log("Sistem Gudang: Stok berhasil diperbarui.");
+}
+
+        function sendWA() {
+            const id = document.getElementById('resID').innerText;
+            const name = document.getElementById('resName').innerText;
+            const total = document.getElementById('resTotal').innerText;
+            const msg = `Halo MAGOS Archive,%0A%0AKONFIRMASI PEMBAYARAN:%0AID ORDER: ${id}%0ANAMA: ${name}%0ATOTAL: ${total}%0A%0ASaya telah melakukan pembayaran via QRIS/Transfer. Mohon verifikasi pesanan saya.`;
+            window.open(`https://wa.me/6282283687565?text=${msg}`, '_blank');
+        }
+    </script>
+</body>
+</html>

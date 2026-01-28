@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>WAREHOUSE PRO V2 | MAGOS SYSTEM</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="magos/css/magos.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    :root { 
+        --magos-green: #25D366; 
+        --border: #222; 
+        --danger: #ff4444;
+    }
+    body { background: #000; color: #fff; padding: 40px 20px; font-family: 'Inter', sans-serif; cursor: none; }
+    .container { max-width: 1200px; margin: 0 auto; }
+    
+    /* Header & Logo */
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; border-bottom: 1px solid var(--border); padding-bottom: 20px; }
+    .logo-area { display: flex; align-items: center; gap: 20px; }
+    .logo-main { height: 60px; filter: invert(1); }
+    .system-status { display: flex; align-items: center; gap: 8px; font-size: 10px; color: var(--magos-green); font-weight: 900; }
+    .pulse-dot { width: 8px; height: 8px; background: var(--magos-green); border-radius: 50%; animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+
+    /* Dashboard Stats */
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 40px; }
+    .stat-card { background: #0b0b0b; border: 1px solid var(--border); padding: 20px; border-radius: 12px; }
+    .stat-card p { font-size: 9px; color: #666; text-transform: uppercase; margin-bottom: 5px; font-weight: 700; }
+    .stat-card h2 { font-size: 22px; font-weight: 900; }
+
+    /* Main Table */
+    .table-container { background: #0b0b0b; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 30px; }
+    table { width: 100%; border-collapse: collapse; }
+    th { background: #111; text-align: left; padding: 15px; font-size: 10px; text-transform: uppercase; color: #444; }
+    td { padding: 15px; font-size: 13px; border-bottom: 1px solid var(--border); }
+
+    .stock-pill { display: inline-flex; flex-direction: column; align-items: center; background: #000; border: 1px solid #222; padding: 5px 10px; border-radius: 6px; margin-right: 5px; }
+    .stock-pill .sz { font-size: 9px; color: #555; font-weight: 900; }
+    .stock-pill .qt.low { color: var(--danger); }
+
+    /* Log System */
+    .log-container { background: #050505; border: 1px solid var(--border); border-radius: 12px; padding: 20px; max-height: 300px; overflow-y: auto; }
+    .log-item { display: flex; justify-content: space-between; font-size: 11px; padding: 8px 0; border-bottom: 1px solid #111; font-family: monospace; }
+    .log-time { color: #444; }
+    .log-msg.sale { color: var(--magos-green); }
+    .log-msg.manual { color: #aaa; }
+
+    .btn-action { background: #fff; color: #000; border: none; padding: 8px 15px; border-radius: 6px; font-size: 10px; font-weight: 900; cursor: pointer; }
+    .btn-action:hover { background: var(--magos-green); }
+  </style>
+</head>
+<body>
+
+<div id="cursor"></div>
+
+<div class="container">
+    <div class="header">
+        <div class="logo-area">
+    <img src="magos/assets/img/logo-header.svg" alt="MAGOS" class="logo-main" style="filter: none;">
+    
+    <div style="border-left: 1px solid #222; padding-left: 20px;">
+        <div class="system-status"><div class="pulse-dot"></div> SYSTEM ONLINE</div>
+        <h1 style="font-size: 14px; color: #666; margin-top: 5px;">WAREHOUSE PRO V2</h1>
+    </div>
+</div>
+        <div style="display: flex; gap: 10px;">
+            <button class="btn-action hover-target" onclick="copyStockReport()"><i class="fa-solid fa-copy"></i> COPY REPORT</button>
+            <button class="btn-action hover-target" onclick="resetStock()" style="background:#ff4444; color:#fff;">HARD RESET</button>
+        </div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <p>Inventory Value</p>
+            <h2 id="totalVal">Rp 0</h2>
+        </div>
+        <div class="stat-card">
+            <p>Total Items</p>
+            <h2 id="totalQty">0</h2>
+        </div>
+        <div class="stat-card">
+            <p>SKU Active</p>
+            <h2 id="totalSKU">0</h2>
+        </div>
+        <div class="stat-card">
+            <p>Top Movement</p>
+            <h2 id="topSize">SIZE: M</h2>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Article Name</th>
+                    <th>Category</th>
+                    <th>Stock Allocation (S - XXL)</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="stockTableBody"></tbody>
+        </table>
+    </div>
+
+    <div style="margin-bottom: 10px; display:flex; justify-content:space-between; align-items:center;">
+        <h3 style="font-size: 12px; letter-spacing: 2px; color: #444;">TRANSACTION LOGS</h3>
+        <button class="hover-target" onclick="clearLogs()" style="background:none; border:none; color:#333; font-size:10px; cursor:pointer;">CLEAR LOGS</button>
+    </div>
+    <div class="log-container" id="logItems">
+        <div class="log-item"><span class="log-time">[00:00:00]</span> <span class="log-msg">SYSTEM_BOOT_COMPLETE</span></div>
+    </div>
+</div>
+
+<script src="magos/js/magos.js"></script>
+<script>
+    function loadWarehouse() {
+        const productData = JSON.parse(localStorage.getItem('magos_products_data'));
+        if(!productData) return;
+
+        const tbody = document.getElementById('stockTableBody');
+        tbody.innerHTML = '';
+        let totalItems = 0;
+        let totalVal = 0;
+
+        productData.forEach((p, index) => {
+            let stockHTML = '';
+            for (let size in p.stock) {
+                const qty = p.stock[size];
+                totalItems += qty;
+                totalVal += (qty * p.price);
+                const low = qty <= 2 ? 'low' : '';
+                stockHTML += `<div class="stock-pill"><span class="sz">${size}</span><span class="qt ${low}">${qty}</span></div>`;
+            }
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><strong>${p.name}</strong></td>
+                <td><span style="color:#444">${p.category}</span></td>
+                <td><div style="display:flex;">${stockHTML}</div></td>
+                <td><button class="btn-action hover-target" onclick="manualEdit(${index})">MANAGE</button></td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        document.getElementById('totalSKU').innerText = productData.length;
+        document.getElementById('totalQty').innerText = totalItems;
+        document.getElementById('totalVal').innerText = "Rp " + totalVal.toLocaleString('id-ID');
+        renderLogs();
+    }
+
+    function manualEdit(idx) {
+        const data = JSON.parse(localStorage.getItem('magos_products_data'));
+        const size = prompt("Enter Size (S/M/L/XL/XXL):").toUpperCase();
+        if(!data[idx].stock[size] && data[idx].stock[size] !== 0) return alert("Invalid Size");
+        
+        const change = parseInt(prompt("Enter quantity change (Example: 10 or -5):"));
+        if(!isNaN(change)) {
+            data[idx].stock[size] = Math.max(0, data[idx].stock[size] + change);
+            localStorage.setItem('magos_products_data', JSON.stringify(data));
+            addLog(`MANUAL_UPDATE: ${data[idx].name} [${size}] (${change > 0 ? '+' : ''}${change})`, 'manual');
+            loadWarehouse();
+        }
+    }
+
+    function addLog(msg, type) {
+        let logs = JSON.parse(localStorage.getItem('magos_warehouse_logs') || "[]");
+        const time = new Date().toLocaleTimeString();
+        logs.unshift({ time, msg, type });
+        localStorage.setItem('magos_warehouse_logs', JSON.stringify(logs.slice(0, 50)));
+        renderLogs();
+    }
+
+    function renderLogs() {
+        const logs = JSON.parse(localStorage.getItem('magos_warehouse_logs') || "[]");
+        const container = document.getElementById('logItems');
+        container.innerHTML = logs.map(l => `
+            <div class="log-item">
+                <span class="log-time">[${l.time}]</span>
+                <span class="log-msg ${l.type}">${l.msg}</span>
+            </div>
+        `).join('');
+    }
+
+    function clearLogs() {
+        localStorage.setItem('magos_warehouse_logs', "[]");
+        renderLogs();
+    }
+
+    function copyStockReport() {
+        const data = JSON.parse(localStorage.getItem('magos_products_data'));
+        let report = "MAGOS STOCK REPORT\n===================\n";
+        data.forEach(p => {
+            report += `${p.name} | S:${p.stock.S} M:${p.stock.M} L:${p.stock.L} XL:${p.stock.XL}\n`;
+        });
+        navigator.clipboard.writeText(report);
+        alert("Report copied to clipboard!");
+    }
+
+    function resetStock() {
+        if(confirm("DANGEROUS: Restore factory default stocks?")) {
+            localStorage.removeItem('magos_products_data');
+            location.reload();
+        }
+    }
+
+    window.onload = loadWarehouse;
+</script>
+
+</body>
+</html>

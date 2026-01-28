@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>MAGOS | USAHADULU Ecosystem</title>
+  <link rel="icon" type="image/svg+xml" href="magos/assets/img/magos-icon.svg">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="magos/css/magos.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+  <style>
+      .marquee-container { 
+          background: #fff; color: #000; padding: 8px 0; 
+          overflow: hidden; white-space: nowrap; border-bottom: 1px solid #333; 
+          position: relative; z-index: 900;
+      }
+      .marquee-content { 
+          display: inline-block; animation: marquee 20s linear infinite; 
+          font-weight: 900; font-size: 12px; letter-spacing: 1px; 
+      }
+      @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+      @media (max-width: 768px) {
+          .filter-container { flex-direction: column; align-items: flex-start; }
+      }
+  </style>
+</head>
+<body>
+    <div id="cursor"></div>
+
+    <div id="preloader">
+        <div class="preloader-content">
+            <img src="magos/assets/img/logo-header.svg" alt="Loading..." class="logo-loader blink-img">
+            <div class="loading-line"></div>
+        </div>
+    </div>
+
+<header>
+  <div class="header-left">
+      <div class="logo" onclick="window.scrollTo({top:0, behavior:'smooth'})">
+        <img src="magos/assets/img/magos-icon.svg" alt="MAGOS" class="logo-header">
+      </div>
+  </div>
+
+  <nav>
+    <a href="index.html" class="studio-link" data-i18n="nav_back">&larr; KEMBALI KE STUDIO</a>
+    <a href="#shop" data-i18n="nav_drop">RILISAN TERBARU</a>
+    <a href="magos/gallery.html" data-i18n="nav_gallery">GALERI</a> 
+    <a href="#" onclick="alert('Coming Soon'); return false;" style="opacity: 0.5;" data-i18n="nav_store">TOKO (SEGERA)</a>
+  </nav>
+
+  <div class="header-right" style="display: flex; align-items: center; gap: 20px;">
+    
+    <div class="lang-switch hover-target" id="langToggle" data-lang="id" onclick="toggleLanguage()">
+        <div class="lang-circle"></div>
+    </div>
+
+    <div class="hover-target" onclick="toggleWishlist()" style="position: relative; cursor: pointer;">
+        <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+        </svg>
+        <span class="cart-count" id="wishlistCount" style="background: #e02e42;">0</span>
+    </div>
+
+    <div class="cart-trigger hover-target" id="cartTrigger" onclick="toggleCart()">
+      <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="9" cy="21" r="1"></circle>
+        <circle cx="20" cy="21" r="1"></circle>
+        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+      </svg>
+      <span class="cart-count" id="cartCount">0</span>
+    </div>
+
+  </div>
+</header>
+
+<div class="marquee-container" style="margin-top: 80px;">
+    <div class="marquee-content">
+        <span>MAGOS ARCHIVE // VOL.1 DARKNESS AVAILABLE NOW // SHIP WORLDWIDE // INDUSTRIAL WEAR // </span>
+        <span>MAGOS ARCHIVE // VOL.1 DARKNESS AVAILABLE NOW // SHIP WORLDWIDE // INDUSTRIAL WEAR // </span>
+        <span>MAGOS ARCHIVE // VOL.1 DARKNESS AVAILABLE NOW // SHIP WORLDWIDE // INDUSTRIAL WEAR // </span>
+    </div>
+</div>
+
+<main>
+    <section class="hero-slider-container" style="margin-top: 0;">
+        <div class="hero-overlay-text">
+            <img src="magos/assets/img/logo-header.svg" alt="ARCHIVE 2026" class="logo-hero">
+            <p data-i18n="hero_sub">ESTETIKA GELAP & PAKAIAN INDUSTRIAL.</p>
+            <button class="btn primary" onclick="document.getElementById('shop').scrollIntoView()" data-i18n="hero_btn">LIHAT KOLEKSI</button>
+        </div>
+        <div class="hero-track">
+            <div class="slide"><img src="magos/assets/img/magos_artwork_1.jpg"></div>
+            <div class="slide"><img src="magos/assets/img/magos_artwork_2.jpg"></div>
+            <div class="slide"><img src="magos/assets/img/magos_artwork_3.jpg"></div>
+            <div class="slide"><img src="magos/assets/img/magos_artwork_4.jpg"></div>
+            <div class="slide"><img src="magos/assets/img/magos_artwork_5.jpg"></div>
+        </div>
+    </section>
+
+    <section id="shop">
+      <div class="section-header">
+          <h2 class="section-title" data-i18n="sec_drops">KOLEKSI TERBARU</h2>
+          <div class="line-spacer"></div>
+      </div>
+      
+      <div class="filter-container">
+          <button class="filter-btn active" onclick="filterProducts('all')">ALL</button>
+          <button class="filter-btn" onclick="filterProducts('T-SHIRT')">T-SHIRT</button>
+          <button class="filter-btn" onclick="filterProducts('OUTERWEAR')">OUTERWEAR</button>
+          <button class="filter-btn" onclick="filterProducts('BOTTOMS')">BOTTOMS</button>
+          <button class="filter-btn" onclick="filterProducts('ACCESSORIES')">ACCESSORIES</button>
+      </div>
+
+      <div class="grid lookbook-layout" id="productGrid"></div> 
+      <div id="paginationContainer" class="pagination-container"></div>
+    </section>
+</main>
+
+<section id="social-proof" style="background: #000; border-top: 1px dashed #333;">
+    <div class="section-header">
+        <h2 class="section-title">@MAGOS.ARCHIVE</h2>
+        <div class="line-spacer"></div>
+    </div>
+    <div class="grid" style="grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));">
+        <div class="prod hover-target"><img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=400" style="width:100%; filter:grayscale(1);"></div>
+        <div class="prod hover-target"><img src="https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=400" style="width:100%; filter:grayscale(1);"></div>
+        <div class="prod hover-target"><img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=400" style="width:100%; filter:grayscale(1);"></div>
+        <div class="prod hover-target"><img src="https://images.unsplash.com/photo-1534972195531-d756b9bfa9f2?w=400" style="width:100%; filter:grayscale(1);"></div>
+        <div class="prod hover-target"><img src="https://images.unsplash.com/photo-1571120038865-c35012e1284a?w=400" style="width:100%; filter:grayscale(1);"></div>
+    </div>
+</section>
+
+<footer class="industrial-footer">
+    <div class="footer-divider"></div>
+
+    <div class="footer-grid">
+        
+        <div class="f-col brand-col">
+            <img src="magos/assets/img/logo-header.svg" alt="MAGOS" class="f-logo">
+            <p class="f-desc" data-i18n="hero_sub">ESTETIKA GELAP & PAKAIAN INDUSTRIAL.</p>
+            <div class="f-status">
+                <span class="dot"></span> SYSTEM ONLINE
+            </div>
+        </div>
+
+        <div class="f-col link-col">
+            <h4 class="f-head">SITEMAP</h4>
+            <ul class="f-links">
+                <li><a href="index.html">STUDIO</a></li>
+                <li><a href="#shop">ARCHIVE / SHOP</a></li>
+                <a href="contact.html" class="hover-target">CONTACT</a>
+            </ul>
+        </div>
+
+        <div class="f-col link-col">
+            <h4 class="f-head">LEGAL</h4>
+            <ul class="f-links">
+                <li><a href="magos/terms.html" data-i18n="terms_title">TERMS & CONDITIONS</a></li>
+                <li><a href="magos/privacy.html">PRIVACY POLICY</a></li>
+            </ul>
+        </div>
+
+        <div class="f-col link-col end-col">
+            <h4 class="f-head">CONNECT</h4>
+            <ul class="f-social">
+                <li><a href="#">INSTAGRAM <span class="arrow">↗</span></a></li>
+                <li><a href="#">SOCIAL MEDIA <span class="arrow">↗</span></a></li>
+                <li><a href="mailto:contact@magos.com">EMAIL <span class="arrow">↗</span></a></li>
+            </ul>
+             <p class="f-copyright" data-i18n="footer_copy">©2026 | USAHADULU STUDIO</p>
+        </div>
+
+    </div>
+</footer>
+
+<div class="modal-backdrop" id="productModal">
+    <div class="modal-window">
+      <div class="modal-close" onclick="closeModal('productModal')"><span>&times;</span></div>
+      <div class="product-slider-wrapper">
+          <div class="product-slider-track" id="pTrack"></div>
+          <div class="p-slider-btn prev" onclick="moveProductSlide(-1)">&#10094;</div>
+          <div class="p-slider-btn next" onclick="moveProductSlide(1)">&#10095;</div>
+      </div>
+      <div class="modal-info">
+        <div class="info-top">
+            <h2 class="modal-title" id="mTitle">Nama Produk</h2>
+            <p class="modal-price" id="mPrice">Rp 000</p>
+            <div class="size-chart-trigger" onclick="toggleSizeChart()" data-i18n="btn_size_chart">LIHAT SIZE CHART</div>
+            <div class="modal-desc" id="mDesc"></div>
+        </div>
+        <div class="info-bottom">
+            <p id="sizeLabel" style="font-size: 10px; font-weight: bold; color: #666; margin-bottom: 10px; text-transform: uppercase;" data-i18n="lbl_select_size">PILIH UKURAN:</p>
+            <div class="stock-container" id="stockContainer">
+                <div class="stock-item"><span class="stock-num">3</span><div class="stock-circle">S</div></div>
+                <div class="stock-item"><span class="stock-num">12</span><div class="stock-circle">M</div></div>
+                <div class="stock-item"><span class="stock-num">8</span><div class="stock-circle">L</div></div>
+                <div class="stock-item"><span class="stock-num">5</span><div class="stock-circle">XL</div></div>
+                <div class="stock-item empty"><span class="stock-num">0</span><div class="stock-circle">XXL</div></div>
+            </div>
+            <div id="allSizeBadge" style="display: none; margin-bottom: 20px;">
+                <div style="display: inline-block; border: 1px solid #fff; background: #fff; color: #000; padding: 10px 30px; border-radius: 50px; font-weight: 900; font-size: 12px; letter-spacing: 1px;">ALL SIZE</div>
+            </div>
+            <button class="btn primary" id="btnAddToCart" style="width:100%;" data-i18n="btn_add_cart">TAMBAH KE KERANJANG</button>
+        </div>
+      </div>
+    </div>
+</div>
+
+<div class="modal-backdrop" id="checkoutModal">
+    <div class="modal-window checkout-window">
+        <div class="modal-close" onclick="closeModal('checkoutModal')"><span>&times;</span></div>
+        <div class="checkout-content">
+            <h2 class="modal-title" style="margin-bottom: 20px; border-bottom: 1px dashed #333; padding-bottom: 15px;">CHECKOUT</h2>
+            <div id="step-1-info" class="checkout-step">
+                <h4 style="margin-bottom:15px; color:#fff;">1. SHIPPING DETAILS</h4>
+                <div class="form-group"><label>Full Name</label><input type="text" id="coName" class="contact-input" placeholder="Ex: Fajri"></div>
+                <div class="form-group"><label>WhatsApp / Phone</label><input type="tel" id="coPhone" class="contact-input" placeholder="08xx"></div>
+                <div class="form-group"><label>Full Address</label><textarea id="coAddress" class="contact-input" rows="3" placeholder="Street, City, Country, Zip Code"></textarea></div>
+                <button class="btn primary" onclick="goToStep2()" style="width:100%; margin-top:10px;">NEXT: SHIPPING & PAYMENT</button>
+            </div>
+            <div id="step-2-shipping" class="checkout-step" style="display:none;">
+                <h4 style="margin-bottom:15px; color:#fff;">2. METHOD</h4>
+                <div class="form-group">
+                    <label>Shipping Courier</label>
+                    <select id="coCourier" class="contact-input" onchange="calculateGrandTotal()">
+                        <option value="jne">JNE REG (Local - IDR 30.000)</option>
+                        <option value="jnt">J&T Express (Local - IDR 35.000)</option>
+                        <option value="dhl">DHL Express (Intl - IDR 550.000)</option>
+                        <option value="fedex">FedEx (Intl - IDR 600.000)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Payment Method</label>
+                    <select id="coPayment" class="contact-input">
+                        <option value="BCA">BCA Transfer (Virtual Account)</option>
+                        <option value="QRIS">QRIS (GoPay/OVO/Dana)</option>
+                        <option value="PAYPAL">PayPal (International Only)</option>
+                    </select>
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button class="btn ghost" onclick="showStep(1)" style="width:50%;">BACK</button>
+                    <button class="btn primary" onclick="goToStep3()" style="width:50%;">REVIEW ORDER</button>
+                </div>
+            </div>
+            <div id="step-3-summary" class="checkout-step" style="display:none;">
+                <h4 style="margin-bottom:15px; color:#fff;">3. ORDER SUMMARY</h4>
+                <div class="confirm-data-box" style="font-size: 11px; color: #aaa; margin-bottom: 20px;">
+                    <p><strong style="color:#fff;">Ship To:</strong> <span id="sumName">-</span></p>
+                    <p><strong style="color:#fff;">Address:</strong> <span id="sumAddress">-</span></p>
+                    <p><strong style="color:#fff;">Courier:</strong> <span id="sumCourier">-</span></p>
+                    <p><strong style="color:#fff;">Payment:</strong> <span id="sumPayment">-</span></p>
+                </div>
+                <div class="voucher-section" style="margin-bottom: 20px; padding: 15px; background: #080808; border: 1px dashed #333; border-radius: 8px;">
+                    <label style="font-size:10px; font-weight:bold; color:#666; display:block; margin-bottom:5px;">HAVE A PROMO CODE?</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="voucherCode" class="contact-input" placeholder="Ex: MGS-STORE" style="text-transform: uppercase; padding: 8px;">
+                        <button class="btn" onclick="applyVoucher()" style="padding: 8px 15px; font-size: 10px;">APPLY</button>
+                    </div>
+                    <p id="voucherMsg" style="font-size: 10px; margin-top: 5px; display: none;"></p>
+                </div>
+                <div style="border-top: 1px dashed #333; padding-top: 15px; margin-bottom: 20px;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:5px; font-size:12px; color:#888;">
+                        <span>Subtotal</span><span id="sumSubtotal">Rp 0</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:5px; font-size:12px; color:#888;">
+                        <span>Shipping Cost</span><span id="sumShippingCost">Rp 0</span>
+                    </div>
+                    <div id="rowDiscount" style="display:none; justify-content:space-between; margin-bottom:5px; font-size:12px; color:#25D366;">
+                        <span>Discount</span><span id="sumDiscount">- Rp 0</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; font-weight:900; font-size:16px; color:#fff; margin-top:10px; border-top: 1px solid #333; padding-top: 10px;">
+                        <span>TOTAL</span><span id="sumGrandTotal">Rp 0</span>
+                    </div>
+                </div>
+                <button class="btn primary" onclick="generateInvoicePDF()" style="width:100%;">DOWNLOAD INVOICE (PDF)</button>
+                <button class="btn" onclick="sendOrderViaWA()" style="width:100%; margin-top:10px; background:#25D366; border-color:#25D366; color:#fff; font-weight:900;">
+                    CONFIRM VIA WHATSAPP &rarr;
+                </button>
+                <button class="btn ghost" onclick="showStep(2)" style="width:100%; margin-top:10px;">BACK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-backdrop" id="sizeChartModal">
+    <div class="modal-window size-chart-window" style="max-width: 500px; padding: 30px;">
+        <div class="modal-close" onclick="closeModal('sizeChartModal')"><span>&times;</span></div>
+        <h3 style="margin-bottom: 25px; text-align: left; font-weight: 900; letter-spacing: 1px; font-size: 20px;">SIZE GUIDE</h3>
+        <div class="static-chart-container" style="display: flex; justify-content: center; align-items: center; margin-bottom: 20px;">
+            <img src="assets/img/size-guide.jpg" alt="Size Chart" style="max-width: 100%; height: auto; border-radius: 8px; border: 1px dashed #333;">
+        </div>
+        <p style="text-align: center; font-size: 11px; color: #666;">*Tolerance 1-2cm due to manual measurement.</p>
+    </div>
+</div>
+
+<div class="cart-drawer-backdrop" id="cartBackdrop" onclick="toggleCart()"></div>
+
+<div class="cart-drawer" id="cartDrawer">
+    <div class="cart-header">
+        <div class="cart-title-capsule" onclick="toggleCart()">
+            <span style="font-weight:900; letter-spacing:1px; font-size:12px;">CART</span>
+            <span class="close-icon-inside">&times;</span>
+        </div>
+    </div>
+    <div class="cart-items-container" id="cartItemsContainer"></div>
+    <div class="cart-footer">
+        <div class="cart-total"><span>TOTAL</span><span id="cartTotalDisplay">Rp 0</span></div>
+        <button class="btn primary cart-checkout-btn" onclick="openCheckoutModal()">CHECK OUT</button>
+    </div>
+</div>
+
+<div class="cart-drawer" id="wishlistDrawer" style="border-left: 1px solid #333;">
+    <div class="cart-header">
+        <div class="cart-title-capsule" onclick="toggleWishlist()">
+            <span style="font-weight:900; letter-spacing:1px; font-size:12px;">WISHLIST</span>
+            <span class="close-icon-inside">&times;</span>
+        </div>
+    </div>
+    <div class="cart-items-container" id="wishlistItemsContainer"></div>
+</div>
+
+<script src="magos/js/magos.js"></script>
+</body>
+</html>
