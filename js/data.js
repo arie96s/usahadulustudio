@@ -37,7 +37,7 @@ const siteData = {
             nav_shop: "TOKO ASET", 
             shop_title: "MARKET ASET KREATIF",
             shop_desc: "Tidak mau menunggu? Ambil aset premium siap pakai kami. Kualitas tinggi, bisa diedit, dan download instan.",
-            shop_note: "*Pembayaran aman & pengiriman otomatis via Mayar/Gumroad",
+            shop_note: "*Pembayaran aman & pengiriman internasional via Redbubble",
             filter_all_assets: "SEMUA ASET",
             filter_template: "TEMPLATE",
             filter_mockup: "MOCKUP",
@@ -85,7 +85,7 @@ const siteData = {
             nav_shop: "ASSET STORE",
             shop_title: "CREATIVE ASSETS MARKET",
             shop_desc: "Don't want to wait? Grab our premium pre-made assets. High quality, fully editable, and instant download.",
-            shop_note: "*Secure payment & delivery powered by Gumroad/LemonSqueezy",
+            shop_note: "*Secure payment & worldwide delivery powered by Redbubble",
             filter_all_assets: "ALL ASSETS",
             filter_template: "TEMPLATES",
             filter_mockup: "MOCKUPS",
@@ -248,19 +248,60 @@ const siteData = {
         "MAGOS-VIP": { type: 'fixed', value: 50000 },    // Potongan fix 50 Ribu (Contoh)
         "ADMIN-FREE": { type: 'percent', value: 1.00 }   // Gratis 100% (Untuk tes)
     },
+    // Di dalam translations.id:
+id: {
+    // ... (kode lama biarkan) ...
 
+    // --- TAMBAHAN BARU UNTUK INDEX ---
+    core_title: "THE CORE",
+    core_subtitle: "Identitas Visual & Aset Digital.",
+    
+    // Kartu 1 (Visual Identity)
+    card_1_title: "IDENTITAS VISUAL",
+    card_1_desc: "Menerjemahkan visi menjadi visual. Spesialis logo, branding, dan identitas clothing line.",
+    
+    // Kartu 2 (Creative Supply)
+    card_2_title: "SUPLAI KREATIF",
+    card_2_desc: "Akses ribuan aset desain premium. Vektor, mockup, dan template siap pakai.",
+    card_2_btn: "KUNJUNGI TOKO ➔",
+    
+    // Kartu 3 (Est 2013)
+    card_3_title: "EST. 2013",
+    card_3_desc: "Berdiri di Dumai, berkarya untuk global. Menggabungkan etos kerja keras dengan estetika."
+},
 
-    // --- DATA SHOP ASSETS (MULTI-CURRENCY READY) ---
+// Di dalam translations.en:
+en: {
+    // ... (kode lama biarkan) ...
+
+    // --- TAMBAHAN BARU UNTUK INDEX ---
+    core_title: "THE CORE",
+    core_subtitle: "Visual Identity & Digital Assets.",
+    
+    // Kartu 1 (Visual Identity)
+    card_1_title: "VISUAL IDENTITY",
+    card_1_desc: "Translating vision into visuals. Specialist in logo, branding, and clothing line identity.",
+    
+    // Kartu 2 (Creative Supply)
+    card_2_title: "CREATIVE SUPPLY",
+    card_2_desc: "Access thousands of premium assets. Vectors, mockups, and ready-to-use templates.",
+    card_2_btn: "VISIT STORE ➔",
+    
+    // Kartu 3 (Est 2013)
+    card_3_title: "EST. 2013",
+    card_3_desc: "Established in Dumai, crafting for the globe. Combining hard work ethics with aesthetics."
+    },
+
+    // --- DATA SHOP ASSETS (REDBUBBLE EXCLUSIVE) ---
     shop: [
         {
             id: 101,
             category: 'template',
             title: 'METAL BAND LOGO KIT VOL.1',
             type: 'Adobe Illustrator / EPS',
-            priceRaw: 149000, // Harga IDR
-            img: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=600&q=80', 
-            link_idr: 'https://mayar.id/', // Link Mayar
-            link_usd: 'https://gumroad.com/', // Link Gumroad
+            priceRaw: 14.99, // Harga dalam USD
+            img: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=600&q=80',
+            link_redbubble: 'https://www.redbubble.com/shop/ap/YOUR_PRODUCT_ID_1', // Ganti dengan link Redbubble Anda
             badge: 'BEST SELLER'
         },
         {
@@ -268,10 +309,9 @@ const siteData = {
             category: 'mockup',
             title: 'HEAVYWEIGHT TEE MOCKUP',
             type: 'Photoshop PSD (4K)',
-            priceRaw: 99000,
+            priceRaw: 9.99, // Harga dalam USD
             img: 'https://images.unsplash.com/photo-1571120038865-c35012e1284a?auto=format&fit=crop&w=600&q=80',
-            link_idr: '#',
-            link_usd: '#',
+            link_redbubble: 'https://www.redbubble.com/shop/ap/YOUR_PRODUCT_ID_2',
             badge: null
         },
         {
@@ -279,10 +319,9 @@ const siteData = {
             category: 'vector',
             title: 'DARK SKULL VECTOR PACK',
             type: 'SVG / PNG / AI',
-            priceRaw: 125000,
+            priceRaw: 12.50, // Harga dalam USD
             img: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80',
-            link_idr: '#',
-            link_usd: '#',
+            link_redbubble: 'https://www.redbubble.com/shop/ap/YOUR_PRODUCT_ID_3',
             badge: 'NEW'
         },
         {
@@ -290,10 +329,9 @@ const siteData = {
             category: 'template',
             title: 'RETRO INSTAGRAM FEEDS',
             type: 'Canva Template',
-            priceRaw: 75000,
+            priceRaw: 7.99, // Harga dalam USD
             img: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?auto=format&fit=crop&w=600&q=80',
-            link_idr: '#',
-            link_usd: '#',
+            link_redbubble: 'https://www.redbubble.com/shop/ap/YOUR_PRODUCT_ID_4',
             badge: null
         },
         {
@@ -301,10 +339,9 @@ const siteData = {
             category: 'mockup',
             title: 'HOODIE STREETWEAR MOCKUP',
             type: 'Photoshop PSD',
-            priceRaw: 110000,
+            priceRaw: 11.00, // Harga dalam USD
             img: 'https://images.unsplash.com/photo-1556906781-9a412961c28c?auto=format&fit=crop&w=600&q=80',
-            link_idr: '#',
-            link_usd: '#',
+            link_redbubble: 'https://www.redbubble.com/shop/ap/YOUR_PRODUCT_ID_5',
             badge: 'POPULAR'
         },
         {
@@ -312,13 +349,12 @@ const siteData = {
             category: 'vector',
             title: 'GOTHIC FONT BUNDLE',
             type: 'TTF / OTF',
-            priceRaw: 199000,
+            priceRaw: 19.99, // Harga dalam USD
             img: 'https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?auto=format&fit=crop&w=600&q=80',
-            link_idr: '#',
-            link_usd: '#',
+            link_redbubble: 'https://www.redbubble.com/shop/ap/YOUR_PRODUCT_ID_6',
             badge: null
         }   
-    ],  // <--- INI YANG HILANG DI KODE ABANG (Penutup Array Shop)
+    ],
 
     // --- DATA BLOG / ARTIKEL ---
     blog: [

@@ -348,12 +348,12 @@ window.closeLightboxOnly = function() {
 let currentShopPage = 1;
 const itemsPerPage = 6; 
 
-// --- FUNGSI RENDER SHOP TERBARU (MULTI-CURRENCY + PAGINATION) ---
+// Perubahan fungsi renderShop di main.js
+// Perbaikan fungsi renderShop di main.js agar harga tampil sesuai USD
 window.renderShop = function(filter, page = 1) {
     const grid = document.getElementById('shopGrid');
     if(!grid) return;
     
-    // Smooth Scroll logic
     if(page !== currentShopPage && page !== 1) {
         const yOffset = -120; 
         const y = grid.getBoundingClientRect().top + window.pageYOffset + yOffset;
@@ -363,22 +363,6 @@ window.renderShop = function(filter, page = 1) {
     currentShopPage = page;
     grid.innerHTML = ''; 
     const lang = siteData.currentLang; 
-    const t = siteData.translations[lang]; 
-
-    // Update State Tombol Currency
-    document.querySelectorAll('.currency-btn').forEach(btn => {
-        if(btn.dataset.curr === activeCurrency) btn.classList.add('active');
-        else btn.classList.remove('active');
-    });
-
-    // Reset tombol filter
-    document.querySelectorAll('#shopFilter .filter-btn').forEach(btn => {
-        btn.classList.remove('active');
-        const btnOnClick = btn.getAttribute('onclick');
-        if(btnOnClick.includes(`'${filter}'`) || (filter === 'all' && btnOnClick.includes(`'all'`))) {
-            btn.classList.add('active');
-        }
-    });
 
     const allItems = filter === 'all' ? siteData.shop : siteData.shop.filter(p => p.category === filter);
 
@@ -389,55 +373,33 @@ window.renderShop = function(filter, page = 1) {
         return;
     }
 
-    // Pagination Logic
     const totalItems = allItems.length;
     const totalPages = Math.ceil(totalItems / itemsPerPage);
-    if (page > totalPages) page = 1;
     const start = (page - 1) * itemsPerPage;
     const end = start + itemsPerPage;
     const paginatedItems = allItems.slice(start, end);
 
-    // Render Items dengan Logika Kurs
     paginatedItems.forEach((p, index) => {
-        let badgeStyle = '';
-        let badgeText = p.badge || ''; 
+        let badgeStyle = p.badge === 'NEW' ? 'background: #fff; color: #000;' : (p.badge === 'BEST SELLER' ? 'background: #ffd700; color: #000; border:none;' : '');
 
-        if(p.badge === 'NEW') badgeStyle = 'background: #fff; color: #000;';
-        else if (p.badge === 'BEST SELLER') badgeStyle = 'background: #ffd700; color: #000; border:none;';
-
-        // --- KALKULASI HARGA & MARKUP ---
-        let displayPrice, buyLink, btnText;
-
-        if (activeCurrency === 'IDR') {
-            // IDR (Harga Mentah dari Data)
-            displayPrice = "IDR " + (p.priceRaw / 1000).toFixed(0) + "K";
-            buyLink = p.link_idr;
-            btnText = lang === 'id' ? "BELI (MAYAR)" : "BUY (IDR)";
-        } else {
-            // USD (Rumus: (IDR / Rate) * 1.7)
-            let rawUsd = (p.priceRaw / currentRate) * 1.7;
-            
-            // Psychological Rounding (.99)
-            let finalUsd = Math.ceil(rawUsd) - 0.01; 
-            if (finalUsd < 0.99) finalUsd = 0.99; // Minimum price safety
-
-            displayPrice = "$ " + finalUsd.toFixed(2);
-            buyLink = p.link_usd;
-            btnText = "BUY (GUMROAD)";
-        }
+        // PERBAIKAN: Langsung menggunakan p.priceRaw karena data sudah dalam format USD (Dolar)
+        let displayPrice = "$ " + p.priceRaw.toFixed(2); 
+        
+        let buyLink = p.link_redbubble || "#"; 
+        let btnText = siteData.currentLang === 'id' ? "BELI DI REDBUBBLE" : "BUY ON REDBUBBLE";
 
         const card = document.createElement('div');
         card.className = 'product-card hover-target';
         card.style.animationDelay = `${index * 0.1}s`; 
         
         card.innerHTML = `
-            ${badgeText ? `<div class="instant-badge" style="${badgeStyle}">${badgeText}</div>` : ''}
+            ${p.badge ? `<div class="instant-badge" style="${badgeStyle}">${p.badge}</div>` : ''}
             <img src="${p.img}" alt="${p.title}" class="product-img">
             <div class="product-info">
                 <span class="product-cat">${p.type}</span>
                 <h3 class="product-title">${p.title}</h3>
                 <div class="product-footer">
-                    <span class="product-price" style="${activeCurrency === 'USD' ? 'color:#ffd700;' : ''}">${displayPrice}</span>
+                    <span class="product-price" style="color:#ffd700;">${displayPrice}</span>
                     <a href="${buyLink}" target="_blank" class="buy-btn hover-target">${btnText}</a>
                 </div>
             </div>
@@ -447,47 +409,6 @@ window.renderShop = function(filter, page = 1) {
     
     renderPagination(totalPages, filter);
     bindHoverEvents();
-}
-
-// Fungsi Switch Currency (Dipanggil dari HTML)
-window.switchCurrency = function(curr) {
-    activeCurrency = curr;
-    
-    // Cari filter yang sedang aktif agar tidak reset ke 'all'
-    const activeFilterBtn = document.querySelector('#shopFilter .filter-btn.active');
-    let currentFilter = 'all';
-    
-    if (activeFilterBtn) {
-        // Ekstrak nama filter dari atribut onclick, misal: renderShop('vector')
-        const match = activeFilterBtn.getAttribute('onclick').match(/'([^']+)'/);
-        if (match) currentFilter = match[1];
-    }
-    
-    renderShop(currentFilter, currentShopPage);
-}
-
-// --- FUNGSI GENERATOR TOMBOL ANGKA ---
-function renderPagination(totalPages, currentFilter) {
-    let pagContainer = document.getElementById('shopPagination');
-    if (!pagContainer) {
-        pagContainer = document.createElement('div');
-        pagContainer.id = 'shopPagination';
-        pagContainer.className = 'pagination-container';
-        const grid = document.getElementById('shopGrid');
-        grid.parentNode.insertBefore(pagContainer, grid.nextSibling);
-    }
-
-    pagContainer.innerHTML = '';
-    if (totalPages <= 1) return;
-
-    for (let i = 1; i <= totalPages; i++) {
-        const btn = document.createElement('button');
-        btn.className = `page-btn hover-target ${i === currentShopPage ? 'active' : ''}`;
-        btn.innerText = i;
-        btn.onclick = () => window.renderShop(currentFilter, i);
-        pagContainer.appendChild(btn);
-    }
-    bindHoverEvents(); 
 }
 
 // 10. REVIEW SYSTEM
@@ -1089,3 +1010,4 @@ document.addEventListener("DOMContentLoaded", () => {
         runWACycle();
     }
 });
+
