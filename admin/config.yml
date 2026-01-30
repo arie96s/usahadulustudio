@@ -9,7 +9,7 @@ collections:
   - name: "data"
     label: "Database Website"
     files:
-      # --- SHOP (JANGAN UBAH) ---
+      # --- SHOP (SINKRONISASI REDBUBBLE & USD) ---
       - file: "_data/shop.json"
         label: "Produk Shop"
         name: "shop"
@@ -20,13 +20,12 @@ collections:
             fields:
               - {label: "Nama Produk", name: "title", widget: "string"}
               - {label: "Kategori", name: "category", widget: "select", options: ["template", "mockup", "vector"]}
-              - {label: "Tipe File", name: "type", widget: "string"}
-              - {label: "Harga IDR", name: "priceRaw", widget: "number"}
-              - {label: "Gambar", name: "img", widget: "image"}
-              - {label: "Link Mayar", name: "link_idr", widget: "string", default: "#"}
-              - {label: "Link Gumroad", name: "link_usd", widget: "string", default: "#"}
+              - {label: "Tipe File", name: "type", widget: "string", hint: "Contoh: PSD, AI, EPS"}
+              - {label: "Harga (USD)", name: "priceRaw", widget: "number", value_type: "float", hint: "Masukkan angka saja (Gunakan titik untuk desimal), misal: 12.50"}
+              - {label: "Gambar Produk", name: "img", widget: "image"}
+              - {label: "Link Redbubble", name: "link_redbubble", widget: "string", default: "https://www.redbubble.com/people/arie96s/shop"}
               - {label: "Badge", name: "badge", widget: "select", options: ["NEW", "BEST SELLER", "NONE"], required: false}
-
+              
       # --- PORTFOLIO (JANGAN UBAH) ---
       - file: "_data/portfolio.json"
         label: "Portfolio Item"
