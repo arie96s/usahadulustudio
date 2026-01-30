@@ -1,14 +1,15 @@
 {
   "items": [
     {
-      "link_idr": "#",
       "link_usd": "#",
-      "title": "MONSTERA",
-      "category": "vector",
-      "type": "AI",
-      "priceRaw": 449000,
+      "badge": "NEW",
       "img": "img/magos-monster-1.png",
-      "badge": "NEW"
+      "link_idr": "#",
+      "title": "MONSTERA",
+      "link_redbubble": "https://www.redbubble.com/shop/ap/178061098",
+      "type": "AI",
+      "category": "vector",
+      "priceRaw": 49
     }
   ]
 }
