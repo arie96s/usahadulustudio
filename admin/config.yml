@@ -64,3 +64,29 @@ collections:
               
               # Isian Artikel Baru
               - {label: "Isi Artikel (Markdown)", name: "body", widget: "markdown", required: false}
+# --- MAGOS ARCHIVE (PRODUK FISIK) ---
+      - file: "_data/magos_products.json"
+        label: "Produk MAGOS Archive"
+        name: "magos_products"
+        fields:
+          - label: "Daftar Koleksi MAGOS"
+            name: "items"
+            widget: "list"
+            fields:
+              - {label: "ID Produk", name: "id", widget: "string", hint: "Contoh: mgs-01"}
+              - {label: "Nama Produk", name: "name", widget: "string"}
+              - {label: "Kategori", name: "category", widget: "select", options: ["T-SHIRT", "OUTERWEAR", "BOTTOMS", "ACCESSORIES"]}
+              - {label: "Harga (Angka saja)", name: "price", widget: "number"}
+              - {label: "Deskripsi", name: "desc", widget: "text"}
+              - {label: "Gambar Utama", name: "img", widget: "image"}
+              
+              # Stok Per Ukuran
+              - label: "Stok Barang"
+                name: "stock"
+                widget: "object"
+                fields:
+                  - {label: "Stok S", name: "S", widget: "number", default: 0}
+                  - {label: "Stok M", name: "M", widget: "number", default: 0}
+                  - {label: "Stok L", name: "L", widget: "number", default: 0}
+                  - {label: "Stok XL", name: "XL", widget: "number", default: 0}
+                  - {label: "Stok XXL", name: "XXL", widget: "number", default: 0}

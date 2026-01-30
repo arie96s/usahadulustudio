@@ -149,7 +149,7 @@
             <ul class="f-links">
                 <li><a href="index.html">STUDIO</a></li>
                 <li><a href="#shop">ARCHIVE / SHOP</a></li>
-                <a href="contact.html" class="hover-target">CONTACT</a>
+                <li><a href="contact.html">CONTACT</a></li>
             </ul>
         </div>
 
@@ -319,7 +319,35 @@
     </div>
     <div class="cart-items-container" id="wishlistItemsContainer"></div>
 </div>
-
 <script src="magos/js/magos.js"></script>
+<script>
+    async function loadMagosProducts() {
+        try {
+            // Pastikan file ini ada di folder _data/ di repositori Anda
+            const response = await fetch('_data/magos_products.json');
+            const data = await response.json();
+            
+            // Transformasi data CMS (field 'img') agar sesuai dengan slider magos.js (field 'images')
+            const processedItems = data.items.map(item => ({
+                ...item,
+                // Netlify CMS hanya kirim 1 gambar, kita duplikasi untuk front/back view
+                images: [item.img, item.img] 
+            }));
+
+            // Hubungkan ke sistem display di magos.js
+            if (typeof displayProducts === "function") {
+                // 'products' adalah variabel global di magos.js
+                products = processedItems; 
+                displayProducts('all', 1); 
+                console.log("MAGOS System: CMS Data Synced.");
+            }
+        } catch (error) {
+            console.error("MAGOS System Error:", error);
+        }
+    }
+
+    // Satu-satunya event listener yang diperlukan
+    window.addEventListener('load', loadMagosProducts);
+</script>
 </body>
 </html>
