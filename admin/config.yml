@@ -120,7 +120,7 @@ collections:
         fields:
           - {label: "Username Instagram", name: "ig_username", widget: "string", default: "magos.archive"}
           - {label: "Link Asli Instagram", name: "ig_link", widget: "string"}
-          - label: "Instagram Preview Images (Grid Bawah)", 
+          - label: "Instagram Preview Images (Grid Bawah)" # BARIS INI HARUS SEJAJAR DENGAN Username Instagram
             name: "ig_preview"
             widget: "list"
             max: 5
