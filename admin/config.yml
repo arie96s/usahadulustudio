@@ -1,6 +1,7 @@
 backend:
   name: github
   repo: arie96s/usahadulustudio
+  client_id: 19d7b50557c27dd68f06e9e448779d0eb942b7cd
   branch: main
   base_url: https://cms-proxy-auth.netlify.app
   auth_endpoint: api/auth
