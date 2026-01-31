@@ -1,6 +1,8 @@
 backend:
-  name: git-gateway
+  name: github
+  repo: arie96s/usahadulustudio  # Pastikan ini sesuai dengan nama repo Anda
   branch: main
+  base_url: https://usahadulustudio.pages.dev # Ganti jika link Pages Anda berbeda
 
 media_folder: "img"
 public_folder: "img"
