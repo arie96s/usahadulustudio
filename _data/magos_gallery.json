@@ -1,0 +1,11 @@
+{
+  "volumes": [
+    {
+      "file": "gallery_issue/gallery_issue.html",
+      "id": 1,
+      "title": "VOL.1: VINCE TE IPSUM",
+      "desc": "Eksplorasi visual tentang peperangan batin. Sebuah pengingat bahwa batasan dan musuh terbesar bukan berasal dari luar, melainkan dari dalam diri sendiri",
+      "cover": "img/vol-1-vince-te-ipsum.png"
+    }
+  ]
+}
