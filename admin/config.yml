@@ -2,7 +2,7 @@ backend:
   name: github
   repo: arie96s/usahadulustudio
   branch: main
-  base_url: https://auth-usahadulu.yahjudmahjud.workers.dev # Link Worker Anda
+  base_url: https://login-usahadulu.yahjudmahjud.workers.dev # Link Worker Anda
   auth_endpoint: api/auth
 
 media_folder: "img"
