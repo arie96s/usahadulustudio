@@ -238,31 +238,48 @@
     </script>
     <script>
     async function renderGallery() {
+        const grid = document.getElementById('mainAlbumGrid');
+        
         try {
+            // Ambil data asli dari Admin
             const response = await fetch('_data/magos_gallery.json');
+            if (!response.ok) throw new Error("File JSON tidak ditemukan");
+            
             const data = await response.json();
-            const grid = document.getElementById('mainAlbumGrid');
+            
+            // KOSONGKAN GRID (Ini kunci agar gambar dummy hilang total)
             grid.innerHTML = '';
             
-            data.volumes.forEach(album => {
-                const el = document.createElement('div');
-                el.className = 'album-card hover-target';
-                // Kirim ID volume lewat URL agar dibaca oleh halaman issue
-                // Di file magos/gallery.html
-            el.onclick = () => { 
-            window.location.href = `gallery_issue/gallery_issue.html?id=${album.id}`; 
-                };
-                el.innerHTML = `
-                    <img src="${album.cover}" class="album-cover-img" loading="lazy">
-                    <div class="album-info">
-                        <h3 class="album-title">${album.title}</h3>
-                        <p class="album-desc">${album.desc}</p>
-                    </div>
-                `;
-                grid.appendChild(el);
-            });
-        } catch (e) { console.error("Gagal memuat galeri:", e); }
+            if (data.volumes && data.volumes.length > 0) {
+                data.volumes.forEach(album => {
+                    const el = document.createElement('div');
+                    el.className = 'album-card hover-target';
+                    
+                    // Arahkan ke template tunggal dengan ID unik
+                    el.onclick = () => { 
+                        window.location.href = `gallery_issue/gallery_issue.html?id=${album.id}`; 
+                    };
+                    
+                    el.innerHTML = `
+                        <img src="${album.cover}" class="album-cover-img" loading="lazy">
+                        <div class="album-info">
+                            <h3 class="album-title">${album.title}</h3>
+                            <p class="album-desc">${album.desc}</p>
+                        </div>
+                    `;
+                    grid.appendChild(el);
+                });
+                console.log("MAGOS: Data Admin Berhasil Dimuat.");
+            } else {
+                grid.innerHTML = '<p style="color:#666; font-size:12px;">ARSIP MASIH KOSONG.</p>';
+            }
+        } catch (e) { 
+            console.error("Gagal memuat galeri:", e);
+            grid.innerHTML = '<p style="color:#666; font-size:12px;">GAGAL MENGHUBUNGKAN KE ARSIP.</p>';
+        }
     }
+
+    // Jalankan fungsi saat halaman selesai dimuat
     window.addEventListener('load', renderGallery);
 </script>
 </body>
