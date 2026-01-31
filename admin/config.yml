@@ -2,7 +2,7 @@ backend:
   name: github
   repo: arie96s/usahadulustudio
   branch: main
-  base_url: https://login-usahadulu.yahjudmahjud.workers.dev # Link Worker Anda
+  base_url: https://login-usahadulu.yahjudmahjud.workers.dev
   auth_endpoint: api/auth
 
 media_folder: "img"
@@ -24,12 +24,12 @@ collections:
               - {label: "Nama Produk", name: "title", widget: "string"}
               - {label: "Kategori", name: "category", widget: "select", options: ["template", "mockup", "vector"]}
               - {label: "Tipe File", name: "type", widget: "string", hint: "Contoh: PSD, AI, EPS"}
-              - {label: "Harga (USD)", name: "priceRaw", widget: "number", value_type: "float", hint: "Masukkan angka saja (Gunakan titik untuk desimal), misal: 12.50"}
+              - {label: "Harga (USD)", name: "priceRaw", widget: "number", value_type: "float"}
               - {label: "Gambar Produk", name: "img", widget: "image"}
               - {label: "Link Redbubble", name: "link_redbubble", widget: "string", default: "https://www.redbubble.com/people/arie96s/shop"}
               - {label: "Badge", name: "badge", widget: "select", options: ["NEW", "BEST SELLER", "NONE"], required: false}
               
-      # --- PORTFOLIO (JANGAN UBAH) ---
+      # --- PORTFOLIO ---
       - file: "_data/portfolio.json"
         label: "Portfolio Item"
         name: "portfolio"
@@ -46,7 +46,7 @@ collections:
               - {label: "Solution", name: "solution", widget: "text", default: "-"}
               - {label: "Result", name: "result", widget: "text", default: "-"}
 
-      # --- BLOG (INI YANG BARU) ---
+      # --- BLOG ---
       - file: "_data/blog.json"
         label: "Artikel Blog"
         name: "blog"
@@ -60,12 +60,9 @@ collections:
               - {label: "Kategori", name: "category", widget: "select", options: ["EDUKASI", "CASE STUDY", "BRANDING", "TUTORIAL"]}
               - {label: "Gambar Sampul", name: "image", widget: "image"}
               - {label: "Cuplikan Pendek (Excerpt)", name: "excerpt", widget: "text"}
-              
-              # KOLOM PENTING UNTUK FILE LAMA
-              - {label: "Link Custom (ISI JIKA FILE HTML SUDAH ADA)", name: "custom_link", widget: "string", required: false, hint: "Contoh: artikel-tren-2026.html. Kosongkan jika ini artikel baru."}
-              
-              # Isian Artikel Baru
+              - {label: "Link Custom", name: "custom_link", widget: "string", required: false}
               - {label: "Isi Artikel (Markdown)", name: "body", widget: "markdown", required: false}
+
       # --- MAGOS ARCHIVE (PRODUK FISIK) ---
       - file: "_data/magos_products.json"
         label: "Produk MAGOS Archive"
@@ -75,14 +72,12 @@ collections:
             name: "items"
             widget: "list"
             fields:
-              - {label: "ID Produk", name: "id", widget: "string", hint: "Contoh: mgs-01"}
+              - {label: "ID Produk", name: "id", widget: "string"}
               - {label: "Nama Produk", name: "name", widget: "string"}
               - {label: "Kategori", name: "category", widget: "select", options: ["T-SHIRT", "OUTERWEAR", "BOTTOMS", "ACCESSORIES"]}
-              - {label: "Harga (Angka saja)", name: "price", widget: "number"}
+              - {label: "Harga", name: "price", widget: "number"}
               - {label: "Deskripsi", name: "desc", widget: "text"}
               - {label: "Gambar Utama", name: "img", widget: "image"}
-              
-              # Stok Per Ukuran
               - label: "Stok Barang"
                 name: "stock"
                 widget: "object"
@@ -93,7 +88,7 @@ collections:
                   - {label: "Stok XL", name: "XL", widget: "number", default: 0}
                   - {label: "Stok XXL", name: "XXL", widget: "number", default: 0}
 
-                  # --- MAGOS GALLERY (PENGATURAN VOLUMES) ---
+      # --- MAGOS GALLERY (VOLUMES) ---
       - file: "_data/magos_gallery.json"
         label: "Magos Gallery Volumes"
         name: "magos_gallery"
@@ -105,22 +100,22 @@ collections:
               - {label: "ID Volume", name: "id", widget: "number"}
               - {label: "Judul Volume", name: "title", widget: "string"}
               - {label: "Deskripsi", name: "desc", widget: "text"}
-              - {label: "Gambar Sampul (Gallery.html)", name: "cover", widget: "image"}
-              - {label: "Link File HTML", name: "file", widget: "string", hint: "Contoh: gallery_issue/gallery_issue1.html"}
-              - label: "Daftar Foto (Isi Issue)"
+              - {label: "Gambar Sampul", name: "cover", widget: "image"}
+              - {label: "Link File HTML", name: "file", widget: "string", default: "gallery_issue/gallery_issue.html"}
+              - label: "Daftar Foto"
                 name: "images"
                 widget: "list"
                 fields:
                   - {label: "Upload Foto", name: "url", widget: "image"}
 
-      # --- SOSIAL MEDIA & INSTAGRAM PREVIEW ---
+      # --- SOSIAL MEDIA & INSTAGRAM ---
       - file: "_data/social_config.json"
         label: "Social Media & Instagram"
         name: "social_config"
         fields:
           - {label: "Username Instagram", name: "ig_username", widget: "string", default: "magos.archive"}
           - {label: "Link Asli Instagram", name: "ig_link", widget: "string"}
-          - label: "Instagram Preview Images (Grid Bawah)" # BARIS INI HARUS SEJAJAR DENGAN Username Instagram
+          - label: "Instagram Preview Images"
             name: "ig_preview"
             widget: "list"
             max: 5
