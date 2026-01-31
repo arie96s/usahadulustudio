@@ -66,7 +66,7 @@ collections:
               
               # Isian Artikel Baru
               - {label: "Isi Artikel (Markdown)", name: "body", widget: "markdown", required: false}
-# --- MAGOS ARCHIVE (PRODUK FISIK) ---
+      # --- MAGOS ARCHIVE (PRODUK FISIK) ---
       - file: "_data/magos_products.json"
         label: "Produk MAGOS Archive"
         name: "magos_products"
@@ -92,3 +92,37 @@ collections:
                   - {label: "Stok L", name: "L", widget: "number", default: 0}
                   - {label: "Stok XL", name: "XL", widget: "number", default: 0}
                   - {label: "Stok XXL", name: "XXL", widget: "number", default: 0}
+
+                  # --- MAGOS GALLERY (PENGATURAN VOLUMES) ---
+      - file: "_data/magos_gallery.json"
+        label: "Magos Gallery Volumes"
+        name: "magos_gallery"
+        fields:
+          - label: "Daftar Volume Galeri"
+            name: "volumes"
+            widget: "list"
+            fields:
+              - {label: "ID Volume", name: "id", widget: "number"}
+              - {label: "Judul Volume", name: "title", widget: "string"}
+              - {label: "Deskripsi", name: "desc", widget: "text"}
+              - {label: "Gambar Sampul (Gallery.html)", name: "cover", widget: "image"}
+              - {label: "Link File HTML", name: "file", widget: "string", hint: "Contoh: gallery_issue/gallery_issue1.html"}
+              - label: "Daftar Foto (Isi Issue)"
+                name: "images"
+                widget: "list"
+                fields:
+                  - {label: "Upload Foto", name: "url", widget: "image"}
+
+      # --- SOSIAL MEDIA & INSTAGRAM PREVIEW ---
+      - file: "_data/social_config.json"
+        label: "Social Media & Instagram"
+        name: "social_config"
+        fields:
+          - {label: "Username Instagram", name: "ig_username", widget: "string", default: "magos.archive"}
+          - {label: "Link Asli Instagram", name: "ig_link", widget: "string"}
+          - label: "Instagram Preview Images (Grid Bawah)", 
+            name: "ig_preview"
+            widget: "list"
+            max: 5
+            fields:
+              - {label: "Foto Grid", name: "url", widget: "image"}

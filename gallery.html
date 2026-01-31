@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>GALLERY | MAGOS Archive</title>
+  <link rel="icon" type="image/svg+xml" href="magos/assets/img/magos-icon.svg">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/magos.css">
+  
+  <style>
+      /* --- MAGOS GALLERY REFINED --- */
+      .gallery-container {
+          max-width: 1200px;
+          margin: 140px auto 80px;
+          padding: 0 40px;
+      }
+
+      /* FIX: Header Galeri sesuai screenshot */
+      .section-header {
+          display: flex;
+          align-items: center;
+          gap: 25px;
+          margin-bottom: 60px;
+      }
+
+      .gallery-main-title {
+          font-size: 48px;
+          font-weight: 900;
+          letter-spacing: -3px;
+          text-transform: uppercase;
+          line-height: 1;
+          margin: 0;
+      }
+
+      .gallery-sub-title {
+          color: #666;
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 1.5px;
+          text-transform: uppercase;
+          margin: 0;
+          max-width: 300px;
+          line-height: 1.4;
+      }
+
+      /* Album Grid */
+      .album-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 40px;
+      }
+
+      .album-card {
+          position: relative;
+          border-radius: 24px; 
+          overflow: hidden;
+          cursor: pointer;
+          aspect-ratio: 3/4.5;
+          background: #0b0b0b;
+          border: 1px solid #1a1a1a;
+          transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      .album-card:hover {
+          transform: translateY(-15px) scale(1.02);
+          border-color: #fff;
+          box-shadow: 0 30px 60px rgba(0,0,0,0.8);
+      }
+
+      .album-cover-img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          filter: grayscale(100%) brightness(0.7);
+          transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      .album-card:hover .album-cover-img {
+          filter: grayscale(0%) brightness(1);
+          transform: scale(1.1);
+      }
+
+      .album-info {
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          width: 100%;
+          padding: 40px 30px;
+          background: linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.8) 40%, transparent 100%);
+          color: #fff;
+          z-index: 2;
+      }
+
+      .album-title {
+          font-size: 26px;
+          font-weight: 900;
+          margin-bottom: 8px;
+          text-transform: uppercase;
+          letter-spacing: 2px;
+          line-height: 1;
+      }
+
+      .album-desc {
+          font-size: 11px;
+          color: #888;
+          line-height: 1.6;
+          letter-spacing: 0.5px;
+      }
+
+      /* Responsive */
+      @media (max-width: 1024px) {
+          .album-grid { grid-template-columns: repeat(2, 1fr); gap: 20px; }
+      }
+      @media (max-width: 768px) {
+          .gallery-container { margin-top: 100px; padding: 0 20px; }
+          .album-grid { grid-template-columns: 1fr; }
+          .section-header { flex-direction: column; align-items: flex-start; gap: 15px; }
+          .gallery-main-title { font-size: 38px; }
+      }
+  </style>
+</head>
+<body>
+    <div id="cursor"></div>
+    
+    <div id="preloader">
+        <div class="preloader-content">
+            <img src="assets/img/logo-header.svg" alt="MAGOS" class="logo-loader blink-img">
+            <div class="loading-line"></div>
+        </div>
+    </div>
+
+    <header>
+        <a href="../magos.html">
+            <img src="assets/img/magos-icon.svg" alt="MAGOS" class="logo-header">
+        </a>
+        <nav>
+            <a href="../magos.html" class="hover-target" data-i18n="nav_back">STUDIO</a>
+            <a href="../magos.html#shop" class="hover-target">ARCHIVE</a>
+            <a href="contact.html" class="hover-target">CONTACT</a>
+            <div class="lang-switch hover-target" data-lang="en" id="langToggle" onclick="toggleLanguage()">
+                <div class="lang-circle"></div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="gallery-container">
+        <div class="section-header">
+            <div class="header-title-wrapper">
+                <h1 class="gallery-main-title" data-i18n="nav_gallery">GALERI</h1>
+            </div>
+           </div>
+        
+        <div class="album-grid" id="mainAlbumGrid">
+            </div>
+    </main>
+
+    <footer class="industrial-footer">
+        <div class="footer-divider"></div>
+        <div class="footer-grid">
+            <div class="f-col brand-col">
+                <img src="assets/img/logo-header.svg" alt="MAGOS" class="f-logo">
+                <p class="f-desc" data-i18n="hero_sub">ESTETIKA GELAP & PAKAIAN INDUSTRIAL.</p>
+                <div class="f-status"><span class="dot"></span> SYSTEM ONLINE</div>
+            </div>
+            <div class="f-col link-col">
+                <h4 class="f-head">SITEMAP</h4>
+                <ul class="f-links">
+                    <li><a href="../magos.html">STUDIO</a></li>
+                    <li><a href="../magos.html#shop">ARCHIVE / SHOP</a></li>
+                    <li><a href="contact.html">CONTACT</a></li>
+                </ul>
+            </div>
+            <div class="f-col link-col">
+                <h4 class="f-head">LEGAL</h4>
+                <ul class="f-links">
+                    <li><a href="terms.html" data-i18n="terms_title">TERMS & CONDITIONS</a></li>
+                    <li><a href="privacy.html" data-i18n="priv_title">PRIVACY POLICY</a></li>
+                </ul>
+            </div>
+            <div class="f-col link-col end-col">
+                <h4 class="f-head">CONNECT</h4>
+                <ul class="f-social">
+                    <li><a href="#">INSTAGRAM <span class="arrow">↗</span></a></li>
+                    <li><a href="#">SOCIAL MEDIA <span class="arrow">↗</span></a></li>
+                    <li><a href="mailto:contact@magos.com">EMAIL <span class="arrow">↗</span></a></li>
+                </ul>
+                <p class="f-copyright" data-i18n="footer_copy">©2026 | USAHADULU STUDIO</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/magos.js"></script>
+    <script>
+        const albums = [
+            {
+                id: 1,
+                title: "VOL.1: DARKNESS",
+                desc: "The genesis of Magos. Exploring the void through monochromatic textures and heavy silhouettes.",
+                cover: "https://images.unsplash.com/photo-1534972195531-d756b9bfa9f2?w=800",
+                file: "gallery_issue/gallery_issue1.html"
+            },
+            {
+                id: 2,
+                title: "VOL.2: NEON CITY",
+                desc: "A futuristic approach to streetwear. Inspired by the lights of a dystopian metropolis.",
+                cover: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=800",
+                file: "gallery_issue/gallery_issue2.html"
+            },
+            {
+                id: 3,
+                title: "VOL.3: INDUSTRIAL",
+                desc: "Raw, unpolished, and functional. Heavy fabrics meets tactical utility in the urban void.",
+                cover: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800",
+                file: "gallery_issue/gallery_issue3.html"
+            }
+        ];
+
+        function renderGallery() {
+            const grid = document.getElementById('mainAlbumGrid');
+            grid.innerHTML = '';
+            albums.forEach(album => {
+                const el = document.createElement('div');
+                el.className = 'album-card hover-target';
+                el.onclick = () => { window.location.href = album.file; };
+                el.innerHTML = `
+                    <img src="${album.cover}" class="album-cover-img" loading="lazy">
+                    <div class="album-info">
+                        <h3 class="album-title">${album.title}</h3>
+                        <p class="album-desc">${album.desc}</p>
+                    </div>
+                `;
+                grid.appendChild(el);
+            });
+        }
+
+        window.addEventListener('load', renderGallery);
+    </script>
+    <script>
+    async function renderGallery() {
+        try {
+            const response = await fetch('_data/magos_gallery.json');
+            const data = await response.json();
+            const grid = document.getElementById('mainAlbumGrid');
+            grid.innerHTML = '';
+            
+            data.volumes.forEach(album => {
+                const el = document.createElement('div');
+                el.className = 'album-card hover-target';
+                // Kirim ID volume lewat URL agar dibaca oleh halaman issue
+                // Di file magos/gallery.html
+            el.onclick = () => { 
+            window.location.href = `gallery_issue/gallery_issue.html?id=${album.id}`; 
+                };
+                el.innerHTML = `
+                    <img src="${album.cover}" class="album-cover-img" loading="lazy">
+                    <div class="album-info">
+                        <h3 class="album-title">${album.title}</h3>
+                        <p class="album-desc">${album.desc}</p>
+                    </div>
+                `;
+                grid.appendChild(el);
+            });
+        } catch (e) { console.error("Gagal memuat galeri:", e); }
+    }
+    window.addEventListener('load', renderGallery);
+</script>
+</body>
+</html>

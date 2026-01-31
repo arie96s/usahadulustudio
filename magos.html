@@ -349,5 +349,28 @@
     // Satu-satunya event listener yang diperlukan
     window.addEventListener('load', loadMagosProducts);
 </script>
+<script>
+    async function loadSocialConfig() {
+        try {
+            const response = await fetch('_data/social_config.json');
+            const data = await response.json();
+            
+            // Update Link Instagram asli
+            const igLinks = document.querySelectorAll('a[href*="instagram"]');
+            igLinks.forEach(link => link.href = data.ig_link);
+
+            // Update Grid Foto Instagram di bagian bawah
+            const igGrid = document.querySelector('#social-proof .grid');
+            if(data.ig_preview && igGrid) {
+                igGrid.innerHTML = data.ig_preview.map(img => `
+                    <div class="prod hover-target">
+                        <img src="${img.url}" style="width:100%; filter:grayscale(1);">
+                    </div>
+                `).join('');
+            }
+        } catch (e) { console.log("Social Config belum diisi."); }
+    }
+    window.addEventListener('load', loadSocialConfig);
+</script>
 </body>
 </html>
