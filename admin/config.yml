@@ -1,8 +1,9 @@
 backend:
   name: github
-  repo: arie96s/usahadulustudio  # Pastikan ini sesuai dengan nama repo Anda
+  repo: arie96s/usahadulustudio
   branch: main
-  base_url: https://usahadulustudio.pages.dev # Ganti jika link Pages Anda berbeda
+  base_url: https://cms-proxy-auth.netlify.app
+  auth_endpoint: api/auth
 
 media_folder: "img"
 public_folder: "img"
