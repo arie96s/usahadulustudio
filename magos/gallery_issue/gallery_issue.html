@@ -105,35 +105,41 @@
         }
 
         async function loadIssueData() {
-            try {
-                const params = new URLSearchParams(window.location.search);
-                const id = params.get('id');
-                
-                const response = await fetch('../../_data/magos_gallery.json'); 
-                const data = await response.json();
-                
-                const issue = data.volumes.find(v => v.id == id);
-                
-                if (issue) {
-                    document.getElementById('issueTitle').innerText = issue.title;
-                    document.getElementById('issueDesc').innerText = issue.desc;
-                    document.title = `${issue.title} | MAGOS ARCHIVE`;
+    try {
+        const params = new URLSearchParams(window.location.search);
+        const id = params.get('id');
+        
+        // BETULKAN PATH: Hanya naik satu tingkat ke folder 'magos/', 
+        // kemudian masuk ke '_data/' jika folder _data ada di dalam magos/
+        // ATAU jika _data di root, gunakan: fetch('../../_data/magos_gallery.json') 
+        // Mari kita cuba path yang paling tepat untuk struktur anda:
+        const response = await fetch('../_data/magos_gallery.json'); 
+        
+        const data = await response.json();
+        const issue = data.volumes.find(v => v.id == id);
+        
+        if (issue) {
+            document.getElementById('issueTitle').innerText = issue.title;
+            document.getElementById('issueDesc').innerText = issue.desc;
+            document.title = `${issue.title} | MAGOS ARCHIVE`;
 
-                    const grid = document.getElementById('issueGrid');
-                    grid.innerHTML = issue.images.map(img => {
-                        const fullPath = `../../${img.url}`;
-                        return `
-                            <div class="issue-item hover-target" onclick="openPopup('${fullPath}')">
-                                <img src="${fullPath}" class="issue-img" loading="lazy">
-                            </div>
-                        `;
-                    }).join('');
-                }
-            } catch (e) {
-                console.error("Gagal sinkronisasi data:", e);
-                document.getElementById('issueTitle').innerText = "ERROR LOADING";
-            }
+            const grid = document.getElementById('issueGrid');
+            grid.innerHTML = issue.images.map(img => {
+                // Gambar di config.yml biasanya 'img/nama.jpg'
+                // Kita perlu naik satu tingkat ke root untuk akses folder 'img/'
+                const fullPath = `../../${img.url}`; 
+                return `
+                    <div class="issue-item hover-target" onclick="openPopup('${fullPath}')">
+                        <img src="${fullPath}" class="issue-img" loading="lazy">
+                    </div>
+                `;
+            }).join('');
         }
+    } catch (e) {
+        console.error("Gagal sinkronisasi data:", e);
+        document.getElementById('issueTitle').innerText = "ERROR LOADING";
+    }
+}
 
         window.addEventListener('load', loadIssueData);
     </script>
