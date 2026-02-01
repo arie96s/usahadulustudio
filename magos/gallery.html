@@ -191,50 +191,43 @@
     </footer>
 
     <script src="js/magos.js"></script>
-    <script>
-        const albums = [
-            {
-                id: 1,
-                title: "VOL.1: DARKNESS",
-                desc: "The genesis of Magos. Exploring the void through monochromatic textures and heavy silhouettes.",
-                cover: "https://images.unsplash.com/photo-1534972195531-d756b9bfa9f2?w=800",
-                file: "gallery_issue/gallery_issue1.html"
-            },
-            {
-                id: 2,
-                title: "VOL.2: NEON CITY",
-                desc: "A futuristic approach to streetwear. Inspired by the lights of a dystopian metropolis.",
-                cover: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=800",
-                file: "gallery_issue/gallery_issue2.html"
-            },
-            {
-                id: 3,
-                title: "VOL.3: INDUSTRIAL",
-                desc: "Raw, unpolished, and functional. Heavy fabrics meets tactical utility in the urban void.",
-                cover: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800",
-                file: "gallery_issue/gallery_issue3.html"
-            }
-        ];
+    // Ganti kode lama dengan ini
+async function renderGallery() {
+    const grid = document.getElementById('mainAlbumGrid');
+    grid.innerHTML = '<p>Loading Gallery...</p>';
 
-        function renderGallery() {
-            const grid = document.getElementById('mainAlbumGrid');
-            grid.innerHTML = '';
-            albums.forEach(album => {
-                const el = document.createElement('div');
-                el.className = 'album-card hover-target';
-                el.onclick = () => { window.location.href = album.file; };
-                el.innerHTML = `
-                    <img src="${album.cover}" class="album-cover-img" loading="lazy">
-                    <div class="album-info">
-                        <h3 class="album-title">${album.title}</h3>
-                        <p class="album-desc">${album.desc}</p>
-                    </div>
-                `;
-                grid.appendChild(el);
-            });
-        }
+    try {
+        // Ambil data dari path yang sesuai dengan config.yml
+        const response = await fetch('../_data/magos_gallery.json');
+        const data = await response.json();
+        const albums = data.volumes; // Sesuaikan dengan struktur 'volumes' di config.yml
 
-        window.addEventListener('load', renderGallery);
+        grid.innerHTML = '';
+        albums.forEach(album => {
+            const el = document.createElement('div');
+            el.className = 'album-card hover-target';
+            
+            // Redirect ke halaman gallery_issue dengan membawa ID volume
+            el.onclick = () => { 
+                window.location.href = `gallery_issue/gallery_issue.html?id=${album.id}`; 
+            };
+            
+            el.innerHTML = `
+                <img src="../${album.cover}" class="album-cover-img" loading="lazy">
+                <div class="album-info">
+                    <h3 class="album-title">${album.title}</h3>
+                    <p class="album-desc">${album.desc}</p>
+                </div>
+            `;
+            grid.appendChild(el);
+        });
+    } catch (error) {
+        console.error("Gagal memuat galeri:", error);
+        grid.innerHTML = '<p>Gagal memuat data galeri.</p>';
+    }
+}
+
+window.addEventListener('load', renderGallery);
     </script>
 </body>
 </html>
