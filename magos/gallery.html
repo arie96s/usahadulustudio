@@ -191,43 +191,47 @@
     </footer>
 
     <script src="js/magos.js"></script>
-    // Ganti kode lama dengan ini
-async function renderGallery() {
-    const grid = document.getElementById('mainAlbumGrid');
-    grid.innerHTML = '<p>Loading Gallery...</p>';
 
-    try {
-        // Ambil data dari path yang sesuai dengan config.yml
-        const response = await fetch('../_data/magos_gallery.json');
-        const data = await response.json();
-        const albums = data.volumes; // Sesuaikan dengan struktur 'volumes' di config.yml
+    <script>
+        async function renderGallery() {
+            const grid = document.getElementById('mainAlbumGrid');
+            grid.innerHTML = '<div class="loading-status">SINKRONISASI ARSIP...</div>';
 
-        grid.innerHTML = '';
-        albums.forEach(album => {
-            const el = document.createElement('div');
-            el.className = 'album-card hover-target';
-            
-            // Redirect ke halaman gallery_issue dengan membawa ID volume
-            el.onclick = () => { 
-                window.location.href = `gallery_issue/gallery_issue.html?id=${album.id}`; 
-            };
-            
-            el.innerHTML = `
-                <img src="../${album.cover}" class="album-cover-img" loading="lazy">
-                <div class="album-info">
-                    <h3 class="album-title">${album.title}</h3>
-                    <p class="album-desc">${album.desc}</p>
-                </div>
-            `;
-            grid.appendChild(el);
-        });
-    } catch (error) {
-        console.error("Gagal memuat galeri:", error);
-        grid.innerHTML = '<p>Gagal memuat data galeri.</p>';
-    }
-}
+            try {
+                // Mengambil data dari root/_data/magos_gallery.json
+                const response = await fetch('../_data/magos_gallery.json');
+                if (!response.ok) throw new Error('File JSON tidak ditemukan');
+                
+                const data = await response.json();
+                const albums = data.volumes; // Mengambil array 'volumes' dari config
 
-window.addEventListener('load', renderGallery);
+                grid.innerHTML = '';
+                albums.forEach(album => {
+                    const el = document.createElement('div');
+                    el.className = 'album-card hover-target';
+                    
+                    // Navigasi ke template gallery_issue dengan parameter ID
+                    el.onclick = () => { 
+                        window.location.href = `gallery_issue/gallery_issue.html?id=${album.id}`; 
+                    };
+                    
+                    el.innerHTML = `
+                        <img src="../${album.cover}" class="album-cover-img" loading="lazy">
+                        <div class="album-info">
+                            <h3 class="album-title">${album.title}</h3>
+                            <p class="album-desc">${album.desc}</p>
+                        </div>
+                    `;
+                    grid.appendChild(el);
+                });
+            } catch (error) {
+                console.error("Gagal memuat galeri:", error);
+                grid.innerHTML = '<p style="color: red; text-align: center;">GAGAL MEMUAT DATA ARSIP.</p>';
+            }
+        }
+
+        // Jalankan fungsi saat halaman selesai dimuat
+        window.addEventListener('load', renderGallery);
     </script>
 </body>
 </html>
