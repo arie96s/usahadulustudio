@@ -5,7 +5,12 @@
       "id": 1,
       "title": "VOL.1: VINCE TE IPSUM",
       "desc": "Eksplorasi visual tentang peperangan batin. Sebuah pengingat bahwa batasan dan musuh terbesar bukan berasal dari luar, melainkan dari dalam diri sendiri",
-      "cover": "img/vol-1-vince-te-ipsum.png"
+      "cover": "img/vol-1-vince-te-ipsum.png",
+      "images": [
+        {
+          "url": "img/magos-monster-1.png"
+        }
+      ]
     }
   ]
 }
