@@ -191,26 +191,18 @@
     </footer>
 
     <script src="js/magos.js"></script>
-
     <script>
         async function renderGallery() {
             const grid = document.getElementById('mainAlbumGrid');
-            grid.innerHTML = '<div class="loading-status">SINKRONISASI ARSIP...</div>';
-
             try {
-                // Mengambil data dari root/_data/magos_gallery.json
                 const response = await fetch('../_data/magos_gallery.json');
-                if (!response.ok) throw new Error('File JSON tidak ditemukan');
-                
                 const data = await response.json();
-                const albums = data.volumes; // Mengambil array 'volumes' dari config
+                const albums = data.volumes;
 
                 grid.innerHTML = '';
                 albums.forEach(album => {
                     const el = document.createElement('div');
                     el.className = 'album-card hover-target';
-                    
-                    // Navigasi ke template gallery_issue dengan parameter ID
                     el.onclick = () => { 
                         window.location.href = `gallery_issue/gallery_issue.html?id=${album.id}`; 
                     };
@@ -226,11 +218,9 @@
                 });
             } catch (error) {
                 console.error("Gagal memuat galeri:", error);
-                grid.innerHTML = '<p style="color: red; text-align: center;">GAGAL MEMUAT DATA ARSIP.</p>';
+                grid.innerHTML = '<p>Gagal memuat data galeri.</p>';
             }
         }
-
-        // Jalankan fungsi saat halaman selesai dimuat
         window.addEventListener('load', renderGallery);
     </script>
 </body>
