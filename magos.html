@@ -355,20 +355,29 @@
             const response = await fetch('_data/social_config.json');
             const data = await response.json();
             
-            // Update Link Instagram asli
+            // Update Link Instagram asli pada menu dan footer
             const igLinks = document.querySelectorAll('a[href*="instagram"]');
-            igLinks.forEach(link => link.href = data.ig_link);
+            igLinks.forEach(link => {
+                link.href = data.ig_link || "https://www.instagram.com/magos.archive";
+                link.target = "_blank"; // Memastikan buka di tab baru
+            });
 
-            // Update Grid Foto Instagram di bagian bawah
+            // Update Grid Foto Instagram agar bisa diklik dan memiliki efek hover
             const igGrid = document.querySelector('#social-proof .grid');
             if(data.ig_preview && igGrid) {
                 igGrid.innerHTML = data.ig_preview.map(img => `
-                    <div class="prod hover-target">
-                        <img src="${img.url}" style="width:100%; filter:grayscale(1);">
-                    </div>
+                    <a href="${data.ig_link}" target="_blank" class="prod hover-target" style="display: block; overflow: hidden;">
+                        <img src="${img.url}" 
+                             style="width:100%; filter:grayscale(1); transition: filter 0.5s ease, transform 0.5s ease; display: block;" 
+                             onmouseover="this.style.filter='grayscale(0)'; this.style.transform='scale(1.05)';" 
+                             onmouseout="this.style.filter='grayscale(1)'; this.style.transform='scale(1)';"
+                             loading="lazy">
+                    </a>
                 `).join('');
             }
-        } catch (e) { console.log("Social Config belum diisi."); }
+        } catch (e) { 
+            console.log("Social Config belum diisi atau file JSON tidak ditemukan."); 
+        }
     }
     window.addEventListener('load', loadSocialConfig);
 </script>
