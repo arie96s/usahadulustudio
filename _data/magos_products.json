@@ -1,26 +1,34 @@
 {
   "items": [
     {
-      "id": "MGS0001",
-      "name": "MAGOS Flame Tee – Black",
-      "status": "NORMAL",
-      "category": "T-SHIRT",
-      "price": 189000,
-      "desc": "Kaos MAGOS Flame Tee hadir dengan desain tipografi api berwarna kuning yang menyala di atas dasar hitam pekat. Visualnya terinspirasi dari simbol energi, pemberontakan, dan kekuatan personal—cocok untuk kamu yang ingin tampil berani, beda, dan penuh karakter.\n\nDetail Produk:\n\t• Warna: Hitam\n\t• Sablon: Platisol\n\t• Model: Oversize / relaxed fit\n\t• Bahan: Cotton combed 20S\n\nMAGOS – Burn your limits.",
       "images_list": [
-        { "url": "img/model-1.png" },
-        { "url": "img/model-1-back.png" },
-        { "url": "img/model-1-detail.png" },
-        { "url": "img/model-1-flatlay.png" }
+        {
+          "url": "img/model-1.png"
+        },
+        {
+          "url": "img/front-1-magos-logo.jpg"
+        },
+        {
+          "url": "img/back-1.jpg"
+        },
+        {
+          "url": "img/vol-1.png"
+        }
       ],
-      "size_chart_custom": "img/size-chart-tee.jpg",
+      "price": 189000,
+      "name": "MAGOS Flame Tee – Black",
+      "size_chart_custom": "img/size-chart-1.png",
+      "desc": "Kaos MAGOS Flame Tee hadir dengan desain tipografi api berwarna kuning yang menyala di atas dasar hitam pekat. Visualnya terinspirasi dari simbol energi, pemberontakan, dan kekuatan personal—cocok untuk kamu yang ingin tampil berani, beda, dan penuh karakter.\n\nDetail Produk:\n\t• Warna: Hitam\n\t• Sablon: Platisol\n\t• Model: Oversize / relaxed fit\n\t• Bahan: Cotton combed 20S\n\nMAGOS – Burn your limits.",
+      "status": "PRESALE",
       "stock": {
         "S": 3,
         "M": 3,
         "L": 3,
         "XL": 3,
         "XXL": 1
-      }
+      },
+      "id": "MGS0001",
+      "category": "T-SHIRT"
     }
   ]
 }
