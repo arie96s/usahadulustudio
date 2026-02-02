@@ -308,25 +308,35 @@ function toggleSizeChart() {
 
 // Tambahkan/Update di magos.js
 function addToCart(p, size) {
-    // Cari apakah produk dengan ID dan SIZE yang sama sudah ada
-    const existingIndex = cart.findIndex(item => item.id === p.id && item.size === size);
-
-    if (existingIndex > -1) {
-        cart[existingIndex].qty += 1; // Jika ada, tambah jumlahnya
-    } else {
-        const cartItem = { 
-            ...p, 
-            size: size, 
-            qty: 1, // Pastikan ada qty awal
-            cartId: Date.now() 
-        };
-        cart.push(cartItem);
-    }
+    // Cari produk di database lokal untuk update stok
+    const productInDb = products.find(item => item.id === p.id);
     
-    saveCart();
-    updateCartUI();
-    closeModal('productModal');
-    toggleCart();
+    if (productInDb && productInDb.stock[size] > 0) {
+        // 1. Kurangi stok lokal
+        productInDb.stock[size] -= 1;
+        
+        // 2. Simpan kondisi produk terbaru ke LocalStorage
+        localStorage.setItem('magos_products_data', JSON.stringify(products));
+
+        // 3. Masukkan ke array keranjang
+        const existingIndex = cart.findIndex(item => item.id === p.id && item.size === size);
+        if (existingIndex > -1) {
+            cart[existingIndex].qty += 1;
+        } else {
+            // Kita buat salinan objek agar tidak merusak data asli
+            cart.push({ ...p, size: size, qty: 1, cartId: Date.now() });
+        }
+        
+        saveCart();
+        updateCartUI();
+        closeModal('productModal');
+        toggleCart();
+        
+        // Refresh tampilan grid agar badge SOLDOUT muncul jika stok jadi 0
+        displayProducts(currentFilter, currentPage);
+    } else {
+        alert("MAAF, STOK UKURAN INI HABIS / OUT OF STOCK");
+    }
 }
 
 function loadCartFromStorage() {
@@ -386,10 +396,25 @@ function updateCartUI() {
     }
 }
 
-function removeFromCart(i) {
-    cart.splice(i, 1);
-    saveCart();
-    updateCartUI();
+function removeFromCart(cartId) {
+    const itemToRemove = cart.find(item => item.cartId === cartId);
+    
+    if (itemToRemove) {
+        // Cari produk di database untuk mengembalikan stok
+        const productInDb = products.find(p => p.id === itemToRemove.id);
+        if (productInDb) {
+            // Kembalikan stok sebanyak jumlah (qty) yang ada di keranjang
+            productInDb.stock[itemToRemove.size] += itemToRemove.qty;
+            localStorage.setItem('magos_products_data', JSON.stringify(products));
+        }
+        
+        // Hapus dari array keranjang
+        cart = cart.filter(item => item.cartId !== cartId);
+        
+        saveCart();
+        updateCartUI();
+        displayProducts(currentFilter, currentPage); // Update tampilan grid
+    }
 }
 
 // Wishlist Logic
@@ -975,14 +1000,5 @@ if (window.location.pathname.includes('checkout.html')) {
     if (currentCart.length === 0) {
         alert("ACCESS_DENIED: YOUR CART IS EMPTY");
         window.location.href = "magos.html";
-    }
-}
-
-// Tambahkan di baris terakhir magos.js
-if (window.location.pathname.includes('checkout.html')) {
-    const currentCart = JSON.parse(localStorage.getItem('magos_cart') || "[]");
-    if (currentCart.length === 0) {
-        alert("ACCESS_DENIED: YOUR CART IS EMPTY");
-        window.location.href = "magos.html"; // Balikkan ke toko
     }
 }
