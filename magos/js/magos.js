@@ -38,31 +38,43 @@ window.addEventListener('load', () => {
     if (preloader) {
         setTimeout(() => {
             preloader.style.opacity = '0';
-            setTimeout(() => { preloader.style.visibility = 'hidden'; }, 500);
+            setTimeout(() => { 
+                preloader.style.visibility = 'hidden'; 
+            }, 500);
         }, 800); 
     }
 
-    // B. Language & Currency Sync
+    // B. Jalankan Fungsi Pendukung
+    // Memulai slider fade gambar hero
+    initHeroFade(); 
+    
+    // Memulai animasi teks berjalan (Marquee)
+    initInfiniteLoop('marquee-content'); 
+
+    // C. Sinkronisasi Data Tambahan (Opsional tapi disarankan)
     const savedLang = localStorage.getItem('magos_lang') || 'id';
-    setLanguage(savedLang);
+    if (typeof setLanguage === "function") setLanguage(savedLang);
+});
+
+// B. Language & Currency Sync
+    const savedLang = localStorage.getItem('magos_lang') || 'id';
+    if (typeof setLanguage === "function") setLanguage(savedLang);
     currentCurrency = (savedLang === 'en') ? 'USD' : 'IDR';
 
-    // C. Data Generation
-    generateProducts();
+    // C. Data Generation (DIHAPUS)
+    // Jangan panggil generateProducts() lagi agar data JSON tidak tertimpa
 
     // D. UI Rendering
     if(document.getElementById('productGrid')) {
-        displayProducts('all', 1);
+        // Berikan sedikit delay agar fetch data JSON selesai sebelum di-render
+        setTimeout(() => {
+            displayProducts('all', 1);
+        }, 100);
     }
 
     // E. Storage Retrieval
     loadCartFromStorage();
     loadWishlistFromStorage();
-
-    // F. Infinite Loop Animations
-    initInfiniteLoop('hero-track');      
-    initInfiniteLoop('marquee-content'); 
-});
 
 // --- 3. DATA GENERATION & FORMATTING ---
 function generateProducts() {
