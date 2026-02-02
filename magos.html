@@ -323,29 +323,76 @@
 <script>
     async function loadMagosProducts() {
         try {
-            // Pastikan file ini ada di folder _data/ di repositori Anda
             const response = await fetch('_data/magos_products.json');
             const data = await response.json();
             
-            // Transformasi data CMS (field 'img') agar sesuai dengan slider magos.js (field 'images')
-            const processedItems = data.items.map(item => ({
-                ...item,
-                // Netlify CMS hanya kirim 1 gambar, kita duplikasi untuk front/back view
-                images: [item.img, item.img] 
-            }));
+            const processedItems = data.items.map(item => {
+                // Mengambil list gambar dari admin, jika tidak ada pakai gambar utama lama sebagai fallback
+                const gallery = item.images_list ? item.images_list.map(imgObj => imgObj.url) : [item.img];
+                
+                return {
+                    ...item,
+                    images: gallery, // Mengisi array images untuk slider (maks 4)
+                    status: item.status || "NORMAL",
+                    sizeChart: item.size_chart_custom || "assets/img/size-guide.jpg" // Fallback ke default
+                };
+            });
 
-            // Hubungkan ke sistem display di magos.js
             if (typeof displayProducts === "function") {
-                // 'products' adalah variabel global di magos.js
                 products = processedItems; 
                 displayProducts('all', 1); 
-                console.log("MAGOS System: CMS Data Synced.");
+                
+                // Tambahkan logika CSS inject untuk efek SOLDOUT secara dinamis
+                applyStatusEffects();
             }
         } catch (error) {
             console.error("MAGOS System Error:", error);
         }
     }
 
+    function applyStatusEffects() {
+    // Logika ini berjalan setelah produk di-render oleh magos.js
+    const productElements = document.querySelectorAll('.prod');
+    productElements.forEach((el, index) => {
+        const pData = products[index];
+        
+        if (pData && pData.status !== "NORMAL") {
+            // 1. Tambahkan Badge Status
+            const badge = document.createElement('div');
+            badge.className = 'status-badge';
+            badge.innerText = pData.status;
+            
+            // Styling Badge: Merah untuk SOLDOUT, Putih/Hitam untuk PRESALE
+            const isSoldOut = pData.status === 'SOLDOUT';
+            badge.style = `
+                position: absolute; 
+                top: 15px; 
+                left: 15px; 
+                background: ${isSoldOut ? '#ff0000' : '#ffffff'}; 
+                color: ${isSoldOut ? '#ffffff' : '#000000'};
+                padding: 6px 15px; 
+                font-weight: 900; 
+                font-size: 11px; 
+                letter-spacing: 1px;
+                z-index: 5;
+                text-transform: uppercase;
+            `;
+            el.style.position = 'relative';
+            el.appendChild(badge);
+
+            // 2. Efek Fade pada Gambar Utama
+            const img = el.querySelector('img');
+            if (img) {
+                if (pData.status === "SOLDOUT") {
+                    img.style.opacity = "0.4"; // Sangat redup jika habis
+                    img.style.filter = "grayscale(100%)"; // Tambahan: buat hitam putih agar lebih kontras
+                } else if (pData.status === "PRESALE") {
+                    img.style.opacity = "0.7"; // Sedikit redup untuk Pre-Sale
+                }
+            }
+        }
+    });
+}
     // Satu-satunya event listener yang diperlukan
     window.addEventListener('load', loadMagosProducts);
 </script>
