@@ -66,14 +66,48 @@ nav a:hover { color: #fff; }
 }
 .back-btn:hover { background: #fff; color: #000; border-color: #fff; }
 
-/* 3. HERO SLIDER */
+/* --- NEW FADE SLIDER --- */
 .hero-slider-container {
-    position: relative; width: 100%; height: 80vh; overflow: hidden;
-    display: flex; align-items: center; background: #000; margin-top: 80px;
+    position: relative;
+    width: 100%;
+    height: 80vh;
+    overflow: hidden;
+    background: #000;
+    margin-top: 80px;
 }
+
+.hero-fade-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.fade-slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0; /* Sembunyi secara default */
+    transition: opacity 1.5s ease-in-out; /* Durasi animasi fade */
+    z-index: 1;
+}
+
+.fade-slide.active {
+    opacity: 1; /* Tampil jika aktif */
+    z-index: 2;
+}
+
+.fade-slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: grayscale(100%) brightness(0.5); /* Estetika MAGOS */
+}
+
+/* Tulisan overlay harus selalu di paling atas */
 .hero-overlay-text {
-    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-    z-index: 10; text-align: center; width: 100%; text-shadow: 0 0 30px rgba(0,0,0,0.9); pointer-events: none;
+    z-index: 10;
 }
 
 /* STYLE UNTUK LOGO HERO (TENGAH BESAR) */
