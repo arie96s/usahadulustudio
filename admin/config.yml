@@ -74,10 +74,25 @@ collections:
             fields:
               - {label: "ID Produk", name: "id", widget: "string"}
               - {label: "Nama Produk", name: "name", widget: "string"}
+              - label: "Status Produk"
+                name: "status"
+                widget: "select"
+                options: 
+                  - {label: "Normal", value: "NORMAL"}
+                  - {label: "Sold Out", value: "SOLDOUT"}
+                  - {label: "Pre-Sale", value: "PRESALE"}
+                default: "NORMAL"
               - {label: "Kategori", name: "category", widget: "select", options: ["T-SHIRT", "OUTERWEAR", "BOTTOMS", "ACCESSORIES"]}
               - {label: "Harga", name: "price", widget: "number"}
               - {label: "Deskripsi", name: "desc", widget: "text"}
-              - {label: "Gambar Utama", name: "img", widget: "image"}
+              - label: "Gambar Produk (Maks 4)"
+                name: "images_list"
+                widget: "list"
+                minimize_collapsed: true
+                max: 4
+                fields:
+                  - {label: "Foto", name: "url", widget: "image"}
+              - {label: "Gambar Size Chart Khusus", name: "size_chart_custom", widget: "image", required: false, hint: "Jika kosong, akan menggunakan size chart default."}
               - label: "Stok Barang"
                 name: "stock"
                 widget: "object"
@@ -87,7 +102,6 @@ collections:
                   - {label: "Stok L", name: "L", widget: "number", default: 0}
                   - {label: "Stok XL", name: "XL", widget: "number", default: 0}
                   - {label: "Stok XXL", name: "XXL", widget: "number", default: 0}
-
       # --- MAGOS GALLERY (VOLUMES) ---
       - file: "_data/magos_gallery.json"
         label: "Magos Gallery Volumes"
