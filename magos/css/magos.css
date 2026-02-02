@@ -140,10 +140,42 @@ section { padding: 80px 40px; border-bottom: 1px dashed var(--border-color); }
     font-size: 30px; cursor: pointer; background: rgba(0,0,0,0.5); 
     width: 40px; height: 40px; border-radius: 50%; text-align: center; line-height: 40px;
 }
-.product-slider-wrapper { width: 50%; height: 100%; background: #000; position: relative; overflow: hidden; display: flex; align-items: center; flex-shrink: 0; }
-.product-slider-track { display: flex; width: 100%; height: 100%; transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1); }
-.product-slide { min-width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; }
-.product-slide img { width: 100%; height: 100%; object-fit: cover; }
+/* --- PRODUCT SLIDER (LOCKED TO 1:1) --- */
+.product-slider-wrapper { 
+    width: 50%; 
+    aspect-ratio: 1 / 1; /* Mengunci rasio kotak */
+    height: auto; 
+    background: #000; 
+    position: relative; 
+    overflow: hidden; 
+    display: flex; 
+    align-items: center; 
+    flex-shrink: 0; 
+}
+
+.product-slider-track { 
+    display: flex; 
+    width: 100%; 
+    height: 100%; 
+    transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1); 
+}
+
+.product-slide { 
+    min-width: 100%; 
+    height: 100%; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+}
+
+.product-slide img { 
+    width: 100%; 
+    height: 100%; 
+    object-fit: contain; /* Gambar 1:1 Anda akan tampil utuh */
+    background-color: #000;
+}
+
+/* --- NAVIGASI SLIDER --- */
 .p-slider-btn {
     position: absolute; top: 50%; transform: translateY(-50%); width: 35px; height: 35px;
     background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.2);
@@ -152,21 +184,45 @@ section { padding: 80px 40px; border-bottom: 1px dashed var(--border-color); }
 }
 .product-slider-wrapper:hover .p-slider-btn { opacity: 1; }
 .p-slider-btn:hover { background: #fff; color: #000; }
-.p-slider-btn.prev { left: 15px; } .p-slider-btn.next { right: 15px; }
-.modal-info { width: 50%; padding: 40px; display: flex; flex-direction: column; justify-content: flex-start; height: 100%; overflow-y: auto; }
-.info-top { margin-bottom: 30px; } .info-bottom { margin-top: auto; border-top: 1px dashed #333; padding-top: 20px; }
-.modal-title { font-size: 24px; font-weight: 900; margin-bottom: 5px; line-height: 1.1; }
+.p-slider-btn.prev { left: 15px; } 
+.p-slider-btn.next { right: 15px; }
+
+/* --- DETAIL INFO PRODUK --- */
+.modal-info { 
+    width: 50%; 
+    padding: 40px; 
+    display: flex; 
+    flex-direction: column; 
+    justify-content: flex-start; 
+    height: 100%; 
+    overflow-y: auto; 
+}
+.modal-title { font-size: 24px; font-weight: 900; margin-bottom: 5px; line-height: 1.1; color: #fff; }
 .modal-price { font-size: 18px; color: #ccc; margin-bottom: 15px; font-family: monospace; }
 .modal-desc { font-size: 13px; color: #888; line-height: 1.6; margin-bottom: 20px; white-space: pre-line; }
-
+/* --- SIZE CHART TRIGGER --- */
 .size-chart-trigger {
     display: inline-block; margin-bottom: 20px; padding: 10px 24px;
     border: 1px solid #555; border-radius: 50px; font-size: 11px; font-weight: 900;
-    color: #fff; cursor: pointer; transition: all 0.3s; text-transform: uppercase; letter-spacing: 1px; text-align: center;
-    background: rgba(255,255,255,0.05);
+    color: #fff; cursor: pointer; transition: all 0.3s; text-transform: uppercase; 
+    letter-spacing: 1px; text-align: center; background: rgba(255,255,255,0.05);
 }
 .size-chart-trigger:hover { background: #fff; color: #000; border-color: #fff; }
 
+/* --- SIZE CHART MODAL CONTENT --- */
+.size-chart-window { 
+    max-width: 500px !important; 
+    padding: 30px; 
+    height: auto !important; 
+}
+.static-chart-container img {
+    max-width: 100%;
+    height: auto;
+    border: 1px dashed #333;
+    filter: grayscale(1); /* Efek industrial industrial */
+    transition: 0.3s;
+}
+.static-chart-container img:hover { filter: grayscale(0); }
 .stock-container { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
 .stock-item { display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; }
 .stock-num { font-size: 11px; color: #666; font-weight: bold; transition: 0.3s; }
@@ -684,4 +740,10 @@ footer.industrial-footer {
     justify-content: center;
     min-height: 300px;
     width: 100%;
+}
+
+@media (max-width: 768px) {
+    .modal-window { flex-direction: column; height: 100%; max-height: 100%; border-radius: 0; }
+    .product-slider-wrapper { width: 100%; aspect-ratio: 1/1; } /* Tetap kotak di HP */
+    .modal-info { width: 100%; padding: 25px; }
 }
