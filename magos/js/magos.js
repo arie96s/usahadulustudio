@@ -33,48 +33,41 @@ let appliedVoucherCode = '';
 
 // --- 2. INITIALIZATION (WINDOW LOAD) ---
 window.addEventListener('load', () => {
+window.addEventListener('click', (e) => {
+    if (e.target.classList.contains('modal-backdrop')) {
+        closeModal(e.target.id);
+    }
+});    
     // A. Preloader Logic
     const preloader = document.getElementById('preloader');
     if (preloader) {
         setTimeout(() => {
             preloader.style.opacity = '0';
-            setTimeout(() => { 
-                preloader.style.visibility = 'hidden'; 
-            }, 500);
+            setTimeout(() => { preloader.style.visibility = 'hidden'; }, 500);
         }, 800); 
     }
 
-    // B. Jalankan Fungsi Pendukung
-    // Memulai slider fade gambar hero
-    initHeroFade(); 
-    
-    // Memulai animasi teks berjalan (Marquee)
-    initInfiniteLoop('marquee-content'); 
-
-    // C. Sinkronisasi Data Tambahan (Opsional tapi disarankan)
+    // B. Language & Currency Sync
     const savedLang = localStorage.getItem('magos_lang') || 'id';
-    if (typeof setLanguage === "function") setLanguage(savedLang);
-});
-
-// B. Language & Currency Sync
-    const savedLang = localStorage.getItem('magos_lang') || 'id';
-    if (typeof setLanguage === "function") setLanguage(savedLang);
+    setLanguage(savedLang);
     currentCurrency = (savedLang === 'en') ? 'USD' : 'IDR';
 
-    // C. Data Generation (DIHAPUS)
-    // Jangan panggil generateProducts() lagi agar data JSON tidak tertimpa
+    // C. Data Generation
+    generateProducts();
 
     // D. UI Rendering
     if(document.getElementById('productGrid')) {
-        // Berikan sedikit delay agar fetch data JSON selesai sebelum di-render
-        setTimeout(() => {
-            displayProducts('all', 1);
-        }, 100);
+        displayProducts('all', 1);
     }
 
     // E. Storage Retrieval
     loadCartFromStorage();
     loadWishlistFromStorage();
+
+    // F. Infinite Loop Animations
+    initInfiniteLoop('hero-track');      
+    initInfiniteLoop('marquee-content'); 
+});
 
 // --- 3. DATA GENERATION & FORMATTING ---
 function generateProducts() {
@@ -287,16 +280,30 @@ function openProductModal(p) {
     document.getElementById('productModal').classList.add('active');
 }
 
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.remove('active');
+        // Reset variabel global produk saat modal ditutup
+        if (modalId === 'productModal') {
+            currentProduct = null;
+            selectedSize = null;
+        }
+    }
+}
+
 function moveProductSlide(direction) {
     if(productSlideCount <= 1) return;
     currentProductSlide = (currentProductSlide + direction + productSlideCount) % productSlideCount;
     document.getElementById('pTrack').style.transform = `translateX(-${currentProductSlide * 100}%)`;
 }
 
-function toggleSizeChart() { document.getElementById('sizeChartModal').classList.add('active'); }
-function closeModal(id) { 
-    const el = document.getElementById(id);
-    if(el) el.classList.remove('active'); 
+function toggleSizeChart() {
+    const modal = document.getElementById('sizeChartModal');
+    const chartImg = modal.querySelector('img');
+    // 'currentProduct' adalah variabel yang menyimpan data produk yang sedang dibuka modalnya
+    chartImg.src = currentProduct.sizeChart; 
+    modal.classList.add('active');
 }
 
 // Tambahkan/Update di magos.js
