@@ -1,19 +1,26 @@
 {
   "items": [
     {
+      "id": "MGS0001",
+      "name": "MAGOS Flame Tee – Black",
+      "status": "NORMAL",
+      "category": "T-SHIRT",
+      "price": 189000,
+      "desc": "Kaos MAGOS Flame Tee hadir dengan desain tipografi api berwarna kuning yang menyala di atas dasar hitam pekat. Visualnya terinspirasi dari simbol energi, pemberontakan, dan kekuatan personal—cocok untuk kamu yang ingin tampil berani, beda, dan penuh karakter.\n\nDetail Produk:\n\t• Warna: Hitam\n\t• Sablon: Platisol\n\t• Model: Oversize / relaxed fit\n\t• Bahan: Cotton combed 20S\n\nMAGOS – Burn your limits.",
+      "images_list": [
+        { "url": "img/model-1.png" },
+        { "url": "img/model-1-back.png" },
+        { "url": "img/model-1-detail.png" },
+        { "url": "img/model-1-flatlay.png" }
+      ],
+      "size_chart_custom": "img/size-chart-tee.jpg",
       "stock": {
         "S": 3,
         "M": 3,
         "L": 3,
         "XL": 3,
         "XXL": 1
-      },
-      "id": "MGS0001",
-      "name": "MAGOS Flame Tee – Black",
-      "category": "T-SHIRT",
-      "price": 189000,
-      "desc": "Kaos MAGOS Flame Tee hadir dengan desain tipografi api berwarna kuning yang menyala di atas dasar hitam pekat. Visualnya terinspirasi dari simbol energi, pemberontakan, dan kekuatan personal—cocok untuk kamu yang ingin tampil berani, beda, dan penuh karakter.\n\nDesain simpel namun kuat ini membuat kaos mudah dipadukan dengan berbagai gaya: streetwear, rebel, punk, hingga casual daily. Logo api di bagian depan menjadi statement utama yang langsung mencuri perhatian.\n\nDetail Produk:\n\t•\tWarna: Hitam\n\t•\tSablon: Platisol\n\t•\tModel: Oversize / relaxed fit\n\t•\tBahan: Cotton combed 20S (nyaman, adem, tidak kaku)\n\t•\tLeher: O-neck (crew neck)\n\t•\tLengan: Pendek\n\nKarakter & Vibe:\n\n🔥 Rebel\n🔥 Street culture\n🔥 Dark & bold\n🔥 Statement piece\n\nCocok dipakai untuk nongkrong, konser, riding, atau sekadar daily outfit dengan attitude.\n\nMAGOS – Burn your limits.",
-      "img": "img/model-1.png"
+      }
     }
   ]
 }
