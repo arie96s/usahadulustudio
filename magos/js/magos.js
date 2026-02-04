@@ -128,26 +128,37 @@ function displayProducts(filterCat = 'all', page = 1) {
             grid.innerHTML = '<div style="width:100%; text-align:center; padding:50px; color:#666; font-size:10px;">NO_DATA_FOUND</div>';
         } else {
             paginatedItems.forEach(p => {
-                const el = document.createElement('div');
-                el.className = 'prod hover-target';
-                el.onclick = () => openProductModal(p);
-                el.innerHTML = `
-                    <div class="prod-img-wrapper">
-                        <img src="${p.images[0]}" class="img-front" loading="lazy">
-                        <img src="${p.images[1]}" class="img-back" loading="lazy">
-                    </div>
-                    <div class="meta">
-                        <h4>${p.name}</h4>
-                        <p>${formatMoney(p.price)}</p>
-                    </div>
-                    <div class="label">${p.category}</div>
-                `;
-                grid.appendChild(el);
-            });
+    const el = document.createElement('div');
+    el.className = 'prod hover-target';
+    el.onclick = () => openProductModal(p);
+    
+    // PERBAIKAN: Gunakan p.images[0] dan p.images[1] agar sinkron dengan loadMagosProducts
+    const imgFront = p.images && p.images[0] ? p.images[0] : 'assets/img/default.jpg';
+    const imgBack = p.images && p.images[1] ? p.images[1] : imgFront;
+
+    el.innerHTML = `
+        <div class="prod-img-wrapper">
+            <img src="${imgFront}" class="img-front" loading="lazy">
+            <img src="${imgBack}" class="img-back" loading="lazy">
+        </div>
+        <div class="meta">
+            <h4>${p.name}</h4>
+            <p>${formatMoney(p.price)}</p>
+        </div>
+        <div class="label">${p.category}</div>
+    `;
+    grid.appendChild(el);
+});
         }
         grid.style.opacity = '1';
         renderPagination(totalPages, page);
-    }, 300);
+
+        // TAMBAHKAN INI DI SINI
+        if (typeof applyStatusEffects === "function") {
+    // Kirimkan paginatedItems agar label sesuai dengan produk di halaman tersebut
+    applyStatusEffects(paginatedItems); 
+        }
+    }, 300); // Harus di dalam timeout 300ms ini
 }
 
 function renderPagination(totalPages, page) {
