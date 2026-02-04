@@ -747,3 +747,17 @@ footer.industrial-footer {
     .product-slider-wrapper { width: 100%; aspect-ratio: 1/1; } /* Tetap kotak di HP */
     .modal-info { width: 100%; padding: 25px; }
 }
+
+/* Efek hover khusus untuk grid Instagram */
+.ig-item:hover img {
+    filter: grayscale(0) brightness(0.8);
+    transform: scale(1.05);
+}
+
+/* Memastikan grid tetap konsisten di mobile */
+@media (max-width: 768px) {
+    #social-proof .grid {
+        grid-template-columns: repeat(3, 1fr) !important; /* 3 kolom di mobile agar seperti layout IG asli */
+        gap: 5px !important; /* Jarak lebih rapat di mobile */
+    }
+}
