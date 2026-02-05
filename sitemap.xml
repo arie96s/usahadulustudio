@@ -1,60 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset
-      xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-      xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
-            http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
-<url>
-    <loc>https://arie96s.github.io/usahadulustudio/</loc>
-    <lastmod>2026-01-09</lastmod>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://usahadulu.pages.dev/</loc>
+    <lastmod>2026-02-05</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.00</priority>
   </url>
 
   <url>
-    <loc>https://arie96s.github.io/usahadulustudio/services.html</loc>
-    <lastmod>2026-01-09</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.80</priority>
-  </url>
-  <url>
-    <loc>https://arie96s.github.io/usahadulustudio/portfolio.html</loc>
-    <lastmod>2026-01-09</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.80</priority>
-  </url>
-  <url>
-    <loc>https://arie96s.github.io/usahadulustudio/shop.html</loc>
-    <lastmod>2026-01-09</lastmod>
+    <loc>https://usahadulu.pages.dev/magos.html</loc>
+    <lastmod>2026-02-05</lastmod>
     <changefreq>weekly</changefreq>
+    <priority>0.90</priority>
+  </url>
+
+  <url>
+    <loc>https://usahadulu.pages.dev/portfolio.html</loc>
+    <lastmod>2026-02-05</lastmod>
+    <changefreq>monthly</changefreq>
     <priority>0.80</priority>
   </url>
 
   <url>
-    <loc>https://arie96s.github.io/usahadulustudio/about.html</loc>
-    <lastmod>2026-01-09</lastmod>
-    <priority>0.60</priority>
-  </url>
-  <url>
-    <loc>https://arie96s.github.io/usahadulustudio/testimonial.html</loc>
-    <lastmod>2026-01-09</lastmod>
-    <priority>0.60</priority>
-  </url>
-  <url>
-    <loc>https://arie96s.github.io/usahadulustudio/order.html</loc>
-    <lastmod>2026-01-09</lastmod>
-    <priority>0.60</priority>
+    <loc>https://usahadulu.pages.dev/services.html</loc>
+    <lastmod>2026-02-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.80</priority>
   </url>
 
   <url>
-    <loc>https://arie96s.github.io/usahadulustudio/faq.html</loc>
-    <lastmod>2026-01-09</lastmod>
-    <priority>0.50</priority>
+    <loc>https://usahadulu.pages.dev/shop.html</loc>
+    <lastmod>2026-02-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.80</priority>
   </url>
-  <url>
-    <loc>https://arie96s.github.io/usahadulustudio/term_condition.html</loc>
-    <lastmod>2026-01-09</lastmod>
-    <priority>0.50</priority>
-  </url>
-
 </urlset>
