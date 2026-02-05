@@ -9,6 +9,22 @@ media_folder: "img"
 public_folder: "img"
 
 collections:
+  - file: "_data/hero_config.json"
+    label: "Hero Promo Banner"
+    name: "hero_config"
+    fields:
+      - label: "Daftar Gambar Hero (Maks 5)"
+        name: "banners"
+        widget: "list"
+        max: 5
+        fields:
+          - {label: "Gambar Banner", name: "image", widget: "image"}
+          - {label: "Teks Promo (Optional)", name: "promo_text", widget: "string", required: false}
+
+  - name: "data"
+    label: "Database Website"
+    # ... dst
+    
   - name: "data"
     label: "Database Website"
     files:
