@@ -44,20 +44,36 @@
 }
 
 .fade-slide {
-    position: absolute !important;
-    top: 0;
-    left: 0;
-    width: 100% !important; /* Memastikan lebar penuh layar */
-    height: 100% !important; /* Memastikan tinggi penuh hero */
-    opacity: 0;
-    transition: opacity 2s ease-in-out;
-    z-index: 1;
-}
+        position: absolute !important;
+        top: 0;
+        left: 0;
+        width: 100% !important;
+        height: 100% !important;
+        opacity: 0;
+        transition: opacity 2s ease-in-out;
+        z-index: 1;
+    }
 
-.fade-slide.active {
-    opacity: 1 !important;
-    z-index: 2;
-}
+    /* LETAKKAN DI SINI */
+    .fade-slide::after {
+        content: attr(data-promo);
+        position: absolute;
+        bottom: 10%;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 10px;
+        letter-spacing: 5px;
+        color: rgba(255,255,255,0.5);
+        font-weight: 900;
+        text-transform: uppercase;
+        z-index: 100;
+        pointer-events: none;
+    }
+
+    .fade-slide.active {
+        opacity: 1 !important;
+        z-index: 2;
+    }
 
 .fade-slide img {
     width: 100% !important;
@@ -396,6 +412,7 @@
         <div class="static-chart-container" style="display: flex; justify-content: center; align-items: center; margin-bottom: 20px;">
             <img src="assets/img/size-guide.jpg" alt="Size Chart" style="max-width: 100%; height: auto; border-radius: 8px; border: 1px dashed #333;">
         </div>
+        <p style="text-align: center; font-size: 11px; color: #666;">*Tolerance 1-2cm due to manual measurement.</p>
     </div>
 </div>
 
@@ -453,6 +470,30 @@
         }
     }
 
+    async function loadHeroBanners() {
+    try {
+        const response = await fetch('_data/hero_config.json');
+        const data = await response.json();
+        const heroTrack = document.querySelector('.fade-hero-track');
+        if (data.banners && data.banners.length > 0) {
+            let content = "";
+            data.banners.forEach((banner, index) => {
+                const active = index === 0 ? 'active' : '';
+                content += `<div class="fade-slide ${active}" data-promo="${banner.promo_text || ''}"><img src="${banner.image}"></div>`;
+            });
+            heroTrack.innerHTML = content;
+            startFadeHero(); // Jalankan ulang animasi slider
+        }
+    } catch (e) { console.log("Hero banner default aktif."); }
+}
+
+// Tambahkan loadHeroBanners ke window load
+window.addEventListener('load', () => {
+    loadMagosProducts();   // Muat Produk
+    loadHeroBanners();     // Muat Banner Promo dari Admin
+    loadSocialConfig();    // Muat Grid Instagram
+});
+
     // Tambahkan parameter 'currentItems' agar label sesuai dengan halaman yang sedang dibuka
 function applyStatusEffects(currentItems) {
     // Pastikan hanya mengambil .prod yang ada di dalam #productGrid
@@ -492,9 +533,10 @@ function applyStatusEffects(currentItems) {
     // Satu-satunya event listener yang diperlukan
     // Gabungkan dalam satu blok script atau pastikan tag pembuka benar
     window.addEventListener('load', () => {
-        loadMagosProducts();
-        loadSocialConfig(); // Pastikan fungsi ini dipanggil agar gambar muncul
-    });
+    loadMagosProducts();   // Muat Produk
+    loadHeroBanners();     // Muat Banner Promo dari Admin
+    loadSocialConfig();    // Muat Grid Instagram
+});
 
     async function loadSocialConfig() {
         try {
