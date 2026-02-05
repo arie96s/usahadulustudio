@@ -119,11 +119,12 @@
 }
 
 /* Tambahan agar tombol remove selalu bisa diklik */
-.remove-btn, .close-icon-inside {
+/* Gabungkan menjadi satu agar tidak konflik */
+.ci-remove-capsule, .remove-btn, .close-icon-inside, .wishlist-clear-btn {
     cursor: pointer !important;
     pointer-events: auto !important;
     position: relative;
-    z-index: 999;
+    z-index: 10000; /* Pastikan di atas drawer */
 }
 
   </style>
@@ -561,43 +562,70 @@ function applyStatusEffects(currentItems) {
 </script>
 <script>
 /**
- * PERBAIKAN TOMBOL REMOVE UNTUK CLOUDFLARE HOSTING
- * Menjamin fungsi tersedia di lingkup global (window)
+ * MAGOS SYSTEM REPAIR - PRODUCTION READY
+ * Menangani sinkronisasi antara UI (Index) dan Data (CartId)
  */
 
-window.removeFromCart = function(index) {
-    // 1. Ambil data terbaru dari LocalStorage
-    let cart = JSON.parse(localStorage.getItem('cart')) || [];
-    
-    // 2. Hapus item berdasarkan indeks
-    cart.splice(index, 1);
-    
-    // 3. Simpan kembali ke LocalStorage
-    localStorage.setItem('cart', JSON.stringify(cart));
-    
-    // 4. Update tampilan (Memanggil fungsi dari magos.js)
-    if (typeof updateCartDisplay === 'function') {
-        updateCartDisplay();
+window.removeFromCart = function(identifier) {
+    // 1. Validasi keberadaan data keranjang
+    if (typeof cart === 'undefined' || cart.length === 0) return;
+
+    let itemToRemove;
+
+    // 2. Deteksi Identifier (Apakah Index array atau CartID unik)
+    // Jika angka kecil (< 1000), sistem mengasumsikan itu adalah index array dari UI
+    if (typeof identifier === 'number' && identifier < 1000) {
+        itemToRemove = cart[identifier];
+    } else {
+        // Jika angka besar/timestamp, cari berdasarkan properti cartId
+        itemToRemove = cart.find(item => item.cartId === identifier);
     }
-    if (typeof updateCartCount === 'function') {
-        updateCartCount();
+
+    if (itemToRemove) {
+        const targetId = itemToRemove.cartId;
+        
+        // 3. Update stok di database produk (Agar sinkron dengan Grid)
+        if (typeof products !== 'undefined') {
+            const productInDb = products.find(p => p.id === itemToRemove.id);
+            if (productInDb) {
+                // Kembalikan jumlah stok sesuai kuantitas yang dibuang
+                const qtyToRestore = itemToRemove.qty || 1;
+                productInDb.stock[itemToRemove.size] += qtyToRestore;
+                
+                // Simpan perubahan stok ke storage gudang
+                localStorage.setItem('magos_products_data', JSON.stringify(products));
+            }
+        }
+        
+        // 4. Hapus item dari array cart global
+        cart = cart.filter(item => item.cartId !== targetId);
+        
+        // 5. Sinkronisasi ke LocalStorage & Refresh UI
+        localStorage.setItem('magos_cart', JSON.stringify(cart));
+        
+        // Panggil fungsi internal dari magos.js untuk update tampilan
+        if (typeof updateCartUI === 'function') {
+            updateCartUI();
+        }
+        
+        // Refresh grid produk agar status 'SOLDOUT' hilang jika stok kembali ada
+        if (typeof displayProducts === 'function') {
+            displayProducts(currentFilter || 'all', currentPage || 1);
+        }
+        
+        console.log(`MAGOS_SYSTEM: Item ${targetId} removed. Stock restored.`);
     }
-    console.log("Item removed from cart. Index:", index);
 };
 
+/**
+ * WISHLIST REPAIR
+ * Menggunakan sistem toggle bawaan magos.js
+ */
 window.removeFromWishlist = function(index) {
-    let wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
-    wishlist.splice(index, 1);
-    localStorage.setItem('wishlist', JSON.stringify(wishlist));
-    
-    if (typeof updateWishlistDisplay === 'function') {
-        updateWishlistDisplay();
+    if (typeof wishlist !== 'undefined' && wishlist[index]) {
+        const item = wishlist[index];
+        // Fungsi toggleWishlistItem sudah otomatis menghapus jika ID sudah ada
+        toggleWishlistItem(item.id); 
     }
-    if (typeof updateWishlistCount === 'function') {
-        updateWishlistCount();
-    }
-    console.log("Item removed from wishlist. Index:", index);
 };
 </script>
-</body>
-</html>
