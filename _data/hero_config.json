@@ -1,0 +1,24 @@
+{
+  "banners": [
+    {
+      "image": "magos/assets/img/magos_artwork_1.jpg",
+      "promo_text": "MAGOS ARCHIVE - ISSUE VOL 1"
+    },
+    {
+      "image": "magos/assets/img/magos_artwork_2.jpg",
+      "promo_text": "DARKNESS & INDUSTRIAL WEAR"
+    },
+    {
+      "image": "magos/assets/img/magos_artwork_3.jpg",
+      "promo_text": "STREETWEAR EVOLUTION 2026"
+    },
+    {
+      "image": "magos/assets/img/magos_artwork_4.jpg",
+      "promo_text": "ISSUE VOL 2 - COMING SOON"
+    },
+    {
+      "image": "magos/assets/img/magos_artwork_5.jpg",
+      "promo_text": "USAHADULU STUDIO ECOSYSTEM"
+    }
+  ]
+}
