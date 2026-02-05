@@ -6,5 +6,5 @@ Allow: /css/
 Allow: /js/
 Allow: /img/
 
-# Arahkan bot langsung ke Peta Situs
-Sitemap: https://arie96s.github.io/usahadulustudio/sitemap.xml
+# Arahkan bot langsung ke Peta Situs di domain baru
+Sitemap: https://usahadulustudio.pages.dev/sitemap.xml
