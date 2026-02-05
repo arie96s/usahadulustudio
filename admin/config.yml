@@ -9,23 +9,37 @@ media_folder: "img"
 public_folder: "img"
 
 collections:
-  - file: "_data/hero_config.json"
-    label: "Hero Promo Banner"
-    name: "hero_config"
-    fields:
-      - label: "Daftar Gambar Hero (Maks 5)"
-        name: "banners"
-        widget: "list"
-        max: 5
+  - name: "site_settings"
+    label: "Konfigurasi Utama"
+    files:
+      # --- HERO PROMO SLIDER ---
+      - file: "_data/hero_config.json"
+        label: "Hero Promo Banner"
+        name: "hero_config"
         fields:
-          - {label: "Gambar Banner", name: "image", widget: "image"}
-          - {label: "Teks Promo (Optional)", name: "promo_text", widget: "string", required: false}
+          - label: "Daftar Gambar Hero (Maks 5)"
+            name: "banners"
+            widget: "list"
+            max: 5
+            fields:
+              - {label: "Gambar Banner", name: "image", widget: "image"}
+              - {label: "Teks Promo (Optional)", name: "promo_text", widget: "string", required: false}
 
-  - name: "data"
-    label: "Database Website"
-    # ... dst
-    
-  - name: "data"
+      # --- SOSIAL MEDIA & INSTAGRAM ---
+      - file: "_data/social_config.json"
+        label: "Social Media & Instagram"
+        name: "social_config"
+        fields:
+          - {label: "Username Instagram", name: "ig_username", widget: "string", default: "magos.archive"}
+          - {label: "Link Asli Instagram", name: "ig_link", widget: "string"}
+          - label: "Instagram Preview Images"
+            name: "ig_preview"
+            widget: "list"
+            max: 5
+            fields:
+              - {label: "Foto Grid", name: "url", widget: "image"}
+
+  - name: "database"
     label: "Database Website"
     files:
       # --- SHOP (SINKRONISASI REDBUBBLE & USD) ---
@@ -118,6 +132,7 @@ collections:
                   - {label: "Stok L", name: "L", widget: "number", default: 0}
                   - {label: "Stok XL", name: "XL", widget: "number", default: 0}
                   - {label: "Stok XXL", name: "XXL", widget: "number", default: 0}
+
       # --- MAGOS GALLERY (VOLUMES) ---
       - file: "_data/magos_gallery.json"
         label: "Magos Gallery Volumes"
@@ -137,17 +152,3 @@ collections:
                 widget: "list"
                 fields:
                   - {label: "Upload Foto", name: "url", widget: "image"}
-
-      # --- SOSIAL MEDIA & INSTAGRAM ---
-      - file: "_data/social_config.json"
-        label: "Social Media & Instagram"
-        name: "social_config"
-        fields:
-          - {label: "Username Instagram", name: "ig_username", widget: "string", default: "magos.archive"}
-          - {label: "Link Asli Instagram", name: "ig_link", widget: "string"}
-          - label: "Instagram Preview Images"
-            name: "ig_preview"
-            widget: "list"
-            max: 5
-            fields:
-              - {label: "Foto Grid", name: "url", widget: "image"}
