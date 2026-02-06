@@ -1,54 +1,53 @@
-/* MAGOS CMS - INDUSTRIAL OVERHAUL */
-body {
-  background-color: #000 !important;
-  color: #fff !important;
+/* MAGOS CMS - TOTAL INDUSTRIAL OVERHAUL */
+
+/* 1. Reset Global Background */
+body, #nc-root {
+    background-color: #000 !important;
 }
 
-/* 1. Paksa Sidebar dan Container menjadi Hitam & Bergaris */
-div[class*="AppHeaderContainer"], 
+/* 2. Bongkar Paksa Kotak Putih Koleksi & Sidebar */
+/* Kita targetkan class yang dihasilkan secara dinamis oleh CMS */
+div[class*="AppHeaderContainer"],
 div[class*="SidebarContainer"],
-aside {
-  background-color: #000 !important;
-  border-right: 1px dashed #333 !important; /* Garis Putus-putus Sidebar */
+div[class*="CollectionMainView"],
+div[class*="CardContainer"],
+section[class*="Card"] {
+    background-color: #080808 !important;
+    border: 1px dashed #333 !important; /* Ciri khas MAGOS */
+    border-radius: 12px !important;
+    color: #fff !important;
+    box-shadow: none !important;
 }
 
-/* 2. Ubah Kotak Putih Koleksi menjadi Transparan/Gelap */
-div[class*="CollectionMainView"], 
-div[class*="Card"] {
-  background-color: #080808 !important;
-  border: 1px dashed #444 !important; /* Garis Putus-putus Utama */
-  border-radius: 12px !important; /* Sudut Tumpul */
-  color: #fff !important;
-  box-shadow: none !important;
+/* 3. Perbaiki Judul & Teks yang Masih Hitam di Background Gelap */
+h1, h2, h3, h4, p, span, label {
+    color: #fff !important;
 }
 
-/* 3. Perbaiki Header "Database Website" agar tidak kontras putih */
-div[class*="CollectionHeader"] {
-  background: transparent !important;
-  border-bottom: 2px solid #111 !important;
-  margin-bottom: 20px !important;
+/* 4. Target Spesifik untuk List Item (Produk Shop, Blog, dll) */
+/* Ini akan mengubah kotak putih panjang di screenshot kamu */
+a[class*="StyledNavLink"], 
+div[class*="ControlContainer"],
+div[class*="EditorContainer"] {
+    background-color: #0c0c0c !important;
+    border: 1px dashed #444 !important;
+    margin-bottom: 10px !important;
+    border-radius: 8px !important;
 }
 
-/* 4. Tombol Navigasi Samping */
-a[class*="SidebarLink"] {
-  border-radius: 8px !important;
-  transition: all 0.3s ease;
+/* 5. Tombol Publish & Aksi */
+button[class*="Button"] {
+    background-color: #fff !important;
+    color: #000 !important;
+    border-radius: 50px !important;
+    font-weight: 900 !important;
+    text-transform: uppercase !important;
+    border: none !important;
 }
 
-a[class*="SidebarLinkActive"] {
-  background: #111 !important;
-  border-left: 4px solid #fff !important;
-}
-
-/* 5. Input Field di dalam Editor */
-input, select, textarea {
-  background: #0a0a0a !important;
-  border: 1px dashed #555 !important;
-  color: #fff !important;
-  border-radius: 8px !important;
-}
-
-/* 6. Hilangkan bayangan/shadow bawaan CMS */
+/* 6. Hilangkan Semua Border Solid & Shadow Bawaan */
 * {
-  box-shadow: none !important;
+    border-color: #333 !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
 }
