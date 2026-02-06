@@ -4,140 +4,134 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MAGOS | ORDER TRACKING SYSTEM</title>
-    <link rel="stylesheet" href="magos/css/magos.css">
     <style>
-        /* Animasi Pulse untuk Tahap yang Sedang Berjalan */
-        @keyframes statusPulse {
+        /* --- STABILIZER CSS (INTERNAL AGAR TIDAK KACAU) --- */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            background: #050505; 
+            color: #eee; 
+            font-family: 'Inter', sans-serif; 
+            display: flex; 
+            flex-direction: column; 
+            min-height: 100vh;
+        }
+        header {
+            padding: 30px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px dashed #222;
+        }
+        /* Penyesuaian Style Logo */
+        .logo-header { height: 50px; width: auto; cursor: pointer; }
+        .studio-link { color: #fff; text-decoration: none; font-size: 10px; font-weight: 900; letter-spacing: 2px; border: 1px solid #333; padding: 8px 16px; border-radius: 50px; }
+        
+        main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .tracker-box {
+            width: 100%;
+            max-width: 650px;
+            background: #0a0a0a;
+            border: 1px dashed #333;
+            border-radius: 12px;
+            padding: 40px;
+        }
+        h3 { border-left: 3px solid #fff; padding-left: 15px; margin-bottom: 10px; font-size: 18px; letter-spacing: 1px; }
+        .sub-text { font-size: 10px; color: #666; margin-bottom: 30px; letter-spacing: 1px; }
+
+        .input-group { display: flex; gap: 10px; margin-bottom: 40px; }
+        input {
+            flex: 1;
+            background: #111;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            text-transform: uppercase;
+        }
+        .btn-decrypt {
+            background: #fff;
+            color: #000;
+            border: none;
+            padding: 0 25px;
+            border-radius: 8px;
+            font-weight: 900;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        /* Progress Visual */
+        .progress-container {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+            margin: 40px 0;
+            display: none; /* Muncul setelah klik */
+        }
+        .line { position: absolute; top: 15px; left: 0; width: 100%; height: 1px; border-top: 1px dashed #333; z-index: 1; }
+        .node { width: 32px; height: 32px; background: #111; border: 1px solid #333; border-radius: 50%; z-index: 2; position: relative; }
+        .node.active { background: #fff; box-shadow: 0 0 15px rgba(255,255,255,0.3); animation: pulse 2s infinite; }
+        .node.done { background: #25D366; border-color: #25D366; }
+        
+        .status-desc { font-size: 11px; color: #888; font-family: monospace; line-height: 1.8; border-top: 1px dashed #222; padding-top: 20px; }
+        
+        @keyframes pulse {
             0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4); }
             70% { box-shadow: 0 0 0 10px rgba(255, 255, 255, 0); }
             100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
         }
-        .step-node.active { animation: statusPulse 2s infinite; background: #fff !important; }
-        .step-node.completed { background: #25D366 !important; border-color: #25D366 !important; }
-        .tracker-line { position: absolute; top: 15px; left: 0; width: 100%; height: 1px; border-top: 1px dashed #333; z-index: 1; }
     </style>
 </head>
 <body>
-    <div id="cursor"></div>
-
     <header>
-        <div class="header-left">
-            <div class="logo" onclick="window.location.href='magos.html'">
-                <img src="magos/assets/img/magos-icon.svg" alt="MAGOS" class="logo-header">
-            </div>
+        <div class="logo" onclick="window.location.href='magos.html'">
+            <img src="magos/assets/img/magos-icon.svg" class="logo-header">
         </div>
-        <nav>
-            <a href="magos.html" class="studio-link hover-target">← KEMBALI KE STUDIO</a>
-        </nav>
+        <a href="magos.html" class="studio-link">← KEMBALI KE STUDIO</a>
     </header>
 
     <main>
-        <div class="terms-wrapper" style="margin-top: 150px; max-width: 700px; min-height: 60vh;">
-            <div class="contact-form-box">
-                <h3 style="margin-bottom:20px; color:#fff; border-left: 2px solid #fff; padding-left:15px;">PRODUCTION_TRACKER_V1</h3>
-                <p style="font-size:11px; color:#666; margin-bottom:25px; letter-spacing: 1px;">MASUKKAN ID PESANAN ANDA (CONTOH: MGS-123) UNTUK MELIHAT STATUS PRODUKSI PRE-SALE.</p>
-                
-                <div class="form-group" style="display: flex; gap: 10px;">
-                    <input type="text" id="trackInput" class="contact-input hover-target" placeholder="MGS-XXXXX" style="text-transform: uppercase; flex: 1;">
-                    <button class="btn hover-target" style="background:#fff; color:#000; padding: 0 30px;" onclick="initiateTracking()">DECRYPT ↗</button>
-                </div>
-                
-                <div id="trackResult" style="display:none; margin-top:40px; padding-top:30px; border-top:1px dashed #222;">
-                    
-                    <div style="position: relative; display: flex; justify-content: space-between; margin-bottom: 50px; padding: 0 10px;">
-                        <div class="tracker-line"></div>
-                        
-                        <div class="step-item" style="z-index: 2; text-align: center; width: 80px;">
-                            <div id="node-1" class="step-node" style="width:30px; height:30px; background:#111; border:1px solid #333; border-radius:50%; margin:0 auto 10px;"></div>
-                            <span style="font-size:8px; font-weight:900; color:#fff;">ORDER_PLACED</span>
-                        </div>
-
-                        <div class="step-item" style="z-index: 2; text-align: center; width: 80px;">
-                            <div id="node-2" class="step-node" style="width:30px; height:30px; background:#111; border:1px solid #333; border-radius:50%; margin:0 auto 10px;"></div>
-                            <span style="font-size:8px; font-weight:900; color:#fff;">PRODUCTION</span>
-                        </div>
-
-                        <div class="step-item" style="z-index: 2; text-align: center; width: 80px;">
-                            <div id="node-3" class="step-node" style="width:30px; height:30px; background:#111; border:1px solid #333; border-radius:50%; margin:0 auto 10px;"></div>
-                            <span style="font-size:8px; font-weight:900; color:#fff;">QUALITY_CONTROL</span>
-                        </div>
-
-                        <div class="step-item" style="z-index: 2; text-align: center; width: 80px;">
-                            <div id="node-4" class="step-node" style="width:30px; height:30px; background:#111; border:1px solid #333; border-radius:50%; margin:0 auto 10px;"></div>
-                            <span style="font-size:8px; font-weight:900; color:#fff;">SHIPPED</span>
-                        </div>
-                    </div>
-
-                    <div class="f-status" style="margin-bottom:15px; background: rgba(255,255,255,0.05);">
-                        <span class="dot" id="statusDot"></span> <span style="font-size:10px; letter-spacing:1px;">LATEST_STATUS: <span id="statusText">WAITING</span></span>
-                    </div>
-                    <p id="statusDesc" style="font-size:12px; color:#888; line-height:1.6; font-family: monospace;"></p>
-                </div>
+        <div class="tracker-box">
+            <h3>PRODUCTION_TRACKER_V1</h3>
+            <p class="sub-text">DEKRIPSI STATUS PRODUKSI UNTUK PESANAN PRE-SALE ANDA.</p>
+            
+            <div class="input-group">
+                <input type="text" id="trackID" placeholder="ID PESANAN (MGS-PRE)">
+                <button class="btn-decrypt" onclick="checkTrack()">DECRYPT ↗</button>
             </div>
+
+            <div id="visualArea" class="progress-container">
+                <div class="line"></div>
+                <div id="n1" class="node"></div>
+                <div id="n2" class="node"></div>
+                <div id="n3" class="node"></div>
+                <div id="n4" class="node"></div>
+            </div>
+            <p id="descText" class="status-desc"></p>
         </div>
     </main>
 
-    <footer class="industrial-footer">
-        <div class="footer-divider"></div>
-        <div class="footer-grid">
-            <div class="f-col brand-col">
-                <img src="magos/assets/img/logo-header.svg" alt="MAGOS" class="f-logo">
-                <p class="f-desc">ESTETIKA GELAP & PAKAIAN INDUSTRIAL.</p>
-                <div class="f-status"><span class="dot"></span> SYSTEM ONLINE</div>
-            </div>
-            <div class="f-col link-col end-col">
-                <p class="f-copyright">©2026 | USAHADULU STUDIO</p>
-            </div>
-        </div>
-    </footer>
-
-    <script src="magos/js/magos.js"></script>
     <script>
-        function initiateTracking() {
-            const id = document.getElementById('trackInput').value.toUpperCase();
-            const resultArea = document.getElementById('trackResult');
+        function checkTrack() {
+            const id = document.getElementById('trackID').value.toUpperCase();
+            if(id.length < 3) { alert("SISTEM ERROR: ID TIDAK VALID"); return; }
             
-            if(id.length < 3) {
-                alert("SISTEM ERROR: ID PESANAN TIDAK VALID.");
-                return;
-            }
+            document.getElementById('visualArea').style.display = 'flex';
+            const desc = document.getElementById('descText');
+            
+            // Reset nodes
+            document.querySelectorAll('.node').forEach(n => n.className = 'node');
 
-            resultArea.style.display = 'block';
-            updateTrackerUI(id);
-        }
-
-        function updateTrackerUI(id) {
-            const nodes = document.querySelectorAll('.step-node');
-            const statusText = document.getElementById('statusText');
-            const statusDesc = document.getElementById('statusDesc');
-            const dot = document.getElementById('statusDot');
-
-            // Reset UI
-            nodes.forEach(n => { n.className = 'step-node'; n.style.background = '#111'; });
-
-            // Simulasi Logika Tracking Berdasarkan ID
             if(id.includes("PRE")) {
-                // Status: Production
-                nodes[0].classList.add('completed');
-                nodes[1].classList.add('active');
-                statusText.innerText = "IN_PRODUCTION";
-                statusDesc.innerText = "SIGNAL: MATERIAL COTTON COMBED 20S TELAH DITERIMA VENDOR. PROSES SABLON PLASTISOL SEDANG BERJALAN.";
-                dot.style.background = "#fff";
+                document.getElementById('n1').className = 'node done';
+                document.getElementById('n2').className = 'node active';
+                desc.innerHTML = "<strong style='color:#fff'>STATUS: [IN_PRODUCTION]</strong><br>SINYAL TERDETEKSI: MATERIAL COTTON COMBED 20S TELAH DITERIMA VENDOR. SEDANG DALAM PROSES SABLON PLASTISOL.";
             } else if(id.includes("DONE")) {
-                // Status: Shipped
-                nodes[0].classList.add('completed');
-                nodes[1].classList.add('completed');
-                nodes[2].classList.add('completed');
-                nodes[3].classList.add('completed');
-                statusText.innerText = "SHIPPED";
-                statusDesc.innerText = "DEKRIPSI SELESAI: PAKET TELAH DISERAHKAN KE KURIR JNE. SILAKAN CEK WHATSAPP UNTUK NOMOR RESI.";
-                dot.style.background = "#25D366";
+                document.querySelectorAll('.node').forEach(n => n.className = 'node done');
+                desc.innerHTML = "<strong style='color:#25D366'>STATUS: [SHIPPED]</strong><br>DEKRIPSI SELESAI: PAKET TELAH DISERAHKAN KE KURIR. SILAKAN CEK WHATSAPP ANDA UNTUK NOMOR RESI PENGIRIMAN.";
             } else {
-                // Status Default: Order Placed
-                nodes[0].classList.add('active');
-                statusText.innerText = "ORDER_PLACED";
-                statusDesc.innerText = "DATA TERDETEKSI: PESANAN ANDA TELAH MASUK KE DATABASE MAGOS ARCHIVE. MENUNGGU ANTRIAN PRODUKSI BATCH BERIKUTNYA.";
-                dot.style.background = "#ffb200";
+                document.getElementById('n1').className = 'node active';
+                desc.innerHTML = "<strong style='color:#fff'>STATUS: [ORDER_PLACED]</strong><br>DATA DITEMUKAN: PESANAN TELAH MASUK DATABASE. MENUNGGU ANTRIAN PRODUKSI BATCH BERIKUTNYA.";
             }
         }
     </script>
