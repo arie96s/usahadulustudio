@@ -1,18 +1,51 @@
-/* Hanya berpengaruh di jendela preview */
+/* MAGOS PREVIEW CANVAS - INDUSTRIAL DARK */
+body {
+  background-color: #000 !important;
+  margin: 0;
+  padding: 0;
+}
+
 .blog-preview-container {
-  background: #000 !important;
+  background-color: #000 !important;
   color: #fff !important;
+  font-family: 'Inter', sans-serif;
   padding: 40px;
   min-height: 100vh;
 }
+
 .category-badge {
-  border: 1px dashed #555 !important;
-  padding: 5px 15px;
   display: inline-block;
+  border: 1px dashed #444 !important; /* Ciri khas industrial MAGOS */
+  padding: 5px 15px;
   font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 20px;
 }
+
 .preview-title {
+  font-size: 32px;
   font-weight: 900;
   text-transform: uppercase;
-  margin-top: 20px;
+  margin-bottom: 10px;
+  line-height: 1.1;
+}
+
+.preview-date {
+  color: #666;
+  font-size: 12px;
+  margin-bottom: 30px;
+}
+
+.preview-image {
+  width: 100%;
+  border-radius: 12px; /* Sudut tumpul MAGOS */
+  border: 1px solid #222;
+  margin-bottom: 30px;
+}
+
+.preview-body {
+  line-height: 1.6;
+  color: #ccc;
+  font-size: 16px;
 }
