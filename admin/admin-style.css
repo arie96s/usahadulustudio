@@ -1,0 +1,53 @@
+/* Custom Styles for Decap CMS - MAGOS Theme */
+body {
+  background-color: #000 !important; /* Latar belakang hitam pekat */
+  color: #fff !important;
+}
+
+/* Kotak Editor & Koleksi */
+.nc-app-container, .nc-collectionPage-sidebar, .nc-collectionPage-content {
+  background-color: #000 !important;
+  border-radius: 12px !important; /* Sudut tumpul */
+}
+
+/* Card atau List Item */
+.nc-collectionPage-card {
+  background-color: #080808 !important;
+  border: 1px dashed #333 !important; /* Garis putus-putus industrial */
+  border-radius: 12px !important;
+  margin-bottom: 15px !important;
+  transition: border-color 0.3s ease;
+}
+
+.nc-collectionPage-card:hover {
+  border-color: #555 !important;
+}
+
+/* Input & Form Field */
+input, textarea, select {
+  background-color: #0a0a0a !important;
+  color: #fff !important;
+  border: 1px dashed #444 !important;
+  border-radius: 8px !important;
+  padding: 10px !important;
+}
+
+/* Sidebar & Navigation */
+.nc-app-sidebar-link {
+  border-radius: 8px !important;
+  margin: 5px 0 !important;
+}
+
+.nc-app-sidebar-link-active {
+  background-color: #1a1a1a !important;
+  color: #fff !important;
+  border-left: 3px solid #fff !important;
+}
+
+/* Tombol Publish */
+button {
+  border-radius: 50px !important; /* Tombol kapsul sesuai MAGOS */
+  text-transform: uppercase !important;
+  font-weight: 900 !important;
+  letter-spacing: 1px !important;
+}
