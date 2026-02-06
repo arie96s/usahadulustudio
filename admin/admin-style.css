@@ -1,53 +1,51 @@
-/* MAGOS CMS - TOTAL INDUSTRIAL OVERHAUL */
-
-/* 1. Reset Global Background */
+/* MAGOS CMS - STABLE INDUSTRIAL VERSION */
 body, #nc-root {
-    background-color: #000 !important;
+  background-color: #000 !important;
+  color: #fff !important;
 }
 
-/* 2. Bongkar Paksa Kotak Putih Koleksi & Sidebar */
-/* Kita targetkan class yang dihasilkan secara dinamis oleh CMS */
-div[class*="AppHeaderContainer"],
-div[class*="SidebarContainer"],
-div[class*="CollectionMainView"],
+/* 1. Sidebar & Header */
+aside, header, div[class*="AppHeaderContainer"] {
+  background-color: #000 !important;
+  border-right: 1px dashed #333 !important;
+  border-bottom: 1px dashed #333 !important;
+}
+
+/* 2. Koleksi & List Items (Bongkar Kotak Putih) */
+div[class*="CollectionMainView"], 
 div[class*="CardContainer"],
-section[class*="Card"] {
-    background-color: #080808 !important;
-    border: 1px dashed #333 !important; /* Ciri khas MAGOS */
-    border-radius: 12px !important;
-    color: #fff !important;
-    box-shadow: none !important;
+section[class*="Card"],
+div[class*="StyledNavLink"] {
+  background-color: #080808 !important;
+  border: 1px dashed #444 !important;
+  border-radius: 12px !important;
+  color: #fff !important;
+  box-shadow: none !important;
+  margin-bottom: 12px !important;
 }
 
-/* 3. Perbaiki Judul & Teks yang Masih Hitam di Background Gelap */
-h1, h2, h3, h4, p, span, label {
-    color: #fff !important;
+/* 3. Perbaikan Teks (Agar tidak hilang di screenshot) */
+span, p, h1, h2, h3, h4, label, div {
+  color: #fff !important; /* Paksa teks jadi putih */
 }
 
-/* 4. Target Spesifik untuk List Item (Produk Shop, Blog, dll) */
-/* Ini akan mengubah kotak putih panjang di screenshot kamu */
-a[class*="StyledNavLink"], 
-div[class*="ControlContainer"],
-div[class*="EditorContainer"] {
-    background-color: #0c0c0c !important;
-    border: 1px dashed #444 !important;
-    margin-bottom: 10px !important;
-    border-radius: 8px !important;
+/* 4. Search Bar */
+input[class*="SearchInput"] {
+  background: #0a0a0a !important;
+  border: 1px dashed #555 !important;
+  color: #fff !important;
+  border-radius: 50px !important;
 }
 
-/* 5. Tombol Publish & Aksi */
+/* 5. Tombol Utama */
 button[class*="Button"] {
-    background-color: #fff !important;
-    color: #000 !important;
-    border-radius: 50px !important;
-    font-weight: 900 !important;
-    text-transform: uppercase !important;
-    border: none !important;
+  background: #fff !important;
+  color: #000 !important;
+  border-radius: 50px !important;
+  font-weight: 900 !important;
 }
 
-/* 6. Hilangkan Semua Border Solid & Shadow Bawaan */
-* {
-    border-color: #333 !important;
-    box-shadow: none !important;
-    text-shadow: none !important;
+/* 6. Hover effect agar lebih hidup */
+div[class*="Card"]:hover {
+  border-color: #777 !important;
 }
