@@ -1,51 +1,18 @@
-/* MAGOS CMS - STABLE INDUSTRIAL VERSION */
-body, #nc-root {
-  background-color: #000 !important;
+/* Hanya berpengaruh di jendela preview */
+.blog-preview-container {
+  background: #000 !important;
   color: #fff !important;
+  padding: 40px;
+  min-height: 100vh;
 }
-
-/* 1. Sidebar & Header */
-aside, header, div[class*="AppHeaderContainer"] {
-  background-color: #000 !important;
-  border-right: 1px dashed #333 !important;
-  border-bottom: 1px dashed #333 !important;
-}
-
-/* 2. Koleksi & List Items (Bongkar Kotak Putih) */
-div[class*="CollectionMainView"], 
-div[class*="CardContainer"],
-section[class*="Card"],
-div[class*="StyledNavLink"] {
-  background-color: #080808 !important;
-  border: 1px dashed #444 !important;
-  border-radius: 12px !important;
-  color: #fff !important;
-  box-shadow: none !important;
-  margin-bottom: 12px !important;
-}
-
-/* 3. Perbaikan Teks (Agar tidak hilang di screenshot) */
-span, p, h1, h2, h3, h4, label, div {
-  color: #fff !important; /* Paksa teks jadi putih */
-}
-
-/* 4. Search Bar */
-input[class*="SearchInput"] {
-  background: #0a0a0a !important;
+.category-badge {
   border: 1px dashed #555 !important;
-  color: #fff !important;
-  border-radius: 50px !important;
+  padding: 5px 15px;
+  display: inline-block;
+  font-size: 10px;
 }
-
-/* 5. Tombol Utama */
-button[class*="Button"] {
-  background: #fff !important;
-  color: #000 !important;
-  border-radius: 50px !important;
-  font-weight: 900 !important;
-}
-
-/* 6. Hover effect agar lebih hidup */
-div[class*="Card"]:hover {
-  border-color: #777 !important;
+.preview-title {
+  font-weight: 900;
+  text-transform: uppercase;
+  margin-top: 20px;
 }
