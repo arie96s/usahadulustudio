@@ -1,10 +1,98 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MAGOS | TRANSMISSION</title>
     <link rel="stylesheet" href="css/magos.css">
+    <style>
+        /* --- MODAL THE ARCHIVIST DENGAN SUDUT TUMPUL --- */
+        .archivist-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.98);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            backdrop-filter: blur(15px);
+        }
+        .archivist-content {
+            background: #000;
+            border: 1px dashed #333;
+            width: 100%;
+            max-width: 600px;
+            padding: 50px 40px;
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+            /* Sudut Tumpul Modal */
+            border-radius: 20px; 
+        }
+        /* Style untuk kartu pemicu */
+        .archivist-trigger-card {
+            display: inline-block; 
+            cursor: pointer; 
+            border: 1px solid #333; 
+            padding: 25px; 
+            background: #0a0a0a; 
+            max-width: 450px; 
+            width: 100%;
+            /* Sudut Tumpul Kartu */
+            border-radius: 12px; 
+            transition: 0.3s ease;
+        }
+        .archivist-trigger-card:hover {
+            border-color: #555;
+            background: #111;
+        }
+        /* --- FAQ ACCORDION STYLE --- */
+.faq-section {
+    max-width: 600px;
+    margin: 60px auto;
+    padding: 0 20px;
+    text-align: left;
+}
+.faq-item {
+    background: #0a0a0a;
+    border: 1px solid #222;
+    border-radius: 12px; /* Sudut tumpul */
+    margin-bottom: 15px;
+    overflow: hidden;
+    transition: 0.3s;
+}
+.faq-question {
+    padding: 20px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 900;
+    font-size: 12px;
+    letter-spacing: 1px;
+    color: #fff;
+    text-transform: uppercase;
+}
+.faq-answer {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+    background: #050505;
+    color: #888;
+    font-size: 13px;
+    line-height: 1.6;
+}
+.faq-answer-inner {
+    padding: 0 20px 20px;
+}
+.faq-item.active {
+    border-color: #444;
+}
+.faq-item.active .faq-answer {
+    max-height: 200px;
+}
+    </style>
 </head>
 <body>
 
@@ -30,55 +118,89 @@
     </header>
 
     <div class="contact-grid-wrapper">
+    <div class="contact-info-box">
+        <h3 data-i18n="cont_coord">COORDINATES</h3>
         
-        <div class="contact-info-box">
-            <h3 data-i18n="cont_coord">COORDINATES</h3>
-            
-            <div class="contact-detail-item">
-                <span class="contact-label" data-i18n="cont_loc_lbl">LOCATION_HQ</span>
-                <span class="contact-value" data-i18n="cont_loc_val">PAYAKUMBUH, WEST SUMATRA<br>INDONESIA [ID]</span>
-            </div>
-
-            <div class="contact-detail-item">
-                <span class="contact-label" data-i18n="cont_sig_lbl">DIGITAL_SIGNAL</span>
-                <a href="mailto:contact@magos.com" class="contact-value hover-target">CONTACT@MAGOS.COM</a>
-            </div>
-
-            <div class="contact-detail-item">
-                <span class="contact-label" data-i18n="cont_line_lbl">DIRECT_LINE</span>
-                <a href="#" class="contact-value hover-target">+62 812 XXXX XXXX</a>
-            </div>
-
-            <div class="contact-detail-item">
-                <span class="contact-label" data-i18n="cont_hours_lbl">OPERATING_HOURS</span>
-                <span class="contact-value" data-i18n="cont_hours_val">MON - FRI : 0900 - 1700<br>SYSTEM ALWAYS ONLINE</span>
-            </div>
+        <div class="contact-detail-item">
+            <span class="contact-label" data-i18n="cont_loc_lbl">LOCATION HQ</span>
+            <a href="https://maps.google.com/?q=Payakumbuh" target="_blank" class="contact-value hover-target" style="text-decoration: none; display: block;">
+                PAYAKUMBUH, WEST SUMATRA<br>INDONESIA [ID] ↗
+            </a>
         </div>
 
-        <div class="contact-form-box">
-            <h3 style="color:#fff; font-size:16px; margin-bottom:20px; font-weight:900;" data-i18n="cont_form_title">INITIATE TRANSMISSION</h3>
-            
-            <form action="#" method="POST">
-                <div class="form-group">
-                    <label data-i18n="cont_lbl_name">IDENTITY (NAME)</label>
-                    <input type="text" class="contact-input hover-target" placeholder="ENTER YOUR NAME..." required>
-                </div>
-
-                <div class="form-group">
-                    <label data-i18n="cont_lbl_email">SIGNAL BACK (EMAIL)</label>
-                    <input type="email" class="contact-input hover-target" placeholder="ENTER YOUR EMAIL..." required>
-                </div>
-
-                <div class="form-group">
-                    <label data-i18n="cont_lbl_msg">ENCRYPTED MESSAGE</label>
-                    <textarea class="contact-input hover-target" rows="5" placeholder="TYPE YOUR MESSAGE..." style="resize:none;" required></textarea>
-                </div>
-
-                <button type="submit" class="btn hover-target" style="width:100%; margin-top:10px;" data-i18n="cont_btn_send">TRANSMIT DATA ↗</button>
-            </form>
+        <div class="contact-detail-item">
+            <span class="contact-label" data-i18n="cont_direct_lbl">DIRECT LINE</span>
+            <a href="https://wa.me/6282283687565?text=Hi%20The%20Archivist" target="_blank" class="contact-value hover-target" style="text-decoration: none;">
+                +62 822 8368 7565 ↗
+            </a>
         </div>
 
+        <div style="border-top: 1px solid #222; margin-top: 20px; padding-top: 15px;">
+            <p style="font-size: 9px; color: #444; margin-bottom: 5px; font-weight: 900; letter-spacing: 2px;" data-i18n="cont_time_lbl">LOCAL TIME WIB</p>
+            <p id="digitalClock" style="font-size: 20px; color: #fff; font-family: monospace; font-weight: 900; letter-spacing: -1px;">00:00:00</p>
+            <p style="font-size: 9px; color: #25D366; margin-top: 5px; font-weight: 700;" data-i18n="cont_status_lbl">● SYSTEM OPERATIONAL</p>
+        </div>
+    </div> 
+
+    <div class="contact-form-box">
+        <h3 style="color:#fff; font-size:16px; margin-bottom:20px; font-weight:900;" data-i18n="cont_form_title">INITIATE TRANSMISSION</h3>
+        <form action="#" method="POST">
+            <div class="form-group">
+                <label data-i18n="cont_name_lbl">IDENTITY (NAME)</label>
+                <input type="text" class="contact-input" placeholder="ENTER YOUR NAME..." required>
+            </div>
+            <div class="form-group">
+                <label data-i18n="cont_email_lbl">SIGNAL BACK (EMAIL)</label>
+                <input type="email" class="contact-input" placeholder="ENTER YOUR EMAIL..." required>
+            </div>
+            <div class="form-group">
+                <label data-i18n="cont_msg_lbl">ENCRYPTED MESSAGE</label>
+                <textarea class="contact-input" rows="4" placeholder="TYPE YOUR MESSAGE..." style="resize:none;" required></textarea>
+            </div>
+            <button type="submit" class="btn primary" style="width:100%; margin-top:10px;" data-i18n="cont_submit_btn">TRANSMIT DATA ↗</button>
+            <div style="font-size: 9px; color: #25D366; letter-spacing: 2px; margin-top: 15px; font-weight: 900; opacity: 0.8; text-align: center;" data-i18n="cont_secure_lbl">
+                🔒 END TO END ENCRYPTED TRANSMISSION
+            </div>
+        </form>
+    </div> 
+</div>
+    <section style="padding: 40px 20px; background: #050505; border-top: 1px dashed #222; text-align: center;">
+        <div onclick="openArchivistModal()" class="archivist-trigger-card hover-target">
+            <p style="font-size: 9px; letter-spacing: 4px; color: #555; margin-bottom: 12px; font-weight: 900;">AUTHENTICITY SIGNAL</p>
+            <h4 style="font-weight: 900; letter-spacing: 1px; color: #fff; font-size: 14px;">WHO IS THE ARCHIVIST? ↗</h4>
+        </div>
+    </section>
+
+    <div class="faq-section">
+    <p style="font-size: 9px; letter-spacing: 5px; color: #444; margin-bottom: 20px; font-weight: 900; text-align: center;">FREQUENTLY ASKED QUESTIONS</p>
+    
+    <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">HOW DO YOU SHIP? <span>+</span></div>
+        <div class="faq-answer">
+            <div class="faq-answer-inner">
+                Kami mengirim ke seluruh dunia menggunakan layanan DHL Express untuk internasional dan JNE/J&T untuk pengiriman domestik Indonesia.
+            </div>
+        </div>
     </div>
+
+    <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">PAYMENT METHODS? <span>+</span></div>
+        <div class="faq-answer">
+            <div class="faq-answer-inner">
+                Kami menerima pembayaran melalui Transfer Bank Lokal, QRIS, dan PayPal/Payoneer untuk transaksi internasional guna memastikan keamanan data Anda.
+            </div>
+        </div>
+    </div>
+
+    <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">ARE ITEMS READY STOCK? <span>+</span></div>
+        <div class="faq-answer">
+            <div class="faq-answer-inner">
+                Beberapa koleksi di MAGOS Archive menggunakan sistem Pre-Sale terbatas untuk menjaga kualitas dan eksklusivitas setiap rilisan.
+            </div>
+        </div>
+    </div>
+</div>
 
     <footer class="industrial-footer">
         <div class="footer-divider"></div>
@@ -108,15 +230,63 @@
                 <ul class="f-social">
                     <li><a href="#">INSTAGRAM <span class="arrow">↗</span></a></li>
                     <li><a href="#">SOCIAL MEDIA <span class="arrow">↗</span></a></li>
-                    <li><a href="mailto:contact@magos.com">EMAIL <span class="arrow">↗</span></a></li>
+                    <li><a href="mailto:fajrisalam@protonmail.ch">EMAIL <span class="arrow">↗</span></a></li>
                 </ul>
                 <p class="f-copyright" data-i18n="footer_copy">©2026 | USAHADULU STUDIO</p>
             </div>
         </div>
     </footer>
 
+    <div id="archivistModal" class="archivist-modal">
+        <div class="archivist-content">
+            <div onclick="closeArchivistModal()" style="position: absolute; top: 20px; right: 20px; color: #fff; cursor: pointer; font-size: 30px;">&times;</div>
+            <p style="font-size: 9px; letter-spacing: 5px; color: #444; margin-bottom: 20px; font-weight: 900;">FOUNDER STORY</p>
+            <h2 style="color:#fff; margin-bottom: 25px;">DARI PERANTAUAN HINGGA PENGARSIPAN DIGITAL.</h2>
+            <div style="color:#888; font-size: 13px; line-height: 1.8;">
+                <p style="margin-bottom: 15px;">Perjalanan dimulai pada 2018 saat merantau ke Bandung. USAHADULU Studio lahir sebagai arsip dari perjalanan tersebut.</p>
+                <p style="font-weight: 900; color: #fff; margin-top: 25px;">FAJRI SALAM</p>
+                <p style="font-size: 10px; color: #555;">THE ARCHIVIST / PAYAKUMBUH, ID.</p>
+            </div>
+        </div>
+    </div>
+
     <div id="cursor"></div>
-    
     <script src="js/magos.js"></script>
+    <script>
+        function openArchivistModal() {
+            document.getElementById('archivistModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+        function closeArchivistModal() {
+            document.getElementById('archivistModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+        window.onclick = function(e) {
+            if (e.target == document.getElementById('archivistModal')) closeArchivistModal();
+        }
+
+        function toggleFaq(element) {
+    const item = element.parentElement;
+    item.classList.toggle('active');
+    const span = element.querySelector('span');
+    span.innerText = item.classList.contains('active') ? '-' : '+';
+}
+    </script>
+    <script>
+    function updateClock() {
+        const now = new Date();
+        const options = { 
+            timeZone: 'Asia/Jakarta', 
+            hour: '2-digit', 
+            minute: '2-digit', 
+            second: '2-digit', 
+            hour12: false 
+        };
+        const timeString = new Intl.DateTimeFormat('en-GB', options).format(now);
+        document.getElementById('digitalClock').innerText = timeString;
+    }
+    setInterval(updateClock, 1000); 
+    updateClock();
+</script>
 </body>
 </html>
