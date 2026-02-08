@@ -48,7 +48,7 @@ const siteData = {
             badge_best: "TERLARIS",
 
             hero_cta: "MULAI PROYEK",
-            hero_tagline: "SOLUSI VISUAL PROFESIONAL UNTUK IDENTITAS BRAND ANDA",
+            hero_tagline: "VISUAL BRANDING UNTUK BRAND YANG INGIN TERLIHAT SERIUS SEJAK HARI PERTAMA",
             about_title: "TENTANG KAMI",
             payment_title: "CHECKOUT & PEMBAYARAN",
             pay_gateway_btn: "BAYAR SEKARANG (XENDIT/QRIS)",
@@ -96,7 +96,7 @@ const siteData = {
             badge_best: "BEST SELLER",
 
             hero_cta: "START PROJECT",
-            hero_tagline: "PROFESSIONAL VISUAL SOLUTIONS FOR YOUR BRAND IDENTITY",
+            hero_tagline: "VISUAL BRANDING FOR BRANDS THAT WANT TO LOOK SERIOUS FROM DAY ONE",
             about_title: "ABOUT US",
             payment_title: "CHECKOUT & PAYMENT",
             pay_gateway_btn: "PAY NOW (XENDIT/PAYPAL)",
