@@ -359,6 +359,20 @@ window.renderShop = function(filter, page = 1) {
         const y = grid.getBoundingClientRect().top + window.pageYOffset + yOffset;
         window.scrollTo({top: y, behavior: 'smooth'});
     }
+
+    function renderPagination(totalPages, filter) {
+    const container = document.getElementById('shopPagination');
+    if(!container) return;
+    container.innerHTML = '';
+    
+    for (let i = 1; i <= totalPages; i++) {
+        const btn = document.createElement('button');
+        btn.className = `page-btn hover-target ${i === currentShopPage ? 'active' : ''}`;
+        btn.innerText = i;
+        btn.onclick = () => renderShop(filter, i);
+        container.appendChild(btn);
+    }
+}
     
     currentShopPage = page;
     grid.innerHTML = ''; 
@@ -474,7 +488,7 @@ function formatNumberToPrice(num) {
     return "IDR " + num.toLocaleString('id-ID');
 }
 
-// 3. Fungsi Utama: Apply Voucher
+// 3. Fungsi Utama: Apply Voucher (Updated for Payment Term Sync)
 window.applyVoucher = function() {
     const input = document.getElementById('voucherInput');
     const msg = document.getElementById('voucherMsg');
@@ -528,9 +542,15 @@ window.applyVoucher = function() {
         msg.innerText = "Kode voucher tidak valid atau sudah kadaluwarsa.";
         input.style.borderColor = '#ff4757';
     }
+
+    // --- [BARU] TRIGGER UPDATE TAGIHAN REAL-TIME ---
+    // Pastikan angka "TAGIHAN SAAT INI" ikut berubah setelah diskon diterapkan
+    if(typeof updatePayableDisplay === 'function') {
+        updatePayableDisplay();
+    }
 }
 
-// 11. ORDER & PAYMENT LOGIC (Updated PDF with Brief)
+// 11. ORDER & PAYMENT LOGIC (Updated PDF with Brief + Payment Term)
 function initOrderPage() {
     const serviceSelect = document.getElementById('orderService');
     const pkgSelect = document.getElementById('orderPackage');
@@ -538,6 +558,21 @@ function initOrderPage() {
     
     // 1. Cek apakah elemen ada (untuk menghindari error di halaman lain)
     if (!serviceSelect || !pkgSelect || !priceInput) return;
+
+    // --- [BARU] LOGIKA HITUNG TAGIHAN REAL-TIME (DP/FULL) ---
+    window.updatePayableDisplay = function() {
+        const termSelect = document.getElementById('paymentTerm');
+        const term = termSelect ? parseFloat(termSelect.value) : 1.0;
+        
+        // Gunakan currentFinalPrice (harga setelah voucher jika ada)
+        const payable = currentFinalPrice * term;
+        
+        const displayElement = document.getElementById('payableAmountDisplay');
+        const finalPriceEl = document.getElementById('finalPriceDisplay');
+        
+        if(displayElement) displayElement.innerText = formatNumberToPrice(payable);
+        if(finalPriceEl) finalPriceEl.innerText = formatNumberToPrice(currentFinalPrice);
+    };
 
     // 2. Ambil Bahasa Aktif
     const lang = siteData.currentLang || 'id';
@@ -598,6 +633,9 @@ function initOrderPage() {
                 document.getElementById('voucherInput').value = '';
                 currentFinalPrice = currentBasePrice;
                 appliedDiscountCode = null;
+
+                // [BARU] Panggil updatePayableDisplay agar tagihan di bawah ikut sinkron
+                updatePayableDisplay();
             }
         }
     }
@@ -612,24 +650,20 @@ function initOrderPage() {
     });
 
     // 8. LOGIKA URL PARAMETER (Agar link dari Artikel tetap jalan)
-    // Contoh link: order.html?service=LOGO&package=Basic
     const urlParams = new URLSearchParams(window.location.search);
-    const paramService = urlParams.get('service'); // Nama service dari URL
+    const paramService = urlParams.get('service'); 
     
     if (paramService) {
-        // Cari index service berdasarkan nama (cocokkan ID atau EN)
         const foundIndex = siteData.services.findIndex(s => 
             s.name_id.includes(paramService) || s.name_en.includes(paramService)
         );
 
         if (foundIndex !== -1) {
-            serviceSelect.value = foundIndex; // Pilih Service
-            updatePackages(foundIndex); // Load Paket
+            serviceSelect.value = foundIndex; 
+            updatePackages(foundIndex); 
             
-            // Cek jika ada parameter paket spesifik
             const paramPkg = urlParams.get('package');
             if(paramPkg) {
-                // Loop opsi paket untuk mencari yang cocok
                 for(let i=0; i<pkgSelect.options.length; i++) {
                     if(pkgSelect.options[i].value.includes(paramPkg)) {
                         pkgSelect.selectedIndex = i;
@@ -642,14 +676,54 @@ function initOrderPage() {
     }
 }
 
-// GANTI FUNGSI generateInvoicePDF DI js/main.js DENGAN INI:
+window.submitOrder = function() {
+    const name = document.getElementById('clientName').value;
+    const phone = document.getElementById('clientPhone').value;
+    const email = document.getElementById('clientEmail').value;
+    const brief = document.getElementById('clientBrief').value;
+    const serviceSelect = document.getElementById('orderService');
+    const pkgSelect = document.getElementById('orderPackage');
+    const termSelect = document.getElementById('paymentTerm');
 
+    let service = "-";
+    if (serviceSelect && serviceSelect.selectedIndex !== -1) {
+        service = serviceSelect.options[serviceSelect.selectedIndex].text;
+    }
+    const pkg = pkgSelect ? pkgSelect.value : "-";
+    
+    const termValue = termSelect ? parseFloat(termSelect.value) : 1.0;
+    const paymentStatus = termValue === 0.5 ? "DP 50%" : "LUNAS";
+    const amountToPayNow = currentFinalPrice * termValue;
+
+    if(!name || !phone || !brief || service === "" || pkg === "" || service.includes("--")) { 
+        alert("Harap lengkapi data order dan deskripsi konsep!"); 
+        return; 
+    }
+
+    const orderData = { 
+        name, phone, email, service, pkg, brief, 
+        totalPrice: formatNumberToPrice(currentFinalPrice),
+        payableNow: formatNumberToPrice(amountToPayNow),
+        paymentStatus: paymentStatus,
+        voucher: appliedDiscountCode 
+    };
+
+    generateInvoicePDF(orderData); 
+    localStorage.setItem('currentOrder', JSON.stringify(orderData));
+    
+    const btn = document.querySelector('.submit-order-btn');
+    if(btn) btn.innerText = "Processing...";
+    
+    setTimeout(() => { window.location.href = "payment.html"; }, 2000);
+};
+
+// 11. ORDER & PAYMENT LOGIC (Updated PDF with Brief, DP/Full Info & Vouchers)
 function generateInvoicePDF(data) {
     if (!window.jspdf) return;
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
 
-    // HEADER
+    // HEADER & BRANDING
     doc.setFontSize(22); 
     doc.setFont("helvetica", "bold"); 
     doc.text("INVOICE", 105, 20, null, null, "center");
@@ -659,16 +733,25 @@ function generateInvoicePDF(data) {
     doc.text("USAHADULU STUDIO", 105, 28, null, null, "center");
     doc.line(20, 40, 190, 40);
 
-    // INFO CLIENT (BAGIAN YANG DIPERBAIKI)
+    // INFO CLIENT & PAYMENT STATUS
     doc.setFontSize(10);
     doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, 50);
     doc.text(`Client: ${data.name}`, 20, 56);
     doc.text(`Phone: ${data.phone}`, 20, 62);
-    doc.text(`Email: ${data.email || '-'}`, 20, 68); // <--- Baris Email dikembalikan
+    doc.text(`Email: ${data.email || '-'}`, 20, 68);
+
+    // Menampilkan Status Pembayaran (DP/Lunas) di sisi kanan
+    doc.setFont("helvetica", "bold");
+    doc.text("PAYMENT STATUS:", 140, 50);
+    doc.setFontSize(12);
+    doc.setTextColor(data.paymentStatus.includes("DP") ? 255 : 46, data.paymentStatus.includes("DP") ? 71 : 213, data.paymentStatus.includes("DP") ? 87 : 115);
+    doc.text(data.paymentStatus, 140, 58); 
+    doc.setTextColor(0, 0, 0); // Reset ke hitam
 
     // INFO LAYANAN
+    doc.setFontSize(10);
     doc.setFont("helvetica", "bold"); 
-    doc.text("ITEM DESCRIPTION:", 20, 80); // Posisi Y=80 aman (di bawah Email Y=68)
+    doc.text("ITEM DESCRIPTION:", 20, 80);
     
     doc.setFont("helvetica", "normal");
     doc.text(`Service: ${data.service}`, 20, 88);
@@ -682,164 +765,88 @@ function generateInvoicePDF(data) {
     const splitBrief = doc.splitTextToSize(data.brief || "-", 170);
     doc.text(splitBrief, 20, 112);
     
-    // Garis Pembatas Bawah (Dinamis mengikuti panjang brief)
+    // Garis Pembatas Bawah Dinamis
     let yPos = 112 + (splitBrief.length * 5) + 15;
     doc.line(20, yPos, 190, yPos);
     yPos += 10;
 
     // --- LOGIKA HARGA & DISKON ---
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.text(`Total Project Value:`, 140, yPos, null, null, "right");
+    doc.text(`${data.totalPrice}`, 190, yPos, null, null, "right");
+    yPos += 8;
+
     if(data.voucher) {
-        // Tampilkan harga asli dicoret (simulasi teks)
-        doc.setFont("helvetica", "normal");
-        doc.text(`Original Price:`, 140, yPos, null, null, "right");
-        doc.text(`${data.originalPrice}`, 190, yPos, null, null, "right");
-        yPos += 6;
-        
-        // Tampilkan Voucher Merah
         doc.setTextColor(255, 0, 0); 
-        doc.text(`Voucher (${data.voucher}):`, 140, yPos, null, null, "right");
-        doc.text(`DISCOUNT APPLIED`, 190, yPos, null, null, "right");
+        doc.text(`Voucher Applied (${data.voucher}):`, 140, yPos, null, null, "right");
+        doc.text(`DISCOUNTED`, 190, yPos, null, null, "right");
         yPos += 8;
-        doc.setTextColor(0, 0, 0); // Reset ke Hitam
+        doc.setTextColor(0, 0, 0); 
     }
 
-    // TOTAL HARGA
+    // TOTAL YANG HARUS DIBAYAR SEKARANG
     doc.setFontSize(14); 
     doc.setFont("helvetica", "bold");
-    doc.text(`TOTAL: ${data.price}`, 190, yPos, null, null, "right");
+    doc.text(`PAYABLE NOW: ${data.payableNow}`, 190, yPos, null, null, "right");
+
+    // FOOTER NOTA
+    yPos += 20;
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "italic");
+    doc.text("Thank you for choosing USAHADULU Studio. Let's make something great.", 105, yPos, null, null, "center");
 
     // DOWNLOAD
-    doc.save(`Invoice_${data.name}.pdf`);
+    doc.save(`Invoice_USAHADULU_${data.name}.pdf`);
 }
 
-// GANTI SELURUH FUNCTION submitOrder DI js/main.js DENGAN INI:
-
-window.submitOrder = function() {
-    const name = document.getElementById('clientName').value;
-    const phone = document.getElementById('clientPhone').value;
-    const email = document.getElementById('clientEmail').value;
-    const brief = document.getElementById('clientBrief').value;
-    
-    // --- PERBAIKAN DISINI ---
-    // Kita ambil elemen SELECT-nya dulu
-    const serviceSelect = document.getElementById('orderService');
-    const pkgSelect = document.getElementById('orderPackage');
-
-    // Ambil TEXT yang tampil (Contoh: "LOGO & BRANDING"), BUKAN value angkanya (0,1)
-    // Gunakan 'options[selectedIndex].text' agar yang terambil adalah nama layanannya
-    let service = "-";
-    if (serviceSelect.selectedIndex !== -1) {
-        service = serviceSelect.options[serviceSelect.selectedIndex].text;
-    }
-
-    // Untuk paket, karena value-nya sudah nama paket, bisa langsung ambil .value
-    const pkg = pkgSelect.value;
-    // ------------------------
-    
-    // Ambil harga final (diskon) atau harga normal
-    let finalPriceStr = document.getElementById('orderPrice').value;
-    
-    // Jika ada diskon aktif, gunakan harga diskon untuk data order
-    if(appliedDiscountCode && currentFinalPrice > 0) {
-        finalPriceStr = formatNumberToPrice(currentFinalPrice);
-    }
-
-    // Validasi input (Pastikan user sudah memilih layanan & paket)
-    if(!name || !phone || !brief || service === "" || pkg === "" || service.includes("--")) { 
-        alert("Harap lengkapi DATA, pilih LAYANAN & PAKET, serta isi DESKRIPSI!"); 
-        return; 
-    }
-
-    const submitBtn = document.querySelector('.submit-order-btn');
-    submitBtn.innerText = "Processing...";
-    submitBtn.disabled = true;
-
-    // Masukkan data ke object orderData
-    const orderData = { 
-        name, phone, email, service, pkg, brief, 
-        price: finalPriceStr, 
-        originalPrice: formatNumberToPrice(currentBasePrice || parsePriceToNumber(document.getElementById('orderPrice').value)),
-        voucher: appliedDiscountCode 
-    };
-
-    generateInvoicePDF(orderData); 
-
-    // Simpan ke LocalStorage untuk halaman Payment
-    localStorage.setItem('currentOrder', JSON.stringify(orderData));
-
-    setTimeout(() => {
-        // Redirect ke Payment
-        window.location.href = "payment.html";
-    }, 2000);
-};
-
-function renderOrderSummary() {
-    const container = document.getElementById('paymentGatewayContainer');
+// 12. XENDIT DEMO MODAL (Updated to Sync with DP/Full Amount)
+window.openXenditDemo = function(payableAmount) {
+    const modal = document.getElementById('lightboxModal');
     const data = JSON.parse(localStorage.getItem('currentOrder'));
     
-    if(!data) {
-        container.innerHTML = '<p style="text-align:center; color:#888;">Belum ada pesanan aktif. Silakan pilih layanan terlebih dahulu.</p><div style="text-align:center; margin-top:20px;"><a href="services.html" class="service-action-btn">LIHAT LAYANAN</a></div>';
-        return;
-    }
-
-    container.innerHTML = `
-        <div class="summary-card">
-            <h3 class="summary-title">RINGKASAN PESANAN</h3>
-            <div class="summary-row"><span>Nama:</span> <strong>${data.name}</strong></div>
-            <div class="summary-row"><span>Paket:</span> <strong>${data.service} (${data.pkg})</strong></div>
-            <div class="summary-row total"><span>TOTAL:</span> <strong>${data.price}</strong></div>
-        </div>
-        
-        <button class="payment-gateway-trigger hover-target" onclick="openXenditDemo('${data.price}')">
-            ${siteData.currentLang === 'id' ? 'BAYAR VIA XENDIT (QRIS/PAYPAL)' : 'PAY VIA XENDIT (QRIS/PAYPAL)'}
-        </button>
-    `;
-    bindHoverEvents();
-}
-
-// 12. XENDIT DEMO MODAL
-window.openXenditDemo = function(price) {
-    const modal = document.getElementById('lightboxModal');
+    // Gunakan nominal payableNow dari storage jika parameter tidak dikirim
+    const displayPrice = payableAmount || (data ? data.payableNow : "IDR 0");
     
     const html = `
         <div class="modal-content xendit-modal-body">
             <div class="x-header">
                 <span class="x-logo">xendit</span>
-                <span class="x-amount">${price}</span>
+                <span class="x-amount">${displayPrice}</span>
             </div>
             
             <div class="x-content">
-                <span class="x-label">Virtual Account (Demo)</span>
-                <div class="x-option hover-target" onclick="alert('Demo: Payment Successful!')">
+                <div style="background: #fff3cd; color: #856404; padding: 10px; font-size: 11px; margin-bottom: 15px; border-radius: 4px; border: 1px solid #ffeeba;">
+                    <strong>MODE DEMO:</strong> Pembayaran ini hanya simulasi untuk keperluan verifikasi portofolio.
+                </div>
+
+                <span class="x-label">Virtual Account (Simulasi)</span>
+                <div class="x-option hover-target" onclick="alert('Simulasi: Virtual Account BCA dibuat. Silakan transfer ke nomor yang tertera (Demo).')">
                     <div class="x-icon" style="background:#005ce6; color:#fff;">BCA</div>
                     <div class="x-name">BCA Virtual Account</div>
                 </div>
-                 <div class="x-option hover-target" onclick="alert('Demo: Payment Successful!')">
-                    <div class="x-icon" style="background:#f39c12; color:#fff;">BRI</div>
-                    <div class="x-name">BRI Virtual Account</div>
-                </div>
 
                 <span class="x-label">QR Code / E-Wallet</span>
-                <div class="x-option hover-target" onclick="alert('Redirecting to QRIS...')">
+                <div class="x-option hover-target" onclick="alert('Simulasi: Menampilkan QRIS...')">
                     <div class="x-icon" style="background:#fff; border:1px solid #ddd;">
                         <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/QRIS_logo.svg/1200px-QRIS_logo.svg.png" style="width:25px; height:auto;">
                     </div>
                     <div class="x-name">QRIS (GoPay, OVO, Dana, ShopeePay)</div>
                 </div>
                 
-                <span class="x-label">International</span>
-                <div class="x-option hover-target" onclick="alert('Redirecting to PayPal...')">
+                <span class="x-label">International Payment</span>
+                <div class="x-option hover-target" onclick="alert('Simulasi: Mengarahkan ke PayPal Login...')">
                     <div class="x-icon" style="background:#003087; color:#fff;">PP</div>
                     <div class="x-name">PayPal / Credit Card</div>
                 </div>
             </div>
 
             <div class="x-footer">
-                Secured by Xendit Payment Gateway (Demo Mode)
+                Secured by Xendit Payment Gateway (Development Mode)
             </div>
             
             <button class="x-cancel-btn hover-target" onclick="closeLightboxOnly()">
-                CANCEL TRANSACTION
+                BATALKAN TRANSAKSI
             </button>
         </div>
     `;
@@ -847,8 +854,7 @@ window.openXenditDemo = function(price) {
     modal.innerHTML = html;
     modal.classList.add('show');
     bindHoverEvents();
-    
-    };
+};
    // --- RENDER BLOG (ARTIKEL) ---
 window.renderBlog = function() {
     const grid = document.getElementById('blogGrid');
@@ -1011,3 +1017,90 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
+function renderOrderSummary() {
+    const container = document.getElementById('paymentGatewayContainer');
+    const data = JSON.parse(localStorage.getItem('currentOrder'));
+    
+    if(!container || !data) return;
+
+    container.innerHTML = `
+        <div class="form-group" style="background: #111; padding: 20px; border: 1px dashed #444; border-radius: 8px; margin-bottom: 20px;">
+            <label style="color: #888; font-size: 11px; margin-bottom: 12px; display: block; letter-spacing: 1px;">
+                RINGKASAN TAGIHAN (${data.paymentStatus})
+            </label>
+            
+            <div style="border-top: 1px solid #222; padding-top: 15px;">
+                <div style="display: flex; justify-content: space-between; font-size: 13px; color: #888; margin-bottom: 8px;">
+                    <span>Total Project:</span>
+                    <span style="color: #fff; font-weight: bold;">${data.totalPrice}</span>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid #333; margin-top: 10px;">
+                    <span style="color: #eee; font-size: 14px; font-weight: bold;">HARUS DIBAYAR:</span>
+                    <span style="color: #2ed573; font-size: 20px; font-weight: 900;">${data.payableNow}</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="payment-option hover-target" onclick="showBankBCA()" style="border: 1px solid #2ed573; padding: 20px; border-radius: 8px; cursor: pointer; background: rgba(46, 213, 115, 0.05); margin-bottom: 12px; transition: all 0.3s ease;">
+            <div style="font-weight: bold; color: #fff; font-size: 15px; letter-spacing: 0.5px;">TRANSFER BANK BCA (MANUAL)</div>
+            <div style="font-size: 11px; color: #888; margin-top: 4px;">Konfirmasi bukti bayar via WhatsApp Admin.</div>
+        </div>
+
+        <button class="payment-gateway-trigger hover-target" onclick="openXenditDemo('${data.payableNow}')" style="width: 100%; padding: 18px; background: #080808; border: 1px solid #333; color: #444; cursor: pointer; border-radius: 8px; font-size: 12px; font-weight: bold; letter-spacing: 1px;">
+            XENDIT / QRIS / PAYPAL (BELUM AKTIF)
+        </button>
+    `;
+    
+    if(typeof bindHoverEvents === 'function') bindHoverEvents();
+}
+
+window.showBankBCA = function() {
+    const modal = document.getElementById('lightboxModal');
+    if(!modal) return;
+    
+    const data = JSON.parse(localStorage.getItem('currentOrder'));
+    const payable = data ? data.payableNow : "IDR 0";
+
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 420px; padding: 35px; border-radius: 12px; background: #0a0a0a; border: 1px solid #333; text-align: center; position: relative;">
+            <div style="font-size: 40px; margin-bottom: 20px;">🏦</div>
+            <h2 style="color: #fff; font-size: 18px; font-weight: 900; margin-bottom: 10px; letter-spacing: 1px; text-transform: uppercase;">Instruksi Pembayaran</h2>
+            
+            <div style="background: #111; padding: 20px; border-radius: 8px; border: 1px solid #222; margin-bottom: 20px; text-align: left;">
+                <div style="color: #888; font-size: 10px; margin-bottom: 8px; text-transform: uppercase;">1. Transfer ke Rekening BCA:</div>
+                <div style="color: #2ed573; font-size: 24px; font-weight: 900; letter-spacing: 2px; margin-bottom: 4px;">6145150268</div>
+                <div style="color: #fff; font-size: 13px; font-weight: bold;">A/N FAJRI SALAM</div>
+                
+                <div style="margin-top: 15px; border-top: 1px solid #222; padding-top: 10px; display: flex; justify-content: space-between; align-items: center;">
+                    <span style="color: #888; font-size: 11px;">NOMINAL:</span> 
+                    <span style="color: #fff; font-weight: bold; font-size: 16px;">${payable}</span>
+                </div>
+            </div>
+
+            <div style="text-align: left; background: rgba(255,255,255,0.03); padding: 15px; border-radius: 8px; margin-bottom: 25px; border: 1px solid #1a1a1a;">
+                <div style="color: #fff; font-size: 11px; font-weight: bold; margin-bottom: 8px; display: flex; align-items: center;">
+                    <span style="background: #2ed573; color: #000; width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; margin-right: 8px; font-size: 10px; font-weight: 900;">2</span> 
+                    UPLOAD BUKTI BAYAR
+                </div>
+                <p style="color: #888; font-size: 11px; line-height: 1.5; margin: 0;">
+                    Setelah transfer, silakan kirimkan <strong>Screenshot/Foto Bukti Bayar</strong> melalui WhatsApp agar admin dapat segera memverifikasi dan memulai pengerjaan.
+                </p>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <a href="https://wa.me/6282283687565?text=Halo%20Admin,%20saya%20sudah%20transfer%20sebesar%20${encodeURIComponent(payable)}.%20Berikut%20saya%20lampirkan%20bukti%20bayarnya." 
+                   target="_blank" class="cta-btn hover-target" style="background: #2ed573; color: #000; padding: 15px; text-decoration: none; border-radius: 4px; font-weight: 900; font-size: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                   <svg style="width: 16px; height: 16px; fill: currentColor;" viewBox="0 0 448 512"><path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7 .9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/></svg>
+                   KIRIM BUKTI KE WHATSAPP
+                </a>
+                <button onclick="closeLightboxOnly()" style="background: transparent; border: none; color: #555; cursor: pointer; font-size: 11px; text-decoration: underline;">
+                    Tutup Instruksi
+                </button>
+            </div>
+        </div>
+    `;
+    
+    modal.classList.add('show');
+    if(typeof bindHoverEvents === 'function') bindHoverEvents();
+};
