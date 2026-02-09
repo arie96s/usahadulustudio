@@ -47,74 +47,89 @@
     </div>
 
     <div class="page-content">
-        <h1 class="page-title">FORM ORDER KLIEN</h1>
-        
-        <div class="order-form-container" id="orderForm">
-            <div class="form-group">
-                <div class="form-group">
-    <label>PILIH LAYANAN & PAKET</label>
-    <div style="display: flex; gap: 10px; flex-direction: column;">
-        <select id="orderService" class="form-input" style="cursor: pointer;">
-            <option value="">-- Pilih Layanan --</option>
-        </select>
-        
-        <select id="orderPackage" class="form-input" style="cursor: pointer;">
-            <option value="">-- Pilih Paket --</option>
-        </select>
-    </div>
-</div>
-            
-            <div class="form-group">
-                <label>ESTIMASI HARGA</label>
-                <input type="text" id="orderPrice" readonly class="form-input readonly" style="font-weight:bold; color:#fff;">
-            </div>
-
-<div class="form-group" style="background: #111; padding: 15px; border: 1px dashed #444; border-radius: 8px;">
-    <label style="color: #2ed573;">PUNYA KODE PROMO?</label>
-    <div style="display: flex; gap: 10px;">
-        <input type="text" id="voucherInput" class="form-input" placeholder="Masukkan Kode Voucher" style="text-transform: uppercase;">
-        <button type="button" class="mini-order-btn hover-target" onclick="applyVoucher()" style="padding: 0 20px; font-weight: bold; cursor: pointer;">APPLY</button>
-    </div>
-    <p id="voucherMsg" style="font-size: 11px; margin-top: 5px; display: none;"></p>
+    <h1 class="page-title">FORM ORDER KLIEN</h1>
     
-    <div id="discountDisplay" style="display: none; margin-top: 10px; border-top: 1px solid #333; padding-top: 10px;">
-        <div style="display: flex; justify-content: space-between; font-size: 13px; color: #888;">
-            <span>Potongan:</span>
-            <span id="discAmount" style="color: #ff4757;">-0</span>
+    <div class="order-form-container" id="orderForm">
+        <div class="form-group">
+            <label>PILIH LAYANAN & PAKET</label>
+            <div style="display: flex; gap: 10px; flex-direction: column;">
+                <select id="orderService" class="form-input" style="cursor: pointer;">
+                    <option value="">-- Pilih Layanan --</option>
+                </select>
+                <select id="orderPackage" class="form-input" style="cursor: pointer;">
+                    <option value="">-- Pilih Paket --</option>
+                </select>
+            </div>
         </div>
-        <div style="display: flex; justify-content: space-between; font-size: 16px; font-weight: bold; color: #2ed573; margin-top: 5px;">
-            <span>TOTAL BAYAR:</span>
-            <span id="finalPriceDisplay">0</span>
+        
+        <div class="form-group">
+            <label>ESTIMASI HARGA TOTAL</label>
+            <input type="text" id="orderPrice" readonly class="form-input readonly" style="font-weight:bold; color:#fff;">
+        </div>
+
+        <div class="form-group" style="border-top: 1px solid #333; padding-top: 20px;">
+            <label>OPSI PEMBAYARAN / PAYMENT TERM</label>
+            <select id="paymentTerm" class="form-input" style="cursor: pointer;" onchange="updatePayableDisplay()">
+                <option value="1.0">LUNAS / FULL PAYMENT (100%)</option>
+                <option value="0.5">DOWN PAYMENT (50%) - Sesuai Prosedur</option>
+            </select>
+            <p style="font-size: 11px; color: #666; margin-top: 5px;">*Opsi DP tersedia untuk mendukung fleksibilitas budget Anda.</p>
+        </div>
+
+        <div class="form-group" style="background: #111; padding: 20px; border: 1px dashed #444; border-radius: 8px;">
+            <label style="color: #2ed573;">PUNYA KODE PROMO?</label>
+            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                <input type="text" id="voucherInput" class="form-input" placeholder="Masukkan Kode Voucher" style="text-transform: uppercase; flex: 1;">
+                <button type="button" class="mini-order-btn hover-target" onclick="applyVoucher()" style="padding: 0 20px; font-weight: bold; cursor: pointer;">APPLY</button>
+            </div>
+            <p id="voucherMsg" style="font-size: 11px; margin-bottom: 15px; display: none;"></p>
+            
+            <div style="border-top: 1px solid #333; padding-top: 15px; font-size: 13px;">
+                <div id="discountDisplay" style="display: none; margin-bottom: 8px; color: #ff4757;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>Potongan:</span>
+                        <span id="discAmount">-0</span>
+                    </div>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; color: #888; margin-bottom: 8px;">
+                    <span>Total Project Akhir:</span>
+                    <span id="finalPriceDisplay">0</span>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; font-weight: bold; padding-top: 10px; border-top: 1px solid #444;">
+                    <span style="color: #eee;">TAGIHAN SAAT INI:</span>
+                    <span id="payableAmountDisplay" style="color: #2ed573;">0</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>NAMA LENGKAP / BRAND</label>
+            <input type="text" id="clientName" class="form-input hover-target" placeholder="Contoh: Magos Streetwear">
+        </div>
+
+        <div class="form-group">
+            <label>NOMOR WHATSAPP</label>
+            <input type="tel" id="clientPhone" class="form-input hover-target" placeholder="Contoh: 0812xxxxx">
+        </div>
+
+        <div class="form-group">
+            <label>EMAIL AKTIF</label>
+            <input type="email" id="clientEmail" class="form-input hover-target" placeholder="Email untuk file master">
+        </div>
+
+        <div class="form-group">
+            <label>BRIEF / DESKRIPSI KONSEP</label>
+            <textarea id="clientBrief" rows="5" class="form-input hover-target" placeholder="Detail request, gaya desain, tulisan, dll."></textarea>
+        </div>
+
+        <div class="form-actions" style="margin-top: 40px;">
+            <p style="font-size: 11px; color: #444; margin-bottom: 15px;">*Menekan Submit akan mengunduh Invoice PDF dan lanjut ke instruksi pembayaran.</p>
+            <button class="submit-order-btn hover-target" onclick="submitOrder()">SUBMIT & PROCEED</button>
         </div>
     </div>
 </div>
-
-            <div class="form-group">
-                <label>NAMA LENGKAP / BRAND</label>
-                <input type="text" id="clientName" class="form-input hover-target" placeholder="Contoh: Magos Streetwear">
-            </div>
-
-            <div class="form-group">
-                <label>NOMOR WHATSAPP</label>
-                <input type="tel" id="clientPhone" class="form-input hover-target" placeholder="Contoh: 0812xxxxx">
-            </div>
-
-            <div class="form-group">
-                <label>EMAIL AKTIF</label>
-                <input type="email" id="clientEmail" class="form-input hover-target" placeholder="Untuk pengiriman file master">
-            </div>
-
-            <div class="form-group">
-                <label>BRIEF / DESKRIPSI KONSEP</label>
-                <textarea id="clientBrief" rows="5" class="form-input hover-target" placeholder="Jelaskan detail request desain, referensi warna, style, tulisan, dll."></textarea>
-            </div>
-
-            <div class="form-actions">
-                <p style="font-size: 11px; color: #666; margin-bottom: 10px;">*Mengklik Submit akan mengunduh Invoice PDF dan mengarahkan ke halaman pembayaran.</p>
-                <button class="submit-order-btn hover-target" onclick="submitOrder()">SUBMIT & PROCEED TO PAYMENT</button>
-            </div>
-        </div>
-    </div>
 
      <footer>
     <div class="footer-container">
