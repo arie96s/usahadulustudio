@@ -10,6 +10,181 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
   <style>
+
+    /* --- PERBAIKAN TOTAL LABEL KATEGORI & ANIMASI HOVER --- */
+
+/* 1. Gaya Dasar & Mode Lookbook (Label di Atas) */
+.prod {
+    display: flex;
+    flex-direction: column;
+}
+
+.prod .label {
+    display: inline-block;
+    order: -1; /* Memaksa label pindah ke paling atas */
+    margin-bottom: 12px; /* MEMBERI JARAK agar tidak menghimpit judul */
+    margin-top: 15px;
+    padding: 5px 12px;
+    font-size: 8px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    border: 1px solid #222;
+    border-radius: 50px;
+    color: #fff;
+    background: transparent; /* Dasar transparan */
+    text-transform: uppercase;
+    width: fit-content;
+    transition: all 0.3s ease; /* Durasi animasi */
+}
+
+/* 2. Khusus Mode Grid View (Label di Bawah) */
+#productGrid.ecommerce-grid .label {
+    order: 2; /* Pindah ke posisi bawah setelah harga */
+    margin-top: 12px;
+    margin-bottom: 0;
+    color: #fff;
+    background: #111; /* Background sedikit gelap untuk mode grid */
+    border: 1px solid #333;
+}
+
+/* 3. EFEK HOVER SERAGAM (Lookbook & Grid View) */
+/* Saat kotak produk disentuh, label akan berubah warna secara halus */
+.prod:hover .label {
+    background: #fff !important;
+    color: #000 !important;
+    border-color: #fff !important;
+}
+
+/* Memastikan Metadata (Judul & Harga) berada di posisi yang benar */
+#productGrid.ecommerce-grid .meta {
+    order: 1;
+}
+    /* Animasi Skeleton Loading */
+.skeleton {
+    background: linear-gradient(90deg, #050505 25%, #111 50%, #050505 75%);
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s infinite;
+    border-radius: 15px;
+}
+
+@keyframes skeleton-loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+.is-loading .prod-img-wrapper, 
+.is-loading .meta h4, 
+.is-loading .meta p {
+    visibility: hidden; /* Sembunyikan konten asli saat loading */
+}
+
+    /* Gaya Grid E-commerce yang Rapi & Rounded */
+#productGrid.ecommerce-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); /* Petak-petak rapi */
+    gap: 25px;
+}
+
+#productGrid.ecommerce-grid .prod {
+    background: #080808;
+    border: 1px solid #1a1a1a;
+    border-radius: 20px; /* Sudut membulat rapi */
+    padding: 15px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+#productGrid.ecommerce-grid .prod-img-wrapper {
+    border-radius: 15px; /* Gambar juga membulat di dalam */
+    overflow: hidden;
+    margin-bottom: 15px;
+}
+
+#productGrid.ecommerce-grid .meta {
+    text-align: left;
+    padding: 5px;
+}
+
+#productGrid.ecommerce-grid .meta h4 {
+    font-size: 14px;
+    letter-spacing: 0px;
+    margin-bottom: 5px;
+}
+
+#productGrid.ecommerce-grid .meta p {
+    color: #fff;
+    font-weight: 900;
+}
+
+    /* Tambahkan di dalam tag <style> di magos.html */
+@media (max-width: 768px) {
+    .modal-info .info-bottom {
+        padding-bottom: 80px; /* Memberi ruang agar konten tidak tertutup tombol sticky */
+    }
+
+    #realAddToCartBtn {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 90% !important;
+        z-index: 9999;
+        box-shadow: 0 -10px 20px rgba(0,0,0,0.5);
+    }
+    
+    /* Tombol Wishlist tetap di samping atau menyesuaikan */
+    #realWishlistBtn {
+        position: fixed;
+        bottom: 20px;
+        right: 5%;
+        z-index: 10000;
+        background: #000;
+        border: 1px solid #333;
+    }
+}
+
+    .product-slide img {
+    transition: transform 0.5s ease;
+}
+.product-slide:hover img {
+    transform: scale(1.1); /* Efek zoom saat mouse di atas gambar modal */
+}
+
+    @keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0.3; }
+    100% { opacity: 1; }
+}
+    .related-item {
+    cursor: pointer;
+    transition: transform 0.3s ease;
+    border: 1px solid #111;
+    background: #050505;
+}
+.related-item:hover {
+    transform: translateY(-3px);
+    border-color: #333;
+}
+.related-item img {
+    width: 100%;
+    aspect-ratio: 1/1;
+    object-fit: cover;
+    filter: grayscale(100%);
+    transition: filter 0.3s ease;
+}
+.related-item:hover img {
+    filter: grayscale(0%);
+}
+.related-item p {
+    font-size: 8px;
+    font-weight: 900;
+    margin: 5px 0;
+    text-align: center;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0 5px;
+}
       /* --- Marquee/Teks Berjalan --- */
       .marquee-container { 
           background: #fff; color: #000; padding: 8px 0; 
@@ -218,24 +393,32 @@
         </div>
     </section>
 
-    <section id="shop">
-      <div class="section-header">
-          <h2 class="section-title" data-i18n="sec_drops">KOLEKSI TERBARU</h2>
-          <div class="line-spacer"></div>
-      </div>
-      
-      <div class="filter-container">
-          <button class="filter-btn active" onclick="filterProducts('all')">ALL</button>
-          <button class="filter-btn" onclick="filterProducts('T-SHIRT')">T-SHIRT</button>
-          <button class="filter-btn" onclick="filterProducts('OUTERWEAR')">OUTERWEAR</button>
-          <button class="filter-btn" onclick="filterProducts('BOTTOMS')">BOTTOMS</button>
-          <button class="filter-btn" onclick="filterProducts('ACCESSORIES')">ACCESSORIES</button>
-      </div>
+      <section id="shop" style="padding-top: 80px;">
+    <div class="section-header" style="display: flex; align-items: center; gap: 25px; margin-bottom: 50px; padding: 0 5%;">
+        <h2 class="section-title" data-i18n="sec_drops" style="margin: 0; white-space: nowrap; font-weight: 900; letter-spacing: 1px; font-size: 24px;">KOLEKSI TERBARU</h2>
+        <div class="line-spacer" style="flex: 1; height: 1px; border-top: 1px dashed #333;"></div>
+    </div>
 
-      <div class="grid lookbook-layout" id="productGrid"></div> 
-      <div id="paginationContainer" class="pagination-container"></div>
-    </section>
-</main>
+    <div class="filter-wrapper" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; padding: 0 5%; margin-bottom: 40px;">
+        
+        <div class="filter-container" style="margin-bottom: 0; padding: 0; display: flex; gap: 12px; flex-wrap: wrap;">
+            <button class="filter-btn active" onclick="filterProducts('all')">ALL</button>
+            <button class="filter-btn" onclick="filterProducts('T-SHIRT')">T-SHIRT</button>
+            <button class="filter-btn" onclick="filterProducts('OUTERWEAR')">OUTERWEAR</button>
+            <button class="filter-btn" onclick="filterProducts('BOTTOMS')">BOTTOMS</button>
+            <button class="filter-btn" onclick="filterProducts('ACCESSORIES')">ACCESSORIES</button>
+        </div>
+
+        <div class="view-mode-container" style="display: flex; gap: 12px;">
+            <button class="filter-btn active" onclick="setViewMode('lookbook')" id="btnLookbook">LOOKBOOK</button>
+            <button class="filter-btn" onclick="setViewMode('ecommerce')" id="btnEcommerce">GRID VIEW</button>
+        </div>
+    </div>
+
+    <div class="grid lookbook-layout" id="productGrid" style="padding: 0 5%; min-height: 400px;"></div> 
+    
+    <div id="paginationContainer" class="pagination-container" style="margin-top: 60px; padding-bottom: 60px;"></div>
+</section>
 
 <section id="social-proof" style="background: #000; border-top: 1px dashed #333;">
     <div class="section-header">
@@ -302,12 +485,32 @@
           <div class="p-slider-btn prev" onclick="moveProductSlide(-1)">&#10094;</div>
           <div class="p-slider-btn next" onclick="moveProductSlide(1)">&#10095;</div>
       </div>
+      <div id="sliderDots" style="display: flex; justify-content: center; gap: 8px; margin-top: 10px; margin-bottom: 10px;">
+    </div>
       <div class="modal-info">
         <div class="info-top">
             <h2 class="modal-title" id="mTitle">Nama Produk</h2>
             <p class="modal-price" id="mPrice">Rp 000</p>
             <div class="size-chart-trigger" onclick="toggleSizeChart()" data-i18n="btn_size_chart" style="text-align: center; cursor: pointer;">LIHAT SIZE CHART</div>
-            <div class="modal-desc" id="mDesc"></div>
+            <div class="product-tabs" style="margin-top: 20px;">
+    <div class="tab-header" style="display: flex; gap: 20px; border-bottom: 1px solid #222; margin-bottom: 15px;">
+        <span class="tab-link active" onclick="switchTab(event, 'tabDetail')" style="font-size: 10px; font-weight: 900; letter-spacing: 2px; cursor: pointer; padding-bottom: 5px; color: #fff; border-bottom: 2px solid #fff;">DETAIL</span>
+        <span class="tab-link" onclick="switchTab(event, 'tabCare')" style="font-size: 10px; font-weight: 900; letter-spacing: 2px; cursor: pointer; padding-bottom: 5px; color: #666;">CARE</span>
+    </div>
+    
+    <div id="tabDetail" class="tab-content" style="display: block; font-size: 11px; line-height: 1.6; color: #aaa;">
+        <div id="mDesc"></div> </div>
+    
+    <div id="tabCare" class="tab-content" style="display: none; font-size: 11px; line-height: 1.6; color: #aaa;">
+        <ul style="list-style: none; padding: 0;">
+            <li>• WASH INSIDE OUT</li>
+            <li>• COLD WATER ONLY</li>
+            <li>• DO NOT IRON ON PRINT</li>
+            <li>• DO NOT BLEACH</li>
+            <li>• HANG DRY RECOMMENDED</li>
+        </ul>
+    </div>
+</div>
         </div>
         <div class="info-bottom" style="text-align: center;">
             <p id="sizeLabel" style="font-size: 10px; font-weight: bold; color: #666; margin-bottom: 15px; text-transform: uppercase;" data-i18n="lbl_select_size">PILIH UKURAN:</p>
@@ -319,11 +522,19 @@
                 <div class="stock-item" onclick="selectSize(this)"><span class="stock-num">5</span><div class="stock-circle">XL</div></div>
                 <div class="stock-item empty"><span class="stock-num">0</span><div class="stock-circle">XXL</div></div>
             </div>
+            <div id="stockScarcity" style="height: 15px; margin-bottom: 15px;">
+    <p id="scarcityText" style="font-size: 9px; font-weight: 900; color: #ff0000; letter-spacing: 1px; text-transform: uppercase; display: none;"></p>
+</div>
 
             <div id="allSizeBadge" style="display: none; margin-bottom: 20px;">
                 <div style="display: inline-block; border: 1px solid #fff; background: #fff; color: #000; padding: 10px 30px; border-radius: 50px; font-weight: 900; font-size: 12px; letter-spacing: 1px;">ALL SIZE</div>
             </div>
             <button class="btn primary" id="btnAddToCart" style="width:100%;" data-i18n="btn_add_cart">TAMBAH KE KERANJANG</button>
+            <div class="related-products-section" style="margin-top: 30px; border-top: 1px dashed #333; padding-top: 20px;">
+    <h4 style="font-size: 10px; letter-spacing: 2px; color: #666; margin-bottom: 15px; text-transform: uppercase;">YOU MIGHT ALSO LIKE</h4>
+    <div id="relatedGrid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+            </div>
+        </div>
         </div>
       </div>
     </div>
@@ -408,11 +619,24 @@
 <div class="modal-backdrop" id="sizeChartModal">
     <div class="modal-window size-chart-window" style="max-width: 500px; padding: 30px;">
         <div class="modal-close" onclick="closeModal('sizeChartModal')"><span>&times;</span></div>
+        
         <h3 style="margin-bottom: 25px; text-align: left; font-weight: 900; letter-spacing: 1px; font-size: 20px;">SIZE GUIDE</h3>
+        
         <div class="static-chart-container" style="display: flex; justify-content: center; align-items: center; margin-bottom: 20px;">
             <img src="assets/img/size-guide.jpg" alt="Size Chart" style="max-width: 100%; height: auto; border-radius: 8px; border: 1px dashed #333;">
         </div>
-        <p style="text-align: center; font-size: 11px; color: #666;">*Tolerance 1-2cm due to manual measurement.</p>
+        
+        <p style="text-align: center; font-size: 11px; color: #666; margin-bottom: 20px;">*Tolerance 1-2cm due to manual measurement.</p>
+
+        <div class="size-calculator" style="margin-top: 25px; padding-top: 20px; border-top: 1px dashed #333;">
+            <h4 style="font-size: 10px; font-weight: 900; letter-spacing: 2px; margin-bottom: 15px;">SIZE RECOMMENDATION</h4>
+            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                <input type="number" id="calcHeight" placeholder="HEIGHT (CM)" style="flex: 1; background: #080808; border: 1px solid #222; color: #fff; padding: 10px; font-size: 10px; font-weight: 900;">
+                <input type="number" id="calcWeight" placeholder="WEIGHT (KG)" style="flex: 1; background: #080808; border: 1px solid #222; color: #fff; padding: 10px; font-size: 10px; font-weight: 900;">
+            </div>
+            <button onclick="calculateSize()" class="btn primary" style="width: 100%; font-size: 10px; padding: 10px;">FIND MY SIZE</button>
+            <div id="calcResult" style="margin-top: 15px; text-align: center; font-size: 12px; font-weight: 900; color: #25D366; display: none;"></div>
+        </div>
     </div>
 </div>
 
@@ -494,38 +718,28 @@ window.addEventListener('load', () => {
     loadSocialConfig();    // Muat Grid Instagram
 });
 
-    // Tambahkan parameter 'currentItems' agar label sesuai dengan halaman yang sedang dibuka
-function applyStatusEffects(currentItems) {
-    // Pastikan hanya mengambil .prod yang ada di dalam #productGrid
+    function applyStatusEffects(currentItems) {
     const productElements = document.querySelectorAll('#productGrid .prod');
     
     productElements.forEach((el, index) => {
         const pData = currentItems[index]; 
-        
-        // Hapus badge lama jika ada untuk menghindari duplikasi saat pindah halaman
-        const oldBadge = el.querySelector('.status-badge');
-        if (oldBadge) oldBadge.remove();
+        if (!pData) return;
 
-        if (pData && pData.status && pData.status !== "NORMAL") {
-            const badge = document.createElement('div');
-            badge.className = 'status-badge';
-            badge.innerText = pData.status;
+        // Cek apakah semua stok ukuran adalah 0
+        const isActuallySoldOut = Object.values(pData.stock).every(s => s === 0) || pData.status === 'SOLDOUT';
+
+        if (isActuallySoldOut) {
+            el.style.filter = "grayscale(100%)"; // Membuat petak produk jadi hitam putih
+            el.style.opacity = "0.6"; // Sedikit transparan
+            el.style.pointerEvents = "auto"; // Tetap bisa diklik untuk lihat detail
             
-            const isSoldOut = pData.status === 'SOLDOUT';
-            badge.style = `
-                position: absolute; top: 15px; left: 15px; 
-                background: ${isSoldOut ? '#ff0000' : '#ffffff'}; 
-                color: ${isSoldOut ? '#ffffff' : '#000000'};
-                padding: 6px 15px; font-weight: 900; font-size: 11px; 
-                letter-spacing: 1px; z-index: 5; text-transform: uppercase;
-            `;
-            el.style.position = 'relative';
-            el.appendChild(badge);
-
-            const img = el.querySelector('img');
-            if (img) {
-                img.style.filter = isSoldOut ? "grayscale(100%)" : "none";
-                img.style.opacity = isSoldOut ? "0.4" : (pData.status === "PRESALE" ? "0.7" : "1");
+            // Tambahkan badge SOLDOUT jika belum ada
+            if (!el.querySelector('.status-badge')) {
+                const badge = document.createElement('div');
+                badge.className = 'status-badge';
+                badge.innerText = 'SOLD OUT';
+                badge.style = "position: absolute; top: 15px; left: 15px; background: #ff0000; color: #fff; padding: 6px 15px; font-weight: 900; font-size: 11px; z-index: 5;";
+                el.appendChild(badge);
             }
         }
     });
@@ -669,4 +883,5 @@ window.removeFromWishlist = function(index) {
         toggleWishlistItem(item.id); 
     }
 };
+
 </script>
