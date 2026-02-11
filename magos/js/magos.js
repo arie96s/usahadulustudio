@@ -312,10 +312,73 @@ function moveProductSlide(direction) {
 
 function toggleSizeChart() {
     const modal = document.getElementById('sizeChartModal');
-    const chartImg = modal.querySelector('img');
-    // 'currentProduct' adalah variabel yang menyimpan data produk yang sedang dibuka modalnya
-    chartImg.src = currentProduct.sizeChart; 
+    const chartImg = modal.querySelector('.static-chart-container img');
+    const calcResult = document.getElementById('calcResult');
+    
+    if (!modal || !currentProduct) return;
+
+    // 1. Sinkronisasi Gambar Size Chart
+    // Jika produk memiliki sizeChart khusus, gunakan itu. Jika tidak, pakai default.
+    const defaultChart = 'assets/img/size-guide.jpg';
+    chartImg.src = currentProduct.sizeChart || defaultChart;
+
+    // 2. Reset UI Kalkulator
+    // Membersihkan hasil pencarian ukuran sebelumnya agar tidak berantakan
+    if (calcResult) {
+        calcResult.style.display = 'none';
+        calcResult.innerText = '';
+    }
+    
+    // 3. Reset Input
+    if (document.getElementById('calcHeight')) document.getElementById('calcHeight').value = '';
+    if (document.getElementById('calcWeight')) document.getElementById('calcWeight').value = '';
+
+    // 4. Tampilkan Modal
     modal.classList.add('active');
+}
+// --- Sambungan dari fungsi toggleSizeChart ---
+
+function calculateSize() {
+    // 1. Ambil input dari elemen HTML
+    const heightInput = document.getElementById('calcHeight');
+    const weightInput = document.getElementById('calcWeight');
+    const resultDisplay = document.getElementById('calcResult');
+
+    // 2. Validasi Input
+    if (!heightInput || !weightInput || !resultDisplay) return;
+
+    const h = parseFloat(heightInput.value);
+    const w = parseFloat(weightInput.value);
+
+    if (!h || !w) {
+        alert("PLEASE ENTER BOTH HEIGHT AND WEIGHT");
+        return;
+    }
+
+    // 3. Logika Penentuan Ukuran (Bisa disesuaikan dengan standar brand Anda)
+    let recommendedSize = "M"; 
+    if (h > 180 || w > 85) {
+        recommendedSize = "XXL";
+    } else if (h > 175 || w > 75) {
+        recommendedSize = "XL";
+    } else if (h > 168 || w > 65) {
+        recommendedSize = "L";
+    } else if (h < 160 || w < 50) {
+        recommendedSize = "S";
+    }
+
+    // 4. Render Hasil ke UI dengan gaya kapsul industrial
+    resultDisplay.style.display = 'block';
+    resultDisplay.innerHTML = `
+        <div style="margin-top: 15px; padding: 15px; border-top: 1px dashed #222;">
+            <span style="font-size: 9px; color: #666; letter-spacing: 1px; font-weight: 900; text-transform: uppercase;">
+                RECOMMENDED SIZE:
+            </span>
+            <span style="display: inline-block; margin-left: 10px; background: #fff; color: #000; padding: 5px 15px; border-radius: 50px; font-weight: 900; font-size: 12px; letter-spacing: 1px;">
+                ${recommendedSize}
+            </span>
+        </div>
+    `;
 }
 
 // Tambahkan/Update di magos.js
@@ -1053,6 +1116,7 @@ function setViewMode(mode) {
     const btnLook = document.getElementById('btnLookbook');
     const btnEcom = document.getElementById('btnEcommerce');
 
+    // Validasi agar tidak terjadi error jika elemen tidak ditemukan
     if (!grid || !btnLook || !btnEcom) return;
 
     if (mode === 'ecommerce') {
@@ -1067,7 +1131,6 @@ function setViewMode(mode) {
         btnEcom.classList.remove('active');
     }
 
-    // Pemicu Skeleton Loading setiap kali ganti mode (Point 2)
+    // Memicu ulang render produk agar animasi Skeleton Loading muncul
     displayProducts(currentFilter, currentPage);
 }
-// PASTIKAN SETELAH INI HANYA ADA SATU KURUNG TUTUP PUNYA FUNGSI INI.
