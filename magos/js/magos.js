@@ -136,17 +136,18 @@ function displayProducts(filterCat = 'all', page = 1) {
     const imgFront = p.images && p.images[0] ? p.images[0] : 'assets/img/default.jpg';
     const imgBack = p.images && p.images[1] ? p.images[1] : imgFront;
 
-    el.innerHTML = `
-        <div class="prod-img-wrapper">
-            <img src="${imgFront}" class="img-front" loading="lazy">
-            <img src="${imgBack}" class="img-back" loading="lazy">
-        </div>
-        <div class="meta">
-            <h4>${p.name}</h4>
-            <p>${formatMoney(p.price)}</p>
-        </div>
-        <div class="label">${p.category}</div>
-    `;
+    // Cari bagian ini di fungsi displayProducts di magos.js
+el.innerHTML = `
+    <div class="prod-img-wrapper">
+        <img src="${imgFront}" class="img-front" loading="lazy">
+        <img src="${imgBack}" class="img-back" loading="lazy">
+    </div>
+    <div class="label">${p.category}</div> 
+    <div class="meta">
+        <h4>${p.name}</h4>
+        <p>${formatMoney(p.price)}</p>
+    </div>
+`;
     grid.appendChild(el);
 });
         }
@@ -1013,3 +1014,60 @@ if (window.location.pathname.includes('checkout.html')) {
         window.location.href = "magos.html";
     }
 }
+
+function openProductModalById(id) {
+    // Cari produk berdasarkan ID (karena data ID di sistem kamu bisa angka/string)
+    const product = products.find(p => String(p.id) === String(id));
+    if (product) {
+        openProductModal(product); // Panggil fungsi utama yang sudah ada di baris 153
+    }
+}
+
+function renderRelatedProducts(currentCategory, currentProductId) {
+    const relatedContainer = document.getElementById('relatedGrid');
+    if (!relatedContainer) return;
+
+    // Filter produk kategori sama, batasi 3 produk
+    const related = products
+        .filter(p => p.category === currentCategory && p.id !== currentProductId)
+        .slice(0, 3);
+
+    let html = '';
+    related.forEach(item => {
+        // PERBAIKAN: Gunakan item.images[0] bukan item.img
+        const displayImg = (item.images && item.images.length > 0) ? item.images[0] : 'assets/img/default.jpg';
+        
+        html += `
+            <div class="related-item" onclick="openProductModalById(${item.id})">
+                <img src="${displayImg}" alt="${item.name}">
+                <p>${item.name.toUpperCase()}</p>
+            </div>
+        `;
+    });
+    
+    relatedContainer.innerHTML = html || '<p style="font-size:8px; color:#333; text-align:center; width:100%;">NO SIMILAR ITEMS FOUND</p>';
+}
+
+function setViewMode(mode) {
+    const grid = document.getElementById('productGrid');
+    const btnLook = document.getElementById('btnLookbook');
+    const btnEcom = document.getElementById('btnEcommerce');
+
+    if (!grid || !btnLook || !btnEcom) return;
+
+    if (mode === 'ecommerce') {
+        grid.classList.remove('lookbook-layout');
+        grid.classList.add('ecommerce-grid');
+        btnEcom.classList.add('active');
+        btnLook.classList.remove('active');
+    } else {
+        grid.classList.remove('ecommerce-grid');
+        grid.classList.add('lookbook-layout');
+        btnLook.classList.add('active');
+        btnEcom.classList.remove('active');
+    }
+
+    // Pemicu Skeleton Loading setiap kali ganti mode (Point 2)
+    displayProducts(currentFilter, currentPage);
+}
+// PASTIKAN SETELAH INI HANYA ADA SATU KURUNG TUTUP PUNYA FUNGSI INI.
