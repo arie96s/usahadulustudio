@@ -10,6 +10,167 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
   <style>
+    @media (max-width: 768px) {
+    #stockScarcity {
+        margin-top: -10px;
+        margin-bottom: 15px;
+    }
+    
+    #scarcityText {
+        font-size: 8px !important;
+    }
+}
+    @media (max-width: 768px) {
+    .action-row-dynamic {
+        position: sticky;
+        bottom: -25px; /* Menempel di dasar padding modal */
+        background: #050505;
+        padding: 15px 0;
+        z-index: 100;
+        border-top: 1px solid #111;
+    }
+
+    #realAddToCartBtn {
+        height: 50px;
+        font-size: 12px;
+    }
+}
+    @media (max-width: 768px) {
+    .modal-window {
+        width: 95% !important;
+        height: 90vh !important;
+        flex-direction: column !important; /* Slider di atas, Info di bawah */
+        overflow-y: auto;
+        border-radius: 20px;
+        padding: 0 !important;
+    }
+
+    .product-slider-wrapper {
+        width: 100% !important;
+        height: 350px !important; /* Batasi tinggi gambar di HP */
+        border-right: none;
+        border-bottom: 1px solid #111;
+    }
+
+    .modal-info {
+        width: 100% !important;
+        padding: 25px !important;
+        height: auto !important;
+        overflow: visible !important;
+    }
+
+    /* Memperbesar tombol tutup agar mudah ditekan jari */
+    .modal-close {
+        top: 15px;
+        right: 15px;
+        background: rgba(0,0,0,0.5);
+        width: 40px;
+        height: 40px;
+        z-index: 1001;
+    }
+
+    /* Perbaikan Frame Ukuran agar tidak meluap */
+    .size-selection-frame {
+        padding: 20px 10px !important;
+        margin: 20px 0 !important;
+    }
+
+    .stock-container {
+        gap: 10px !important;
+    }
+
+    .stock-circle {
+        width: 35px !important;
+        height: 35px !important;
+        font-size: 10px !important;
+    }
+}
+    @media (max-width: 600px) {
+    /* Mode Lookbook: Gambar penuh ke samping */
+    #productGrid.lookbook-layout {
+        grid-template-columns: 1fr !important;
+        padding: 0 5%;
+    }
+
+    /* Mode E-commerce: 2 kolom agar pas di jempol */
+    #productGrid.ecommerce-grid {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 15px !important;
+        padding: 0 3%;
+    }
+
+    #productGrid.ecommerce-grid .meta h4 {
+        font-size: 11px;
+    }
+
+    #productGrid.ecommerce-grid .meta p {
+        font-size: 10px;
+    }
+}
+    @media (max-width: 768px) {
+    header {
+        padding: 15px 5%;
+        height: auto;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    /* Menyembunyikan link navigasi teks yang terlalu panjang di HP */
+    nav {
+        order: 3;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        border-top: 1px solid #111;
+        padding-top: 10px;
+    }
+
+    nav a {
+        font-size: 9px;
+        letter-spacing: 1px;
+    }
+
+    .studio-link { display: none; } /* Sembunyikan link kembali ke studio di mobile agar lega */
+}
+    /* Animasi Alert FOMO Berkedip */
+@keyframes blinkRed {
+    0% { opacity: 1; }
+    50% { opacity: 0.3; }
+    100% { opacity: 1; }
+}
+
+.blink-red {
+    animation: blinkRed 0.8s infinite;
+}
+    /* Styling Frame Putus-putus untuk Area Ukuran */
+.size-selection-wrapper {
+    margin-top: 25px; /* Menurunkan posisi agar tidak mepet ke atas */
+    margin-bottom: 25px;
+    padding: 20px 10px;
+    border: 1px dashed #444; /* Frame putus-putus */
+    border-radius: 20px;     /* Sudut rounded */
+    background: rgba(255, 255, 255, 0.02); /* Background tipis agar elegan */
+}
+
+/* Merapikan label di dalam frame */
+.size-label-styled {
+    font-size: 10px; 
+    font-weight: 900; 
+    color: #888; 
+    margin-bottom: 20px !important; 
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+/* Memastikan container stok pas di dalam frame */
+.stock-container {
+    display: flex; 
+    justify-content: center; 
+    gap: 15px; 
+    flex-wrap: wrap; 
+    margin-bottom: 0 !important; /* Reset margin bawah karena sudah ada padding di wrapper */
+}
 
     /* --- PERBAIKAN TOTAL LABEL KATEGORI & ANIMASI HOVER --- */
 
@@ -547,31 +708,36 @@
     </div>
 </div>
         </div>
-        <div class="info-bottom" style="text-align: center;">
-            <p id="sizeLabel" style="font-size: 10px; font-weight: bold; color: #666; margin-bottom: 15px; text-transform: uppercase;" data-i18n="lbl_select_size">PILIH UKURAN:</p>
-            
-            <div class="stock-container" id="stockContainer" style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; margin-bottom: 20px;">
-                <div class="stock-item" onclick="selectSize(this)"><span class="stock-num">3</span><div class="stock-circle">S</div></div>
-                <div class="stock-item" onclick="selectSize(this)"><span class="stock-num">12</span><div class="stock-circle">M</div></div>
-                <div class="stock-item" onclick="selectSize(this)"><span class="stock-num">8</span><div class="stock-circle">L</div></div>
-                <div class="stock-item" onclick="selectSize(this)"><span class="stock-num">5</span><div class="stock-circle">XL</div></div>
-                <div class="stock-item empty"><span class="stock-num">0</span><div class="stock-circle">XXL</div></div>
-            </div>
-            <div id="stockScarcity" style="height: 15px; margin-bottom: 15px;">
-    <p id="scarcityText" style="font-size: 9px; font-weight: 900; color: #ff0000; letter-spacing: 1px; text-transform: uppercase; display: none;"></p>
-</div>
+        <div class="info-bottom" style="text-align: center; padding-top: 10px;">
+    <div class="size-selection-frame" style="margin: 35px 0 20px 0; padding: 25px 15px; border: 1px dashed #444; border-radius: 20px; background: rgba(255,255,255,0.02); position: relative;">
+        
+        <p id="sizeLabel" style="font-size: 10px; font-weight: 900; color: #888; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 2px;" data-i18n="lbl_select_size">
+            PILIH UKURAN:
+        </p>
+        
+        <div class="stock-container" id="stockContainer" style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; margin-bottom: 0;">
+            <div class="stock-item" onclick="selectSize(this)"><span class="stock-num">3</span><div class="stock-circle">S</div></div>
+            <div class="stock-item" onclick="selectSize(this)"><span class="stock-num">12</span><div class="stock-circle">M</div></div>
+            <div class="stock-item" onclick="selectSize(this)"><span class="stock-num">8</span><div class="stock-circle">L</div></div>
+            <div class="stock-item" onclick="selectSize(this)"><span class="stock-num">5</span><div class="stock-circle">XL</div></div>
+            <div class="stock-item empty"><span class="stock-num">0</span><div class="stock-circle">XXL</div></div>
+        </div>
 
-            <div id="allSizeBadge" style="display: none; margin-bottom: 20px;">
-                <div style="display: inline-block; border: 1px solid #fff; background: #fff; color: #000; padding: 10px 30px; border-radius: 50px; font-weight: 900; font-size: 12px; letter-spacing: 1px;">ALL SIZE</div>
-            </div>
-            <button class="btn primary" id="btnAddToCart" style="width:100%;" data-i18n="btn_add_cart">TAMBAH KE KERANJANG</button>
-            <div class="related-products-section" style="margin-top: 30px; border-top: 1px dashed #333; padding-top: 20px;">
-    <h4 style="font-size: 10px; letter-spacing: 2px; color: #666; margin-bottom: 15px; text-transform: uppercase;">YOU MIGHT ALSO LIKE</h4>
-    <div id="relatedGrid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
-            </div>
+        <div id="allSizeBadge" style="display: none;">
+            <div style="display: inline-block; border: 1px solid #fff; background: #fff; color: #000; padding: 10px 30px; border-radius: 50px; font-weight: 900; font-size: 12px; letter-spacing: 1px;">ALL SIZE</div>
         </div>
-        </div>
-      </div>
+    </div>
+
+    <div id="stockScarcity" style="height: 20px; margin-bottom: 20px;">
+        <p id="scarcityText" class="blink-red" style="font-size: 9px; font-weight: 900; color: #ff0000; letter-spacing: 1.5px; text-transform: uppercase; display: none;"></p>
+    </div>
+
+    <button class="btn primary" id="btnAddToCart" style="width:100%;" data-i18n="btn_add_cart">TAMBAH KE KERANJANG</button>
+
+    <div class="related-products-section" style="margin-top: 30px; border-top: 1px dashed #333; padding-top: 20px;">
+        <h4 style="font-size: 10px; letter-spacing: 2px; color: #666; margin-bottom: 15px; text-transform: uppercase;">YOU MIGHT ALSO LIKE</h4>
+        <div id="relatedGrid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+            </div>
     </div>
 </div>
 
