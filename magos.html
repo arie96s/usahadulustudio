@@ -11,7 +11,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
   <style>
     /* ==========================================================================
-   TOTAL MOBILE OPTIMIZATION (MAGOS ARCHIVE)
+   TOTAL MOBILE OPTIMIZATION (MAGOS ARCHIVE) - FIXED OVERLAP
    ========================================================================== */
 
 @media (max-width: 768px) {
@@ -38,7 +38,7 @@
     .modal-window {
         width: 95% !important;
         height: 92vh !important;
-        flex-direction: column !important;
+        display: block !important; /* Mengubah ke block agar elemen mengalir ke bawah */
         overflow-y: auto !important;
         border-radius: 20px !important;
         padding: 0 !important;
@@ -53,29 +53,38 @@
         width: 100% !important;
         padding: 20px !important;
         height: auto !important;
+        display: block !important; /* Menghindari konflik flexbox yang menyebabkan overlap */
         overflow: visible !important;
-        display: flex !important;
-        flex-direction: column !important;
     }
 
-    /* 3. SIZE SELECTION FRAME */
+    /* 3. PRODUCT TABS & DESCRIPTION (STUCK FIX) */
+    .product-tabs {
+        margin-bottom: 35px !important; /* Ruang paksa sebelum tombol aksi */
+        display: block;
+        clear: both;
+    }
+
+    /* 4. SIZE SELECTION FRAME */
     .size-selection-frame {
-        margin: 25px 0 15px 0 !important; /* Jarak agar tidak mepet ke atas */
+        margin: 30px 0 !important; 
         padding: 20px 10px !important;
         border: 1px dashed #444 !important;
+        border-radius: 20px !important;
         background: rgba(255,255,255,0.02) !important;
+        display: block;
+        clear: both;
     }
     .stock-container { gap: 10px !important; }
     .stock-circle {
-        width: 32px !important;
-        height: 32px !important;
+        width: 34px !important;
+        height: 34px !important;
         font-size: 10px !important;
     }
 
-    /* 4. FOMO ALERT FIX */
+    /* 5. FOMO ALERT FIX */
     #stockScarcity {
-        margin-top: 5px !important;
-        margin-bottom: 15px !important;
+        margin-top: 10px !important;
+        margin-bottom: 20px !important;
         height: auto !important;
     }
     #scarcityText {
@@ -83,36 +92,36 @@
         letter-spacing: 1px !important;
     }
 
-    /* 5. ACTION BUTTONS (STUCK FIX) */
-    /* Mencegah tombol menempel di deskripsi */
+    /* 6. ACTION BUTTONS (DYNAMIC POSITIONING) */
     .action-row-dynamic {
-        margin-top: 30px !important;
-        padding: 15px 0 !important;
+        position: relative !important; /* Mengikuti aliran dokumen, bukan melayang */
+        margin-top: 40px !important; /* Jarak aman dari teks deskripsi */
+        padding: 20px 0 !important;
         border-top: 1px solid #1a1a1a;
         background: #050505;
-        position: relative !important; /* Gunakan relative agar mengikuti alur konten */
         width: 100% !important;
         display: flex !important;
         gap: 10px !important;
+        clear: both;
     }
     #realAddToCartBtn {
-        height: 48px !important;
+        height: 50px !important;
         font-size: 11px !important;
         font-weight: 900 !important;
         flex: 1;
     }
     .wishlist-btn-modal {
-        width: 48px !important;
-        height: 48px !important;
+        width: 50px !important;
+        height: 50px !important;
         flex-shrink: 0;
     }
 
-    /* 6. MODAL CLOSE BUTTON */
+    /* 7. MODAL CLOSE BUTTON */
     .modal-close {
-        top: 12px !important;
-        right: 12px !important;
-        width: 35px !important;
-        height: 35px !important;
+        top: 15px !important;
+        right: 15px !important;
+        width: 38px !important;
+        height: 38px !important;
         background: rgba(0,0,0,0.6) !important;
         border-radius: 50%;
         z-index: 2000 !important;
@@ -120,7 +129,7 @@
 }
 
 @media (max-width: 600px) {
-    /* 7. GRID LAYOUTS */
+    /* 8. GRID LAYOUTS */
     #productGrid.lookbook-layout {
         grid-template-columns: 1fr !important;
         gap: 40px !important;
@@ -134,7 +143,7 @@
     #productGrid.ecommerce-grid .meta p { font-size: 9px !important; }
 }
 
-/* 8. ANIMATIONS & SHARED STYLES */
+/* 9. ANIMATIONS & SHARED STYLES */
 @keyframes blinkRed {
     0% { opacity: 1; }
     50% { opacity: 0.3; }
