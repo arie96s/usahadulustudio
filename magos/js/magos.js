@@ -204,6 +204,7 @@ function openProductModal(p) {
     track.style.transform = 'translateX(0)';
     currentProductSlide = 0;
     
+    // Render Slider Images
     p.images.forEach(imgSrc => {
         const div = document.createElement('div');
         div.className = 'product-slide';
@@ -212,9 +213,38 @@ function openProductModal(p) {
     });
     productSlideCount = p.images.length;
 
+    // Set Basic Info
     document.getElementById('mTitle').innerText = p.name;
     document.getElementById('mPrice').innerText = formatMoney(p.price);
     document.getElementById('mDesc').innerText = p.desc;
+
+    // Ambil elemen FOMO
+    const scarcity = document.getElementById('scarcityText');
+
+    // --- PERBAIKAN VITAL: RESET ALERT SAAT BUKA PRODUK BARU ---
+    // Memastikan alert dari produk sebelumnya tidak terbawa ke produk baru
+    if (scarcity) {
+        scarcity.style.display = 'none';
+        scarcity.innerText = '';
+    }
+
+    // --- FIX 1: RESET TAB KE 'DETAIL' SAAT MODAL DIBUKA ---
+    const allTabContents = document.querySelectorAll('.tab-content');
+    const allTabLinks = document.querySelectorAll('.tab-link');
+    
+    allTabContents.forEach(content => content.style.display = 'none');
+    allTabLinks.forEach(link => link.classList.remove('active'));
+    
+    if(document.getElementById('tabDetail')) {
+        document.getElementById('tabDetail').style.display = 'block';
+        const detailLink = document.querySelector('.tab-link[onclick*="tabDetail"]');
+        if(detailLink) detailLink.classList.add('active');
+    }
+
+    // --- FIX 2: PANGGIL RELATED PRODUCTS ---
+    if (typeof renderRelatedProducts === "function") {
+        renderRelatedProducts(p.category, p.id);
+    }
 
     const stockGrid = document.getElementById('stockContainer');
     const allSizeBadge = document.getElementById('allSizeBadge');
@@ -225,6 +255,7 @@ function openProductModal(p) {
         allSizeBadge.style.display = 'block';
         sizeLabel.style.display = 'none';
         selectedSize = "ALL SIZE";
+        if(scarcity) scarcity.style.display = 'none'; 
     } else {
         stockGrid.style.display = 'flex';
         allSizeBadge.style.display = 'none';
@@ -248,12 +279,22 @@ function openProductModal(p) {
                     document.querySelectorAll('.stock-item').forEach(el => el.classList.remove('selected'));
                     this.classList.add('selected');
                     selectedSize = labelText;
+                    
+                    // --- LOGIKA ALERT FOMO BERKEDIP ---
+                    if (scarcity) {
+                        if (currentStock > 0 && currentStock <= 3) {
+                            scarcity.innerText = `LOW STOCK: ONLY ${currentStock} LEFT!`;
+                            scarcity.style.display = 'block'; 
+                        } else {
+                            scarcity.style.display = 'none'; 
+                        }
+                    }
                 };
             }
         });
     }
 
-    // Reset tombol dinamis untuk Cart & Wishlist di Modal
+    // Update Tombol Action (Cart & Wishlist)
     const btnPlace = document.querySelector('#btnAddToCart');
     if(btnPlace) {
         const btnContainer = btnPlace.parentElement;
@@ -1133,4 +1174,75 @@ function setViewMode(mode) {
 
     // Memicu ulang render produk agar animasi Skeleton Loading muncul
     displayProducts(currentFilter, currentPage);
+}
+
+// --- 10. MODAL EXTRA FEATURES (TABS & RELATED) ---
+
+/**
+ * Berfungsi untuk berpindah antara tab DETAIL dan CARE di dalam modal produk.
+ */
+function switchTab(event, tabId) {
+    // 1. Sembunyikan semua konten tab
+    const contents = document.querySelectorAll('.tab-content');
+    contents.forEach(content => {
+        content.style.display = 'none';
+    });
+
+    // 2. Reset semua gaya link tab
+    const links = document.querySelectorAll('.tab-link');
+    links.forEach(link => {
+        link.classList.remove('active');
+        link.style.color = '#666';
+        link.style.borderBottom = 'none';
+    });
+
+    // 3. Tampilkan tab yang dipilih
+    const activeTab = document.getElementById(tabId);
+    if (activeTab) {
+        activeTab.style.display = 'block';
+    }
+
+    // 4. Aktifkan tombol yang diklik
+    if (event && event.currentTarget) {
+        event.currentTarget.classList.add('active');
+        event.currentTarget.style.color = '#fff';
+        event.currentTarget.style.borderBottom = '2px solid #fff';
+    }
+}
+
+/**
+ * Mencari dan menampilkan produk terkait berdasarkan kategori yang sama.
+ */
+function renderRelatedProducts(currentCategory, currentProductId) {
+    const relatedContainer = document.getElementById('relatedGrid');
+    if (!relatedContainer) return;
+
+    // Filter produk dengan kategori sama tapi bukan produk yang sedang dibuka
+    const related = products
+        .filter(p => p.category === currentCategory && p.id !== currentProductId)
+        .slice(0, 3);
+
+    let html = '';
+    related.forEach(item => {
+        const displayImg = (item.images && item.images.length > 0) ? item.images[0] : 'assets/img/default.jpg';
+        
+        html += `
+            <div class="related-item hover-target" onclick="closeModal('productModal'); setTimeout(() => openProductModalById(${item.id}), 300)">
+                <img src="${displayImg}" alt="${item.name}">
+                <p>${item.name.toUpperCase()}</p>
+            </div>
+        `;
+    });
+    
+    relatedContainer.innerHTML = html || '<p style="font-size:8px; color:#333; text-align:center; width:100%;">NO SIMILAR ITEMS FOUND</p>';
+}
+
+/**
+ * Membuka modal produk berdasarkan ID (digunakan oleh Related Products)
+ */
+function openProductModalById(id) {
+    const product = products.find(p => String(p.id) === String(id));
+    if (product) {
+        openProductModal(product);
+    }
 }
