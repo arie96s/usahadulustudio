@@ -108,58 +108,80 @@ function displayProducts(filterCat = 'all', page = 1) {
     const grid = document.getElementById('productGrid');
     if(!grid) return;
 
+    // 1. AKTIFKAN STATE LOADING & SKELETON
+    // Menambahkan class 'is-loading' untuk kontrol CSS dan merender kotak skeleton
+    grid.classList.add('is-loading');
+    grid.innerHTML = Array.from({length: itemsPerPage}).map(() => `
+        <div class="prod">
+            <div class="skeleton"></div>
+        </div>
+    `).join('');
+
     currentFilter = filterCat;
     currentPage = page;
 
-    const filtered = filterCat === 'all' || filterCat === 'ALL' 
-        ? products 
-        : products.filter(p => p.category.toLowerCase() === filterCat.toLowerCase());
-
-    const totalItems = filtered.length;
-    const totalPages = Math.ceil(totalItems / itemsPerPage);
-    const start = (page - 1) * itemsPerPage;
-    const end = start + itemsPerPage;
-    const paginatedItems = filtered.slice(start, end);
-
-    grid.style.opacity = '0';
+    // 2. SIMULASI LOADING (800ms) 
+    // Memberikan waktu bagi skeleton untuk terlihat sebelum data asli muncul
     setTimeout(() => {
+        const filtered = filterCat === 'all' || filterCat === 'ALL' 
+            ? products 
+            : products.filter(p => p.category.toLowerCase() === filterCat.toLowerCase());
+
+        const totalItems = filtered.length;
+        const totalPages = Math.ceil(totalItems / itemsPerPage);
+        const start = (page - 1) * itemsPerPage;
+        const end = start + itemsPerPage;
+        const paginatedItems = filtered.slice(start, end);
+
+        // Matikan state loading
+        grid.classList.remove('is-loading');
         grid.innerHTML = '';
+
         if(paginatedItems.length === 0) {
             grid.innerHTML = '<div style="width:100%; text-align:center; padding:50px; color:#666; font-size:10px;">NO_DATA_FOUND</div>';
         } else {
             paginatedItems.forEach(p => {
-    const el = document.createElement('div');
-    el.className = 'prod hover-target';
-    el.onclick = () => openProductModal(p);
-    
-    // PERBAIKAN: Gunakan p.images[0] dan p.images[1] agar sinkron dengan loadMagosProducts
-    const imgFront = p.images && p.images[0] ? p.images[0] : 'assets/img/default.jpg';
-    const imgBack = p.images && p.images[1] ? p.images[1] : imgFront;
+                const el = document.createElement('div');
+                el.className = 'prod hover-target';
+                
+                // Logika Status Badge (Sinkron dengan Admin)
+                let statusBadgeHTML = '';
+                const status = p.status ? p.status.toUpperCase() : 'NORMAL';
+                
+                // Hanya tampilkan badge jika status bukan NORMAL (PRESALE atau SOLDOUT)
+                if (status !== 'NORMAL') {
+                    statusBadgeHTML = `<div class="status-indicator-capsule ${status.toLowerCase()}">${status}</div>`;
+                }
 
-    // Cari bagian ini di fungsi displayProducts di magos.js
-el.innerHTML = `
-    <div class="prod-img-wrapper">
-        <img src="${imgFront}" class="img-front" loading="lazy">
-        <img src="${imgBack}" class="img-back" loading="lazy">
-    </div>
-    <div class="label">${p.category}</div> 
-    <div class="meta">
-        <h4>${p.name}</h4>
-        <p>${formatMoney(p.price)}</p>
-    </div>
-`;
-    grid.appendChild(el);
-});
+                el.onclick = () => openProductModal(p);
+                
+                // Menggunakan images_list dari CMS yang sudah diproses menjadi array images
+                const imgFront = p.images && p.images[0] ? p.images[0] : 'magos/assets/img/default.jpg';
+                const imgBack = p.images && p.images[1] ? p.images[1] : imgFront;
+
+                el.innerHTML = `
+                    <div class="prod-img-wrapper">
+                        <img src="${imgFront}" class="img-front" loading="lazy">
+                        <img src="${imgBack}" class="img-back" loading="lazy">
+                        ${statusBadgeHTML} 
+                    </div>
+                    <div class="label">${p.category}</div> 
+                    <div class="meta">
+                        <h4>${p.name}</h4>
+                        <p>${formatMoney(p.price)}</p>
+                    </div>
+                `;
+                grid.appendChild(el);
+            });
         }
-        grid.style.opacity = '1';
+        
         renderPagination(totalPages, page);
 
-        // TAMBAHKAN INI DI SINI
+        // Terapkan efek visual tambahan untuk produk SOLDOUT (Grayscale/Opacity)
         if (typeof applyStatusEffects === "function") {
-    // Kirimkan paginatedItems agar label sesuai dengan produk di halaman tersebut
-    applyStatusEffects(paginatedItems); 
+            applyStatusEffects(paginatedItems);
         }
-    }, 300); // Harus di dalam timeout 300ms ini
+    }, 800); // Durasi loading skeleton
 }
 
 function renderPagination(totalPages, page) {
@@ -195,16 +217,17 @@ function filterProducts(cat) {
     displayProducts(cat, 1);
 }
 
-// --- 5. MODAL SYSTEM (PRODUCT DETAIL) ---
 function openProductModal(p) {
     currentProduct = p;
     selectedSize = null; 
     const track = document.getElementById('pTrack');
+    if (!track) return; // Guard
+    
     track.innerHTML = ''; 
     track.style.transform = 'translateX(0)';
     currentProductSlide = 0;
     
-    // Render Slider Images
+    // Render Slider
     p.images.forEach(imgSrc => {
         const div = document.createElement('div');
         div.className = 'product-slide';
@@ -213,123 +236,91 @@ function openProductModal(p) {
     });
     productSlideCount = p.images.length;
 
-    // Set Basic Info
+    // Set Info Dasar
     document.getElementById('mTitle').innerText = p.name;
     document.getElementById('mPrice').innerText = formatMoney(p.price);
     document.getElementById('mDesc').innerText = p.desc;
 
-    // Ambil elemen FOMO
-    const scarcity = document.getElementById('scarcityText');
-
-    // --- PERBAIKAN VITAL: RESET ALERT SAAT BUKA PRODUK BARU ---
-    // Memastikan alert dari produk sebelumnya tidak terbawa ke produk baru
-    if (scarcity) {
-        scarcity.style.display = 'none';
-        scarcity.innerText = '';
-    }
-
-    // --- FIX 1: RESET TAB KE 'DETAIL' SAAT MODAL DIBUKA ---
-    const allTabContents = document.querySelectorAll('.tab-content');
-    const allTabLinks = document.querySelectorAll('.tab-link');
-    
-    allTabContents.forEach(content => content.style.display = 'none');
-    allTabLinks.forEach(link => link.classList.remove('active'));
-    
-    if(document.getElementById('tabDetail')) {
-        document.getElementById('tabDetail').style.display = 'block';
-        const detailLink = document.querySelector('.tab-link[onclick*="tabDetail"]');
-        if(detailLink) detailLink.classList.add('active');
-    }
-
-    // --- FIX 2: PANGGIL RELATED PRODUCTS ---
-    if (typeof renderRelatedProducts === "function") {
-        renderRelatedProducts(p.category, p.id);
-    }
-
+    // Handle Stok & UI
     const stockGrid = document.getElementById('stockContainer');
     const allSizeBadge = document.getElementById('allSizeBadge');
-    const sizeLabel = document.getElementById('sizeLabel');
-
+    
     if (p.category === 'ACCESSORIES') {
-        stockGrid.style.display = 'none';
-        allSizeBadge.style.display = 'block';
-        sizeLabel.style.display = 'none';
+        if(stockGrid) stockGrid.style.display = 'none';
+        if(allSizeBadge) allSizeBadge.style.display = 'block';
         selectedSize = "ALL SIZE";
-        if(scarcity) scarcity.style.display = 'none'; 
     } else {
-        stockGrid.style.display = 'flex';
-        allSizeBadge.style.display = 'none';
-        sizeLabel.style.display = 'block';
-
-        // Update Stock UI Dinamis
+        if(stockGrid) stockGrid.style.display = 'flex';
+        if(allSizeBadge) allSizeBadge.style.display = 'none';
+        
         const stockItems = document.querySelectorAll('.stock-item');
         stockItems.forEach(item => {
             const labelText = item.querySelector('.stock-circle').innerText;
             const currentStock = p.stock[labelText] || 0;
-            const numEl = item.querySelector('.stock-num');
-            
-            numEl.innerText = currentStock;
             item.classList.remove('selected', 'empty');
-            item.onclick = null;
-
-            if (currentStock === 0) {
-                item.classList.add('empty');
-            } else {
-                item.onclick = function() {
-                    document.querySelectorAll('.stock-item').forEach(el => el.classList.remove('selected'));
-                    this.classList.add('selected');
-                    selectedSize = labelText;
-                    
-                    // --- LOGIKA ALERT FOMO BERKEDIP ---
-                    if (scarcity) {
-                        if (currentStock > 0 && currentStock <= 3) {
-                            scarcity.innerText = `LOW STOCK: ONLY ${currentStock} LEFT!`;
-                            scarcity.style.display = 'block'; 
-                        } else {
-                            scarcity.style.display = 'none'; 
-                        }
-                    }
-                };
-            }
+            if (currentStock === 0) item.classList.add('empty');
+            item.onclick = function() {
+                if (currentStock === 0) return;
+                document.querySelectorAll('.stock-item').forEach(el => el.classList.remove('selected'));
+                this.classList.add('selected');
+                selectedSize = labelText;
+            };
         });
     }
 
-    // Update Tombol Action (Cart & Wishlist)
-    const btnPlace = document.querySelector('#btnAddToCart');
-    if(btnPlace) {
-        const btnContainer = btnPlace.parentElement;
-        const existingRow = btnContainer.querySelector('.action-row-dynamic');
-        if(existingRow) existingRow.remove();
-        btnPlace.style.display = 'none';
+    // Di dalam openProductModal(p)
+const btnPlace = document.getElementById('btnAddToCart');
+if(btnPlace) {
+    const btnContainer = btnPlace.parentElement;
+    btnPlace.style.display = 'none'; // Sembunyikan tombol default yang rusak
 
-        const isWished = wishlist.some(item => item.id === p.id);
-        const heartClass = isWished ? 'active' : '';
-        const currentLang = localStorage.getItem('magos_lang') || 'id';
-        const addCartText = translations[currentLang]['btn_add_cart'] || 'ADD TO CART';
+    // Hapus baris tombol lama jika sudah ada (mencegah duplikat saat ganti produk)
+    const oldRow = btnContainer.querySelector('.action-row-dynamic');
+    if(oldRow) oldRow.remove();
 
-        const actionRow = document.createElement('div');
-        actionRow.className = 'action-row-dynamic';
-        actionRow.style.cssText = 'display:flex; align-items:center; width:100%; margin-top:10px; gap:10px;';
-        actionRow.innerHTML = `
-            <button class="btn primary hover-target" id="realAddToCartBtn" style="flex:1;">${addCartText}</button>
-            <div class="wishlist-btn-modal hover-target ${heartClass}" id="realWishlistBtn">
-                <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none">
-                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-                </svg>
-            </div>
-        `;
-        btnContainer.appendChild(actionRow);
+    const isWished = wishlist.some(item => item.id === p.id);
+    const heartFill = isWished ? '#e02e42' : 'none';
 
-        document.getElementById('realAddToCartBtn').onclick = () => {
-            if(!selectedSize) { 
-                alert(currentLang === 'id' ? "PILIH UKURAN TERLEBIH DAHULU" : "PLEASE SELECT SIZE FIRST"); 
-                return; 
-            }
-            addToCart(p, selectedSize);
-        };
+    const actionRow = document.createElement('div');
+    actionRow.className = 'action-row-dynamic';
+    actionRow.innerHTML = `
+        <div id="quickWishlist" class="action-icon-btn hover-target">
+            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="${heartFill}">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+            </svg>
+        </div>
+        <button id="btnAcquireNow" class="btn primary hover-target">ACQUIRE NOW</button>
+        <div id="quickAddCart" class="action-icon-btn hover-target">
+            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none">
+                <circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle>
+                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+            </svg>
+        </div>
+    `;
+    btnContainer.appendChild(actionRow);
 
-        document.getElementById('realWishlistBtn').onclick = () => toggleWishlistItem(p.id);
-    }
+    // Re-bind Event Listeners
+    document.getElementById('btnAcquireNow').onclick = () => {
+        if(!selectedSize) { alert("SELECT SIZE FIRST"); return; }
+        addToCart(p, selectedSize); 
+        window.location.href = 'checkout.html';
+    };
+    
+    document.getElementById('quickAddCart').onclick = (e) => {
+        if(!selectedSize) { alert("SELECT SIZE FIRST"); return; }
+        addToCart(p, selectedSize);
+        playJumpAnimation(e, '#cartCount');
+    };
+
+    document.getElementById('quickWishlist').onclick = (e) => {
+        toggleWishlistItem(p.id);
+        const svg = e.currentTarget.querySelector('svg');
+        const isNowWished = wishlist.some(item => item.id === p.id);
+        svg.setAttribute('fill', isNowWished ? '#e02e42' : 'none');
+        playJumpAnimation(e, '#wishlistCount');
+    };
+}
+
     document.getElementById('productModal').classList.add('active');
 }
 
@@ -424,34 +415,50 @@ function calculateSize() {
 
 // Tambahkan/Update di magos.js
 function addToCart(p, size) {
-    // Cari produk di database lokal untuk update stok
+    // 1. Cari produk di database lokal untuk validasi stok terkini
     const productInDb = products.find(item => item.id === p.id);
     
     if (productInDb && productInDb.stock[size] > 0) {
-        // 1. Kurangi stok lokal
+        // 2. Kurangi stok lokal di "gudang" (LocalStorage)
         productInDb.stock[size] -= 1;
-        
-        // 2. Simpan kondisi produk terbaru ke LocalStorage
         localStorage.setItem('magos_products_data', JSON.stringify(products));
 
         // 3. Masukkan ke array keranjang
+        // Gunakan pencarian berdasarkan ID dan Ukuran
         const existingIndex = cart.findIndex(item => item.id === p.id && item.size === size);
+        
         if (existingIndex > -1) {
-            cart[existingIndex].qty += 1;
+            cart[existingIndex].qty += 1; // Jika barang sama & size sama, tambah jumlah
         } else {
-            // Kita buat salinan objek agar tidak merusak data asli
-            cart.push({ ...p, size: size, qty: 1, cartId: Date.now() });
+            // Gunakan performance.now() agar cartId benar-benar unik jika klik sangat cepat
+            cart.push({ 
+                ...p, 
+                size: size, 
+                qty: 1, 
+                cartId: Date.now() + Math.random() 
+            });
         }
         
+        // 4. Simpan dan Update UI
         saveCart();
-        updateCartUI();
-        closeModal('productModal');
-        toggleCart();
+        updateCartUI(); // Update angka (counter) di ikon header
         
-        // Refresh tampilan grid agar badge SOLDOUT muncul jika stok jadi 0
-        displayProducts(currentFilter, currentPage);
+        // 5. Tutup Modal Produk
+        closeModal('productModal');
+        
+        // --- PERBAIKAN ALUR ---
+        // Hapus toggleCart() agar drawer samping tidak otomatis terbuka
+        
+        // 6. Refresh tampilan grid produk
+        // Ini memastikan jika stok habis, label SOLDOUT akan langsung muncul di halaman utama
+        if (typeof displayProducts === "function") {
+            displayProducts(currentFilter, currentPage);
+        }
+        
     } else {
-        alert("MAAF, STOK UKURAN INI HABIS / OUT OF STOCK");
+        // Notifikasi jika stok habis saat diklik
+        const currentLang = localStorage.getItem('magos_lang') || 'id';
+        alert(currentLang === 'id' ? "MAAF, STOK HABIS!" : "OUT OF STOCK!");
     }
 }
 
@@ -512,24 +519,22 @@ function updateCartUI() {
     }
 }
 
-function removeFromCart(cartId) {
-    const itemToRemove = cart.find(item => item.cartId === cartId);
-    
+function removeFromCart(id) {
+    // Cari item berdasarkan cartId (timestamp)
+    const itemToRemove = cart.find(item => item.cartId === id);
     if (itemToRemove) {
-        // Cari produk di database untuk mengembalikan stok
+        // Kembalikan stok
         const productInDb = products.find(p => p.id === itemToRemove.id);
         if (productInDb) {
-            // Kembalikan stok sebanyak jumlah (qty) yang ada di keranjang
-            productInDb.stock[itemToRemove.size] += itemToRemove.qty;
+            productInDb.stock[itemToRemove.size] += (itemToRemove.qty || 1);
             localStorage.setItem('magos_products_data', JSON.stringify(products));
         }
-        
-        // Hapus dari array keranjang
-        cart = cart.filter(item => item.cartId !== cartId);
-        
+        // Filter array
+        cart = cart.filter(item => item.cartId !== id);
         saveCart();
         updateCartUI();
-        displayProducts(currentFilter, currentPage); // Update tampilan grid
+        // Jika di halaman cart.html, refresh halaman
+        if(window.location.pathname.includes('cart.html')) location.reload();
     }
 }
 
@@ -556,8 +561,10 @@ function toggleWishlistItem(id) {
         if(p) wishlist.push(p); 
     }
     saveWishlist();
+
+    // Fix: Hanya jalankan jika elemennya ada (mencegah error di wishlist.html)
     const btnHeart = document.getElementById('realWishlistBtn');
-    if(btnHeart && currentProduct && currentProduct.id === id) {
+    if(btnHeart) {
         btnHeart.classList.toggle('active');
     }
 }
@@ -1131,25 +1138,25 @@ function renderRelatedProducts(currentCategory, currentProductId) {
     const relatedContainer = document.getElementById('relatedGrid');
     if (!relatedContainer) return;
 
-    // Filter produk kategori sama, batasi 3 produk
+    // Filter produk dengan kategori sama, batasi 3 produk
     const related = products
         .filter(p => p.category === currentCategory && p.id !== currentProductId)
         .slice(0, 3);
 
     let html = '';
     related.forEach(item => {
-        // PERBAIKAN: Gunakan item.images[0] bukan item.img
-        const displayImg = (item.images && item.images.length > 0) ? item.images[0] : 'assets/img/default.jpg';
+        // Cek apakah images tersedia dan memiliki elemen, jika tidak gunakan placeholder
+        const displayImg = (item.images && item.images.length > 0) ? item.images[0] : 'magos/assets/img/default.jpg';
         
         html += `
-            <div class="related-item" onclick="openProductModalById(${item.id})">
-                <img src="${displayImg}" alt="${item.name}">
-                <p>${item.name.toUpperCase()}</p>
+            <div class="related-item hover-target" onclick="closeModal('productModal'); setTimeout(() => openProductModalById(${item.id}), 300)">
+                <img src="${displayImg}" alt="${item.name}" style="width:100%; aspect-ratio:1/1; object-fit:cover;">
+                <p style="font-size:8px; margin-top:5px; text-align:center;">${item.name.toUpperCase()}</p>
             </div>
         `;
     });
     
-    relatedContainer.innerHTML = html || '<p style="font-size:8px; color:#333; text-align:center; width:100%;">NO SIMILAR ITEMS FOUND</p>';
+    relatedContainer.innerHTML = html || '<p style="font-size:8px; color:#333; text-align:center; width:100%;">NO_SIMILAR_ITEMS</p>';
 }
 
 function setViewMode(mode) {
