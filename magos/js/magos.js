@@ -221,13 +221,13 @@ function openProductModal(p) {
     currentProduct = p;
     selectedSize = null; 
     const track = document.getElementById('pTrack');
-    if (!track) return; // Guard
+    if (!track) return; 
     
     track.innerHTML = ''; 
     track.style.transform = 'translateX(0)';
     currentProductSlide = 0;
     
-    // Render Slider
+    // 1. Render Slider Gambar
     p.images.forEach(imgSrc => {
         const div = document.createElement('div');
         div.className = 'product-slide';
@@ -236,12 +236,12 @@ function openProductModal(p) {
     });
     productSlideCount = p.images.length;
 
-    // Set Info Dasar
+    // 2. Set Informasi Dasar
     document.getElementById('mTitle').innerText = p.name;
     document.getElementById('mPrice').innerText = formatMoney(p.price);
     document.getElementById('mDesc').innerText = p.desc;
 
-    // Handle Stok & UI
+    // 3. Sinkronisasi Stok & UI
     const stockGrid = document.getElementById('stockContainer');
     const allSizeBadge = document.getElementById('allSizeBadge');
     
@@ -256,9 +256,24 @@ function openProductModal(p) {
         const stockItems = document.querySelectorAll('.stock-item');
         stockItems.forEach(item => {
             const labelText = item.querySelector('.stock-circle').innerText;
-            const currentStock = p.stock[labelText] || 0;
+            // AMBIL ANGKA STOK DARI DATA ADMIN
+            const currentStock = p.stock[labelText] !== undefined ? p.stock[labelText] : 0;
+            
+            // UPDATE ANGKA DI LAYAR
+            const numDisplay = item.querySelector('.stock-num');
+            if(numDisplay) numDisplay.innerText = currentStock;
+
+            // Atur State Visual
             item.classList.remove('selected', 'empty');
-            if (currentStock === 0) item.classList.add('empty');
+            item.style.opacity = "1";
+            item.style.pointerEvents = "auto";
+
+            if (currentStock === 0) {
+                item.classList.add('empty');
+                item.style.opacity = "0.2"; // Efek redup untuk stok habis
+                item.style.pointerEvents = "none"; // Tidak bisa diklik
+            }
+
             item.onclick = function() {
                 if (currentStock === 0) return;
                 document.querySelectorAll('.stock-item').forEach(el => el.classList.remove('selected'));
@@ -268,58 +283,58 @@ function openProductModal(p) {
         });
     }
 
-    // Di dalam openProductModal(p)
-const btnPlace = document.getElementById('btnAddToCart');
-if(btnPlace) {
-    const btnContainer = btnPlace.parentElement;
-    btnPlace.style.display = 'none'; // Sembunyikan tombol default yang rusak
+    // 4. Render Tombol Aksi (Wishlist, Acquire, Cart)
+    const btnPlace = document.getElementById('btnAddToCart');
+    if(btnPlace) {
+        const btnContainer = btnPlace.parentElement;
+        btnPlace.style.display = 'none'; 
 
-    // Hapus baris tombol lama jika sudah ada (mencegah duplikat saat ganti produk)
-    const oldRow = btnContainer.querySelector('.action-row-dynamic');
-    if(oldRow) oldRow.remove();
+        const oldRow = btnContainer.querySelector('.action-row-dynamic');
+        if(oldRow) oldRow.remove();
 
-    const isWished = wishlist.some(item => item.id === p.id);
-    const heartFill = isWished ? '#e02e42' : 'none';
+        const isWished = wishlist.some(item => item.id === p.id);
+        const heartFill = isWished ? '#e02e42' : 'none';
 
-    const actionRow = document.createElement('div');
-    actionRow.className = 'action-row-dynamic';
-    actionRow.innerHTML = `
-        <div id="quickWishlist" class="action-icon-btn hover-target">
-            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="${heartFill}">
-                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-            </svg>
-        </div>
-        <button id="btnAcquireNow" class="btn primary hover-target">ACQUIRE NOW</button>
-        <div id="quickAddCart" class="action-icon-btn hover-target">
-            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none">
-                <circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle>
-                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-            </svg>
-        </div>
-    `;
-    btnContainer.appendChild(actionRow);
+        const actionRow = document.createElement('div');
+        actionRow.className = 'action-row-dynamic';
+        actionRow.innerHTML = `
+            <div id="quickWishlist" class="action-icon-btn hover-target">
+                <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="${heartFill}">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                </svg>
+            </div>
+            <button id="btnAcquireNow" class="btn primary hover-target">ACQUIRE NOW</button>
+            <div id="quickAddCart" class="action-icon-btn hover-target">
+                <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none">
+                    <circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle>
+                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                </svg>
+            </div>
+        `;
+        btnContainer.appendChild(actionRow);
 
-    // Re-bind Event Listeners
-    document.getElementById('btnAcquireNow').onclick = () => {
-        if(!selectedSize) { alert("SELECT SIZE FIRST"); return; }
-        addToCart(p, selectedSize); 
-        window.location.href = 'checkout.html';
-    };
-    
-    document.getElementById('quickAddCart').onclick = (e) => {
-        if(!selectedSize) { alert("SELECT SIZE FIRST"); return; }
-        addToCart(p, selectedSize);
-        playJumpAnimation(e, '#cartCount');
-    };
+        // Bind Events
+        document.getElementById('btnAcquireNow').onclick = () => {
+            if(!selectedSize) { alert("SELECT SIZE FIRST"); return; }
+            addToCart(p, selectedSize); 
+            window.location.href = 'checkout.html';
+        };
+        document.getElementById('quickAddCart').onclick = (e) => {
+            if(!selectedSize) { alert("SELECT SIZE FIRST"); return; }
+            addToCart(p, selectedSize);
+            playJumpAnimation(e, '#cartCount');
+        };
+        document.getElementById('quickWishlist').onclick = (e) => {
+            toggleWishlistItem(p.id);
+            const isNowWished = wishlist.some(item => item.id === p.id);
+            e.currentTarget.querySelector('svg').setAttribute('fill', isNowWished ? '#e02e42' : 'none');
+        };
+    }
 
-    document.getElementById('quickWishlist').onclick = (e) => {
-        toggleWishlistItem(p.id);
-        const svg = e.currentTarget.querySelector('svg');
-        const isNowWished = wishlist.some(item => item.id === p.id);
-        svg.setAttribute('fill', isNowWished ? '#e02e42' : 'none');
-        playJumpAnimation(e, '#wishlistCount');
-    };
-}
+    // 5. Render Sugesti Produk (YOU MIGHT ALSO LIKE)
+    if (typeof renderRelatedProducts === "function") {
+        renderRelatedProducts(p.category, p.id);
+    }
 
     document.getElementById('productModal').classList.add('active');
 }
@@ -1182,75 +1197,4 @@ function setViewMode(mode) {
 
     // Memicu ulang render produk agar animasi Skeleton Loading muncul
     displayProducts(currentFilter, currentPage);
-}
-
-// --- 10. MODAL EXTRA FEATURES (TABS & RELATED) ---
-
-/**
- * Berfungsi untuk berpindah antara tab DETAIL dan CARE di dalam modal produk.
- */
-function switchTab(event, tabId) {
-    // 1. Sembunyikan semua konten tab
-    const contents = document.querySelectorAll('.tab-content');
-    contents.forEach(content => {
-        content.style.display = 'none';
-    });
-
-    // 2. Reset semua gaya link tab
-    const links = document.querySelectorAll('.tab-link');
-    links.forEach(link => {
-        link.classList.remove('active');
-        link.style.color = '#666';
-        link.style.borderBottom = 'none';
-    });
-
-    // 3. Tampilkan tab yang dipilih
-    const activeTab = document.getElementById(tabId);
-    if (activeTab) {
-        activeTab.style.display = 'block';
-    }
-
-    // 4. Aktifkan tombol yang diklik
-    if (event && event.currentTarget) {
-        event.currentTarget.classList.add('active');
-        event.currentTarget.style.color = '#fff';
-        event.currentTarget.style.borderBottom = '2px solid #fff';
-    }
-}
-
-/**
- * Mencari dan menampilkan produk terkait berdasarkan kategori yang sama.
- */
-function renderRelatedProducts(currentCategory, currentProductId) {
-    const relatedContainer = document.getElementById('relatedGrid');
-    if (!relatedContainer) return;
-
-    // Filter produk dengan kategori sama tapi bukan produk yang sedang dibuka
-    const related = products
-        .filter(p => p.category === currentCategory && p.id !== currentProductId)
-        .slice(0, 3);
-
-    let html = '';
-    related.forEach(item => {
-        const displayImg = (item.images && item.images.length > 0) ? item.images[0] : 'assets/img/default.jpg';
-        
-        html += `
-            <div class="related-item hover-target" onclick="closeModal('productModal'); setTimeout(() => openProductModalById(${item.id}), 300)">
-                <img src="${displayImg}" alt="${item.name}">
-                <p>${item.name.toUpperCase()}</p>
-            </div>
-        `;
-    });
-    
-    relatedContainer.innerHTML = html || '<p style="font-size:8px; color:#333; text-align:center; width:100%;">NO SIMILAR ITEMS FOUND</p>';
-}
-
-/**
- * Membuka modal produk berdasarkan ID (digunakan oleh Related Products)
- */
-function openProductModalById(id) {
-    const product = products.find(p => String(p.id) === String(id));
-    if (product) {
-        openProductModal(product);
-    }
 }
