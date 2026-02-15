@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>CART | MAGOS ARCHIVE</title>
+  <link rel="icon" type="image/svg+xml" href="magos/assets/img/magos-icon.svg">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="magos/css/magos.css">
+  <style>
+    /* 1. Page Wrapper & Layout */
+    .cart-page-wrapper { max-width: 1000px; margin: 120px auto; padding: 0 40px; }
+    
+    /* 2. Industrial Header Table */
+    .cart-table-header { 
+        display: grid; 
+        grid-template-columns: 3fr 1fr 100px; 
+        padding-bottom: 20px; 
+        border-bottom: 1px dashed #333; 
+        font-size: 10px; 
+        font-weight: 900; 
+        color: #444; 
+        letter-spacing: 3px; 
+    }
+
+    /* 3. Cart Item Row */
+    .cart-item-row { 
+        display: grid; 
+        grid-template-columns: 3fr 1fr 100px; 
+        align-items: center; 
+        padding: 35px 0; 
+        border-bottom: 1px solid #111; 
+        transition: background 0.3s ease;
+    }
+    .cart-item-row:hover { background: rgba(255,255,255,0.01); }
+
+    /* 4. Product Info (Image + Text) */
+    .cart-item-info { display: flex; gap: 25px; align-items: center; }
+    .cart-item-info img { 
+        width: 100px; 
+        aspect-ratio: 1/1; 
+        object-fit: cover; 
+        border-radius: 12px; 
+        border: 1px solid #222; 
+    }
+
+    /* 5. Typography: Title & Price Berdempetan */
+    .cart-item-details h4 { 
+        font-size: 16px; 
+        font-weight: 900; 
+        color: #fff; 
+        margin-bottom: 2px; /* Merapatkan ke harga */
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .item-price-tag { 
+        font-family: monospace; 
+        font-weight: 700; 
+        font-size: 14px; 
+        color: #888; 
+        margin-bottom: 12px; 
+    }
+    .item-size-badge { 
+        font-size: 9px; 
+        color: #555; 
+        font-family: monospace; 
+        border: 1px solid #222; 
+        padding: 3px 10px; 
+        border-radius: 4px; 
+        font-weight: 900;
+    }
+
+    /* 6. Summary Box Industrial */
+    .cart-summary-box { 
+        margin-top: 60px; 
+        padding: 50px; 
+        background: linear-gradient(180deg, #080808 0%, #050505 100%);
+        border: 1px dashed #333; 
+        border-radius: 24px; 
+        text-align: right; 
+        position: relative;
+        overflow: hidden;
+    }
+    .cart-summary-box::before {
+        content: "ESTIMATED TOTAL SYSTEM";
+        position: absolute;
+        top: 15px;
+        left: 20px;
+        font-size: 8px;
+        color: #222;
+        font-family: monospace;
+        letter-spacing: 2px;
+    }
+    .total-label { font-size: 11px; color: #666; font-weight: 900; letter-spacing: 2px; }
+    .total-value { font-size: 38px; font-weight: 900; color: #fff; margin: 10px 0 35px 0; display: block; letter-spacing: -1px; }
+
+    /* 7. Empty State Decor */
+    .empty-state { padding: 100px 0; text-align: center; }
+    .empty-text { font-size: 12px; letter-spacing: 5px; color: #333; font-weight: 900; }
+
+    /* 8. Mobile Fix */
+    @media (max-width: 768px) {
+        .cart-table-header { display: none; }
+        .cart-item-row { grid-template-columns: 1fr; gap: 25px; text-align: center; padding: 40px 0; }
+        .cart-item-info { flex-direction: column; gap: 15px; }
+        .cart-summary-box { padding: 30px; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+    <div id="cursor"></div>
+<header>
+  <div class="header-left">
+      <a href="magos.html" class="logo hover-target">
+          <img src="magos/assets/img/magos-icon.svg" alt="MAGOS" class="logo-header">
+      </a>
+  </div>
+  <nav><a href="magos.html" class="studio-link hover-target">&larr; BACK TO ARCHIVE</a></nav>
+</header>
+
+<main class="cart-page-wrapper">
+    <div class="section-header">
+        <h2 class="section-title">MY SHOPPING CART</h2>
+        <div class="line-spacer"></div>
+    </div>
+
+    <div id="cartContent">
+        <div class="cart-table-header">
+            <span>PRODUCT DETAILS</span><span>QUANTITY</span><span>ACTION</span>
+        </div>
+        <div id="cartItemsList">
+            </div>
+
+        <div class="cart-summary-box">
+            <span class="total-label">SUBTOTAL DUE</span>
+            <span class="total-value" id="cartGrandTotal">Rp 0</span>
+            <button class="btn primary hover-target" onclick="window.location.href='checkout.html'" style="width: 320px; max-width: 100%; height: 55px; border-radius: 12px;">PROCEED TO CHECKOUT</button>
+        </div>
+    </div>
+</main>
+
+<script src="magos/js/magos.js"></script>
+<script>
+    /**
+     * Render Halaman Keranjang
+     */
+    function renderCartPage() {
+        const list = document.getElementById('cartItemsList');
+        const container = document.getElementById('cartContent');
+        const totalDisplay = document.getElementById('cartGrandTotal');
+        
+        // Ambil data keranjang terbaru dari localStorage jika variabel global kosong
+        if (typeof cart === 'undefined' || cart.length === 0) {
+            const savedCart = localStorage.getItem('magos_cart');
+            cart = savedCart ? JSON.parse(savedCart) : [];
+        }
+        
+        if (!list) return;
+        let total = 0;
+        
+        if (cart.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <p class="empty-text">YOUR CART IS EMPTY</p>
+                    <a href="magos.html" class="btn ghost hover-target" style="margin-top:30px; text-decoration:none; display:inline-block; border-radius:50px; font-size:10px;">RETURN TO SHOP</a>
+                </div>`;
+            return;
+        }
+
+        list.innerHTML = '';
+        cart.forEach((item) => {
+            const itemTotal = item.price * (item.qty || 1);
+            total += itemTotal;
+            
+            list.innerHTML += `
+                <div class="cart-item-row">
+                    <div class="cart-item-info">
+                        <img src="${item.images[0]}" alt="${item.name}">
+                        <div class="cart-item-details">
+                            <h4>${item.name}</h4>
+                            <div class="item-price-tag">${formatMoney(item.price)}</div>
+                            <span class="item-size-badge">SIZE: ${item.size}</span>
+                        </div>
+                    </div>
+                    <div style="font-family:monospace; font-weight:900; color: #fff; font-size:14px;">
+                        [ ${item.qty || 1} ]
+                    </div>
+                    <div>
+                        <span class="ci-remove-capsule hover-target" onclick="removeFromCart(${item.cartId}); location.reload();">REMOVE</span>
+                    </div>
+                </div>`;
+        });
+        totalDisplay.innerText = formatMoney(total);
+    }
+    
+    // Inisialisasi saat halaman dimuat
+    window.addEventListener('load', renderCartPage);
+</script>
+</body>
+</html>

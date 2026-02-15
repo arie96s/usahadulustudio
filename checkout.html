@@ -175,6 +175,7 @@
                         <div class="summary-item"><span>Tujuan</span><span id="resAddr" style="color:#fff; text-align:right; max-width:200px;">-</span></div>
                         <div class="summary-item"><span>Kurir</span><span id="resCour" style="color:#fff;">-</span></div>
                         <div class="summary-item total"><span>Total Bayar</span><span id="resTotal" style="color:var(--magos-green);">Rp 0</span></div>
+                        <div id="checkoutNote" style="display: none; margin-bottom: 20px;"></div>
                     </div>
 
                     <div style="display:none;">
@@ -432,6 +433,23 @@ function deductStock() {
             const msg = `Halo MAGOS Archive,%0A%0AKONFIRMASI PEMBAYARAN:%0AID ORDER: ${id}%0ANAMA: ${name}%0ATOTAL: ${total}%0A%0ASaya telah melakukan pembayaran via QRIS/Transfer. Mohon verifikasi pesanan saya.`;
             window.open(`https://wa.me/6282283687565?text=${msg}`, '_blank');
         }
+        function checkPreSaleStatus() {
+    const cartItems = JSON.parse(localStorage.getItem('magos_cart') || "[]");
+    const hasPreSale = cartItems.some(item => item.status === 'PRESALE');
+    const noteContainer = document.getElementById('checkoutNote');
+
+    if (hasPreSale && noteContainer) {
+        noteContainer.innerHTML = `
+            <div style="background: rgba(255,255,255,0.05); border: 1px dashed #fff; padding: 15px; margin-bottom: 20px; border-radius: 12px;">
+                <p style="font-size: 10px; color: #fff; font-weight: 900; letter-spacing: 1.5px;">
+                    <span class="blink-red">●</span> STATUS: PRE-SALE DETECTED
+                    <br><span style="color:#888; font-weight:400;">ESTIMASI PENGIRIMAN 7-14 HARI SETELAH DROP SELESAI.</span>
+                </p>
+            </div>
+        `;
+        noteContainer.style.display = 'block';
+    }
+}
     </script>
 </body>
 </html>

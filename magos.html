@@ -10,6 +10,86 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
   <style>
+    /* Gaya Dasar Kapsul Status */
+.status-indicator-capsule {
+    position: absolute;
+    padding: 6px 15px;
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    border-radius: 50px;
+    z-index: 10;
+    text-transform: uppercase;
+    pointer-events: none; /* Agar tidak mengganggu klik produk */
+}
+
+/* Warna berdasarkan Status */
+.status-indicator-capsule.soldout {
+    background: #ff0000;
+    color: #fff;
+    box-shadow: 0 0 15px rgba(255, 0, 0, 0.4);
+}
+
+.status-indicator-capsule.presale {
+    background: #fff;
+    color: #000;
+    border: 1px solid #000;
+}
+
+/* 1. POSISI LOOKBOOK: Kiri Atas */
+.lookbook-layout .status-indicator-capsule {
+    top: 20px;
+    left: 20px;
+}
+
+/* 2. POSISI GRID VIEW: Kanan Bawah */
+.ecommerce-grid .status-indicator-capsule {
+    bottom: 20px;
+    right: 20px;
+}
+
+/* Efek Grayscale Otomatis untuk Produk Sold Out */
+.prod:has(.soldout) .prod-img-wrapper img {
+    filter: grayscale(100%) brightness(0.7);
+}
+    /* Container untuk tombol aksi di modal */
+.action-row-dynamic {
+    display: flex !important;
+    align-items: center;
+    gap: 12px;
+    margin-top: 30px;
+    width: 100%;
+}
+
+/* Gaya tombol icon (Wishlist & Cart) agar kotak industrial */
+.action-icon-btn {
+    width: 55px;
+    height: 55px;
+    flex-shrink: 0;
+    border: 1px solid #222;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: 0.3s;
+    background: transparent;
+}
+
+.action-icon-btn:hover {
+    border-color: #fff;
+    background: rgba(255,255,255,0.05);
+}
+
+/* Tombol utama ACQUIRE_NOW */
+#btnAcquireNow {
+    flex: 1;
+    height: 55px;
+    border-radius: 12px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    font-size: 11px;
+}
     /* ==========================================================================
    TOTAL MOBILE OPTIMIZATION (MAGOS ARCHIVE) - FIXED OVERLAP
    ========================================================================== */
@@ -533,23 +613,23 @@
         <div class="lang-circle"></div>
     </div>
 
-    <div class="hover-target" onclick="toggleWishlist()" style="position: relative; cursor: pointer;">
+    <a href="wishlist.html" id="wishlistTrigger" class="hover-target" style="position: relative; cursor: pointer; color: inherit; text-decoration: none; display: flex; align-items: center;">
         <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
         </svg>
-        <span class="cart-count" id="wishlistCount" style="background: #e02e42;">0</span>
-    </div>
+        <span class="cart-count" id="wishlistCount" style="background: #e02e42; position: absolute; top: -5px; right: -5px; width: 16px; height: 16px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 10px; font-weight: bold; color: #fff;">0</span>
+    </a>
 
-    <div class="cart-trigger hover-target" id="cartTrigger" onclick="toggleCart()">
+    <a href="cart.html" id="cartTrigger" class="cart-trigger hover-target" style="text-decoration: none; position: relative; display: flex; align-items: center;">
       <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="9" cy="21" r="1"></circle>
         <circle cx="20" cy="21" r="1"></circle>
         <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
       </svg>
-      <span class="cart-count" id="cartCount">0</span>
-    </div>
+      <span class="cart-count" id="cartCount" style="position: absolute; top: -5px; right: -5px; background: #fff; color: #000; font-size: 10px; font-weight: bold; width: 16px; height: 16px; border-radius: 50%; display: flex; justify-content: center; align-items: center;">0</span>
+    </a>
 
-  </div>
+</div>
 </header>
 
 <div class="marquee-container" style="margin-top: 80px;">
@@ -671,44 +751,79 @@
       <div id="sliderDots" style="display: flex; justify-content: center; gap: 8px; margin-top: 10px; margin-bottom: 10px;">
     </div>
       <div class="modal-info">
-        <div class="info-top">
-            <h2 class="modal-title" id="mTitle">Nama Produk</h2>
-            <p class="modal-price" id="mPrice">Rp 000</p>
-            <div class="size-chart-trigger" onclick="toggleSizeChart()" data-i18n="btn_size_chart" style="text-align: center; cursor: pointer;">LIHAT SIZE CHART</div>
-            <div class="product-tabs" style="margin-top: 20px;">
-    <div class="tab-header" style="display: flex; gap: 20px; border-bottom: 1px solid #222; margin-bottom: 15px;">
-        <span class="tab-link active" onclick="switchTab(event, 'tabDetail')" style="font-size: 10px; font-weight: 900; letter-spacing: 2px; cursor: pointer; padding-bottom: 5px; color: #fff; border-bottom: 2px solid #fff;">DETAIL</span>
-        <span class="tab-link" onclick="switchTab(event, 'tabCare')" style="font-size: 10px; font-weight: 900; letter-spacing: 2px; cursor: pointer; padding-bottom: 5px; color: #666;">CARE</span>
+    <div class="info-top">
+        <h2 class="modal-title" id="mTitle">Nama Produk</h2>
+        <p class="modal-price" id="mPrice">Rp 000</p>
+        
+        <div class="size-chart-trigger" onclick="toggleSizeChart()" data-i18n="btn_size_chart" style="text-align: center; cursor: pointer;">LIHAT SIZE CHART</div>
+        
+        <div class="product-tabs" style="margin-top: 20px;">
+            <div class="tab-header" style="display: flex; gap: 20px; border-bottom: 1px solid #222; margin-bottom: 15px;">
+                <span class="tab-link active" onclick="switchTab(event, 'tabDetail')" style="font-size: 10px; font-weight: 900; letter-spacing: 2px; cursor: pointer; padding-bottom: 5px; color: #fff; border-bottom: 2px solid #fff;">DETAIL</span>
+                <span class="tab-link" onclick="switchTab(event, 'tabCare')" style="font-size: 10px; font-weight: 900; letter-spacing: 2px; cursor: pointer; padding-bottom: 5px; color: #666;">CARE</span>
+            </div>
+            
+            <div id="tabDetail" class="tab-content" style="display: block; font-size: 11px; line-height: 1.6; color: #aaa;">
+                <div id="mDesc"></div> 
+            </div>
+            
+            <div id="tabCare" class="tab-content" style="display: none; font-size: 11px; line-height: 1.6; color: #aaa;">
+                <ul style="list-style: none; padding: 0;">
+                    <li>• WASH INSIDE OUT</li>
+                    <li>• COLD WATER ONLY</li>
+                    <li>• DO NOT IRON ON PRINT</li>
+                    <li>• DO NOT BLEACH</li>
+                    <li>• HANG DRY RECOMMENDED</li>
+                </ul>
+            </div>
+        </div>
     </div>
-    
-    <div id="tabDetail" class="tab-content" style="display: block; font-size: 11px; line-height: 1.6; color: #aaa;">
-        <div id="mDesc"></div> </div>
-    
-    <div id="tabCare" class="tab-content" style="display: none; font-size: 11px; line-height: 1.6; color: #aaa;">
-        <ul style="list-style: none; padding: 0;">
-            <li>• WASH INSIDE OUT</li>
-            <li>• COLD WATER ONLY</li>
-            <li>• DO NOT IRON ON PRINT</li>
-            <li>• DO NOT BLEACH</li>
-            <li>• HANG DRY RECOMMENDED</li>
-        </ul>
+
+    <div class="size-selection-frame" style="margin-top: 25px;">
+        <p id="sizeLabel" style="font-size: 10px; font-weight: 900; color: #666; margin-bottom: 10px; letter-spacing: 1px;">SELECT SIZE:</p>
+        <div class="stock-container" id="stockContainer">
+            <div class="stock-item">
+                <div class="stock-circle">S</div>
+                <span class="stock-num">0</span>
+            </div>
+            <div class="stock-item">
+                <div class="stock-circle">M</div>
+                <span class="stock-num">0</span>
+            </div>
+            <div class="stock-item">
+                <div class="stock-circle">L</div>
+                <span class="stock-num">0</span>
+            </div>
+            <div class="stock-item">
+                <div class="stock-circle">XL</div>
+                <span class="stock-num">0</span>
+            </div>
+            <div class="stock-item">
+                <div class="stock-circle">XXL</div>
+                <span class="stock-num">0</span>
+            </div>
+        </div>
+
+        <div id="allSizeBadge" style="display: none; margin-top: 10px;">
+            <div style="display: inline-block; border: 1px solid #333; padding: 10px 25px; border-radius: 50px; font-weight: 900; font-size: 11px; color: #fff;">ALL SIZE</div>
+        </div>
+    </div>
+
+    <div id="stockScarcity" style="height: 20px; margin: 15px 0;">
+        <p id="scarcityText" class="blink-red" style="font-size: 9px; font-weight: 900; color: #ff0000; letter-spacing: 1.5px; text-transform: uppercase; display: none;"></p>
+    </div>
+
+    <div class="info-bottom">
+        <button class="btn primary" id="btnAddToCart" style="display: none; width:100%;">ADD TO CART</button>
+    </div>
+
+    <div class="related-products-section" style="margin-top: 30px; border-top: 1px dashed #333; padding-top: 20px;">
+        <h4 style="font-size: 10px; letter-spacing: 2px; color: #666; margin-bottom: 15px; text-transform: uppercase;">YOU MIGHT ALSO LIKE</h4>
+        <div id="relatedGrid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+            </div>
     </div>
 </div>
-        </div>
-        <div class="info-bottom" style="text-align: center; padding-top: 10px;">
-    <div class="size-selection-frame" style="margin: 35px 0 20px 0; padding: 25px 15px; border: 1px dashed #444; border-radius: 20px; background: rgba(255,255,255,0.02); position: relative;">
-        
-        <p id="sizeLabel" style="font-size: 10px; font-weight: 900; color: #888; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 2px;" data-i18n="lbl_select_size">
-            PILIH UKURAN:
-        </p>
-        
-        <div class="stock-container" id="stockContainer" style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; margin-bottom: 0;">
-            <div class="stock-item" onclick="selectSize(this)"><span class="stock-num">3</span><div class="stock-circle">S</div></div>
-            <div class="stock-item" onclick="selectSize(this)"><span class="stock-num">12</span><div class="stock-circle">M</div></div>
-            <div class="stock-item" onclick="selectSize(this)"><span class="stock-num">8</span><div class="stock-circle">L</div></div>
-            <div class="stock-item" onclick="selectSize(this)"><span class="stock-num">5</span><div class="stock-circle">XL</div></div>
-            <div class="stock-item empty"><span class="stock-num">0</span><div class="stock-circle">XXL</div></div>
-        </div>
+</div>
 
         <div id="allSizeBadge" style="display: none;">
             <div style="display: inline-block; border: 1px solid #fff; background: #fff; color: #000; padding: 10px 30px; border-radius: 50px; font-weight: 900; font-size: 12px; letter-spacing: 1px;">ALL SIZE</div>
@@ -718,15 +833,6 @@
     <div id="stockScarcity" style="height: 20px; margin-bottom: 20px;">
         <p id="scarcityText" class="blink-red" style="font-size: 9px; font-weight: 900; color: #ff0000; letter-spacing: 1.5px; text-transform: uppercase; display: none;"></p>
     </div>
-
-    <button class="btn primary" id="btnAddToCart" style="width:100%;" data-i18n="btn_add_cart">TAMBAH KE KERANJANG</button>
-
-    <div class="related-products-section" style="margin-top: 30px; border-top: 1px dashed #333; padding-top: 20px;">
-        <h4 style="font-size: 10px; letter-spacing: 2px; color: #666; margin-bottom: 15px; text-transform: uppercase;">YOU MIGHT ALSO LIKE</h4>
-        <div id="relatedGrid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
-            </div>
-    </div>
-</div>
 
 <div class="modal-backdrop" id="checkoutModal">
     <div class="modal-window checkout-window">
@@ -1080,5 +1186,14 @@ window.removeFromWishlist = function(index) {
         toggleWishlistItem(item.id); 
     }
 };
+const processedItems = data.items.map(item => {
+    // Transformasi data admin images_list menjadi images array tunggal
+    const gallery = item.images_list ? item.images_list.map(imgObj => imgObj.url) : [item.img];
+    
+    return {
+        ...item,
+        images: gallery // Pastikan ini menjadi 'images' agar dibaca oleh fungsi slider & related
+    };
+});
 
 </script>

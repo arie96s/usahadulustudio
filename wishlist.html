@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>WISHLIST | MAGOS ARCHIVE</title>
+  <link rel="icon" type="image/svg+xml" href="magos/assets/img/magos-icon.svg">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="magos/css/magos.css">
+  <style>
+    /* Sinkronisasi Grid Wishlist */
+    #wishlistGrid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 30px;
+    }
+
+    /* Memperbaiki posisi kartu dan tombol REMOVE agar tidak tumpang tindih */
+    #wishlistGrid .prod {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        background: #080808;
+        border: 1px dashed #333;
+        padding: 15px;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+    }
+
+    #wishlistGrid .prod:hover {
+        border-color: #fff;
+        transform: translateY(-5px);
+    }
+
+    /* Tombol REMOVE diposisikan absolut agar rapi */
+    .wl-remove-btn {
+        position: absolute;
+        top: 25px;
+        right: 25px;
+        z-index: 10;
+        background: #ff4444;
+        color: #fff;
+        font-size: 9px;
+        font-weight: 900;
+        padding: 6px 12px;
+        border-radius: 50px;
+        cursor: pointer;
+        text-transform: uppercase;
+        border: none;
+        letter-spacing: 1px;
+        transition: 0.3s;
+    }
+
+    .wl-remove-btn:hover {
+        background: #fff;
+        color: #ff4444;
+        transform: scale(1.1);
+    }
+
+    #wishlistGrid .meta {
+        margin-top: 15px;
+        cursor: pointer;
+    }
+
+    /* Perbaikan agar gambar tidak hilang saat hover */
+    .prod:hover .img-front { opacity: 0; }
+    .prod:hover .img-back { opacity: 1; transform: scale(1.05); }
+
+    @media (max-width: 768px) {
+        #wishlistGrid {
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            padding: 20px 5% !important;
+        }
+    }
+  </style>
+</head>
+<body>
+    <div id="cursor"></div>
+
+<header>
+  <div class="header-left">
+      <a href="magos.html" class="logo">
+          <img src="magos/assets/img/magos-icon.svg" alt="MAGOS" class="logo-header">
+      </a>
+  </div>
+  <nav>
+      <a href="magos.html" class="studio-link hover-target">&larr; BACK TO ARCHIVE</a>
+  </nav>
+</header>
+
+<main style="padding-top: 120px;">
+    <div class="section-header" style="padding: 0 5%;">
+        <h2 class="section-title">SAVED ITEMS</h2>
+        <div class="line-spacer"></div>
+    </div>
+
+    <div class="grid" id="wishlistGrid" style="padding: 40px 5%;">
+        </div>
+</main>
+
+<script src="magos/js/magos.js"></script>
+<script>
+    /**
+     * Fungsi untuk merender daftar wishlist secara dinamis
+     */
+    function renderWishlistPage() {
+        const grid = document.getElementById('wishlistGrid');
+        if (!grid) return;
+
+        // Tampilan jika wishlist kosong
+        if (!wishlist || wishlist.length === 0) {
+            grid.innerHTML = `
+                <div class="empty-state" style="grid-column: 1/-1; padding: 100px 0;">
+                    <p class="empty-text" style="color:#444; letter-spacing:3px;">WISHLIST IS EMPTY</p>
+                    <a href="magos.html" class="btn ghost hover-target" style="margin-top:30px; text-decoration:none; display:inline-block;">BROWSE COLLECTION</a>
+                </div>`;
+            return;
+        }
+
+        grid.innerHTML = '';
+        wishlist.forEach(p => {
+            const el = document.createElement('div');
+            el.className = 'prod hover-target';
+            
+            // Perbaikan Vital: Menyediakan img-front dan img-back agar gambar tidak hilang saat hover
+            el.innerHTML = `
+                <div class="prod-img-wrapper" onclick="window.location.href='magos.html?pid=${p.id}'">
+                    <img src="${p.images[0]}" class="img-front">
+                    <img src="${p.images[0]}" class="img-back">
+                </div>
+                <button class="wl-remove-btn hover-target" onclick="removeFromWishlistPage(${p.id})">REMOVE</button>
+                <div class="meta" onclick="window.location.href='magos.html?pid=${p.id}'">
+                    <h4 style="font-size: 14px; text-transform: uppercase;">${p.name}</h4>
+                    <p style="font-family: monospace; color: #888;">${formatMoney(p.price)}</p>
+                </div>
+            `;
+            grid.appendChild(el);
+        });
+    }
+
+    /**
+     * Menghapus item dari wishlist dan langsung merender ulang halaman
+     */
+    function removeFromWishlistPage(id) {
+        toggleWishlistItem(id); // Memanggil fungsi global dari magos.js
+        renderWishlistPage();
+    }
+
+    // Pastikan data dimuat saat window siap
+    window.addEventListener('load', renderWishlistPage);
+</script>
+</body>
+</html>
