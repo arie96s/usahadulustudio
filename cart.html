@@ -186,8 +186,8 @@
                         [ ${item.qty || 1} ]
                     </div>
                     <div>
-                        <span class="ci-remove-capsule hover-target" onclick="removeFromCart(${item.cartId}); location.reload();">REMOVE</span>
-                    </div>
+    <span class="ci-remove-capsule hover-target" onclick="removeFromCart(${item.cartId})">REMOVE</span>
+</div>
                 </div>`;
         });
         totalDisplay.innerText = formatMoney(total);
