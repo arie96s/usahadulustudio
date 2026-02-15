@@ -971,31 +971,35 @@
 <script src="magos/js/magos.js"></script>
 <script>
     async function loadMagosProducts() {
-        try {
-            const response = await fetch('_data/magos_products.json');
-            const data = await response.json();
+    try {
+        const response = await fetch('_data/magos_products.json');
+        const data = await response.json();
+        
+        const processedItems = data.items.map(item => {
+            // Transformasi images_list dari Admin menjadi array images yang bisa dibaca slider & related
+            const gallery = item.images_list ? item.images_list.map(imgObj => imgObj.url) : [item.img];
             
-            const processedItems = data.items.map(item => {
-                // Mengambil list gambar dari admin, jika tidak ada pakai gambar utama lama sebagai fallback
-                const gallery = item.images_list ? item.images_list.map(imgObj => imgObj.url) : [item.img];
-                
-                return {
-                    ...item,
-                    images: gallery, // Mengisi array images untuk slider (maks 4)
-                    status: item.status || "NORMAL",
-                    sizeChart: item.size_chart_custom || "assets/img/size-guide.jpg" // Fallback ke default
-                };
-            });
+            return {
+                ...item,
+                images: gallery, 
+                status: item.status || "NORMAL",
+                sizeChart: item.size_chart_custom || "assets/img/size-guide.jpg"
+            };
+        });
 
-            if (typeof displayProducts === "function") {
-                products = processedItems; 
-                displayProducts('all', 1); 
-                
-            }
-        } catch (error) {
-            console.error("MAGOS System Error:", error);
+        if (typeof displayProducts === "function") {
+            products = processedItems; 
+            
+            // --- PERBAIKAN VITAL: PAKSA SINKRONISASI KE STORAGE ---
+            // Ini akan menimpa data stok dummy (0) dengan data asli dari Admin
+            localStorage.setItem('magos_products_data', JSON.stringify(products)); 
+            
+            displayProducts('all', 1); 
         }
+    } catch (error) {
+        console.error("MAGOS System Error:", error);
     }
+}
 
     async function loadHeroBanners() {
     try {
