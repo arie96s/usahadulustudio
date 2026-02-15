@@ -1136,22 +1136,23 @@ function openProductModalById(id) {
 
 function renderRelatedProducts(currentCategory, currentProductId) {
     const relatedContainer = document.getElementById('relatedGrid');
-    if (!relatedContainer) return;
+    if (!relatedContainer || !products.length) return;
 
-    // Filter produk dengan kategori sama, batasi 3 produk
-    const related = products
-        .filter(p => p.category === currentCategory && p.id !== currentProductId)
-        .slice(0, 3);
+    // Gunakan toLowerCase() agar kategori selalu cocok
+    const related = products.filter(p => 
+        p.category.toLowerCase() === currentCategory.toLowerCase() && 
+        String(p.id) !== String(currentProductId)
+    ).slice(0, 3);
 
     let html = '';
     related.forEach(item => {
-        // Cek apakah images tersedia dan memiliki elemen, jika tidak gunakan placeholder
+        // Gunakan properti 'images' yang sudah diproses di loadMagosProducts
         const displayImg = (item.images && item.images.length > 0) ? item.images[0] : 'magos/assets/img/default.jpg';
         
         html += `
-            <div class="related-item hover-target" onclick="closeModal('productModal'); setTimeout(() => openProductModalById(${item.id}), 300)">
-                <img src="${displayImg}" alt="${item.name}" style="width:100%; aspect-ratio:1/1; object-fit:cover;">
-                <p style="font-size:8px; margin-top:5px; text-align:center;">${item.name.toUpperCase()}</p>
+            <div class="related-item hover-target" onclick="closeModal('productModal'); setTimeout(() => openProductModalById('${item.id}'), 300)">
+                <img src="${displayImg}" alt="${item.name}">
+                <p>${item.name.toUpperCase()}</p>
             </div>
         `;
     });
