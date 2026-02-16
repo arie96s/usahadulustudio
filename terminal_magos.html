@@ -22,7 +22,7 @@
         
         input, select, textarea { 
             width: 100%; background: #000; border: 1px solid #1a1a1a; padding: 14px; 
-            color: #fff; border-radius: 8px; font-family: monospace; font-size: 14px; margin-bottom: 15px;
+            color: #fff; border-radius: 8px; font-family: monospace; font-size: 14px; margin-bottom: 15px; box-sizing: border-box;
         }
 
         .btn-group { display: flex; flex-direction: column; gap: 12px; }
@@ -32,11 +32,11 @@
         }
         .btn-invoice { background: #fff; color: #000; }
         .btn-label { background: transparent; color: #fff; border: 1px solid #333; }
+        .btn-sync { background: var(--m-green); color: #000; margin-bottom: 20px; }
 
         /* Mobile Optimization */
         @media (max-width: 768px) {
             .terminal-grid { grid-template-columns: 1fr; }
-            .mobile-row { grid-template-columns: 1fr !important; }
             #liveTotal { font-size: 20px !important; text-align: center; }
         }
     </style>
@@ -45,9 +45,12 @@
 
 <div class="terminal-wrapper">
     <h1>CONTROL_CENTER</h1>
+    
+    <button class="btn-main btn-sync" onclick="fetchLatestOrder()">FETCH_LATEST_ORDER_DATA</button>
+
     <div class="terminal-grid">
         <div class="panel">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;" class="mobile-row">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                 <div>
                     <label>ORDER_ID</label>
                     <input type="text" id="orderID" value="#MG-">
@@ -61,8 +64,14 @@
             <input type="text" id="custName" placeholder="NAMA PENERIMA">
             <label>PHONE_SIGNAL</label>
             <input type="text" id="custPhone" placeholder="628XXXXXXXX">
-            <label>ADDRESS</label>
+            <label>ADDRESS_COORDINATES</label>
             <textarea id="custAddr" rows="3" placeholder="ALAMAT LENGKAP..."></textarea>
+            <label>COURIER_SERVICE</label>
+            <select id="orderCourier">
+                <option value="JNE REG">JNE REG</option>
+                <option value="J&T EXPRESS">J&T EXPRESS</option>
+                <option value="DHL INT">DHL INT</option>
+            </select>
         </div>
 
         <div class="panel">
@@ -74,7 +83,7 @@
             <select id="orderSize">
                 <option value="S">S</option><option value="M">M</option>
                 <option value="L">L</option><option value="XL">XL</option>
-                <option value="ALL SIZE">ALL SIZE</option>
+                <option value="XXL">XXL</option><option value="ALL SIZE">ALL SIZE</option>
             </select>
             <div style="padding: 20px; background: #000; border: 1px solid #111; margin-bottom: 20px; border-radius: 12px;">
                 <label>VALUATION</label>
@@ -82,23 +91,36 @@
             </div>
             <div class="btn-group">
                 <button class="btn-main btn-invoice" onclick="generateInvoicePDF()">GENERATE_INVOICE</button>
-                <button class="btn-main btn-label" onclick="printShippingLabel()">SHIPPING_LABEL</button>
+                <button class="btn-main btn-label" onclick="printShippingLabel()">DHL_STYLE_LABEL</button>
+                <button class="btn-main" style="background:transparent; color:#444;" onclick="location.reload()">RESET_TERMINAL</button>
             </div>
         </div>
     </div>
-</div>
-
-<div style="display:none;">
-    <span id="resID"></span><span id="resName"></span><span id="resAddr"></span>
-    <span id="resPhone"></span><span id="sumSubtotal"></span><span id="resTotal"></span>
-    <span id="sumShippingCost">Rp 0</span>
 </div>
 
 <script>
     window.onload = () => {
         document.getElementById('orderDate').value = new Date().toLocaleDateString('id-ID');
         loadDatabase();
+        fetchLatestOrder(); // Otomatis cek data saat dibuka
     };
+
+    // Sinkronisasi data dari checkout.html
+    function fetchLatestOrder() {
+        const logs = JSON.parse(localStorage.getItem('magos_warehouse_logs') || "[]");
+        const pendingData = JSON.parse(localStorage.getItem('magos_pending_checkout') || "{}");
+
+        if (pendingData.name) {
+            document.getElementById('custName').value = pendingData.name.toUpperCase();
+            document.getElementById('custPhone').value = pendingData.phone || "";
+            document.getElementById('custAddr').value = `${pendingData.addr || ""}, ${pendingData.city || ""}, ${pendingData.prov || ""}`.toUpperCase();
+            
+            if (logs.length > 0) {
+                const matchID = logs[0].msg.match(/#MG-[A-Z0-9]+/);
+                if (matchID) document.getElementById('orderID').value = matchID[0];
+            }
+        }
+    }
 
     function loadDatabase() {
         const data = JSON.parse(localStorage.getItem('magos_products_data') || "[]");
@@ -118,18 +140,16 @@
         document.getElementById('liveTotal').innerText = "Rp " + price.toLocaleString('id-ID');
     }
 
-    // FUNGSI INVOICE CUSTOM MAGOS
     function generateInvoicePDF() {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
         const select = document.getElementById('orderProduct');
         const price = parseInt(select.options[select.selectedIndex]?.dataset.price || 0);
-        const name = document.getElementById('custName').value.toUpperCase();
+        const name = document.getElementById('custName').value;
 
-        if(!name) return alert("INPUT_IDENTITY_REQUIRED");
+        if(!name) return alert("ERR: IDENTITY_REQUIRED");
 
-        // Header Style
-        doc.setFillColor(10, 10, 10);
+        doc.setFillColor(5, 5, 5);
         doc.rect(0, 0, 210, 40, 'F');
         doc.setTextColor(255, 255, 255);
         doc.setFontSize(22);
@@ -139,46 +159,53 @@
         doc.text("ORDER_ID: " + document.getElementById('orderID').value, 150, 20);
         doc.text("DATE: " + document.getElementById('orderDate').value, 150, 25);
 
-        // Content
         doc.setTextColor(0, 0, 0);
-        doc.setFontSize(10);
-        doc.text("SHIP_TO:", 15, 55);
-        doc.setFontSize(14);
-        doc.text(name, 15, 65);
-        doc.setFontSize(9);
-        doc.text(document.getElementById('custAddr').value.toUpperCase(), 15, 72, { maxWidth: 100 });
-
-        // Table
         doc.autoTable({
             startY: 90,
-            head: [['DESCRIPTION', 'SIZE', 'PRICE', 'QTY', 'TOTAL']],
+            head: [['ITEM', 'SIZE', 'PRICE', 'QTY', 'TOTAL']],
             body: [[select.options[select.selectedIndex].text.split('|')[1], document.getElementById('orderSize').value, "Rp " + price.toLocaleString('id-ID'), "1", "Rp " + price.toLocaleString('id-ID')]],
             theme: 'grid',
             headStyles: { fillColor: [0, 0, 0] }
         });
 
-        doc.save(`INVOICE_${name.replace(/\s+/g, '_')}.pdf`);
+        doc.save(`INVOICE_MAGOS_${name.replace(/\s+/g, '_')}.pdf`);
     }
 
-    // FUNGSI SHIPPING LABEL A6
     function printShippingLabel() {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: [105, 148] });
         const name = document.getElementById('custName').value.toUpperCase();
+        const addr = document.getElementById('custAddr').value;
+        const orderID = document.getElementById('orderID').value;
 
-        doc.rect(5, 5, 95, 138);
-        doc.setFontSize(14);
-        doc.text("MAGOS ARCHIVE", 10, 15);
-        doc.line(5, 25, 100, 25);
-        
+        // DHL Style Branding
+        doc.setFillColor(0, 0, 0);
+        doc.rect(0, 0, 105, 25, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(18);
+        doc.text("MAGOS LOGISTICS", 8, 15);
+        doc.setFontSize(24);
+        doc.text("DUM", 80, 17); // Area Code Simulation
+
+        doc.setTextColor(0, 0, 0);
         doc.setFontSize(8);
-        doc.text("RECIPIENT:", 10, 35);
-        doc.setFontSize(12);
-        doc.text(name, 10, 45);
+        doc.text("SHIP TO:", 8, 35);
+        doc.setFontSize(14);
+        doc.text(name, 8, 45);
         doc.setFontSize(9);
-        doc.text(document.getElementById('custAddr').value.toUpperCase(), 10, 52, { maxWidth: 85 });
-        
-        doc.save(`LABEL_${name.replace(/\s+/g, '_')}.pdf`);
+        doc.text(addr, 8, 52, { maxWidth: 90 });
+
+        // Barcode Simulation
+        doc.setFillColor(0, 0, 0);
+        let startX = 15;
+        for(let i=0; i<30; i++) {
+            let w = Math.random() * 2;
+            doc.rect(startX, 110, w, 15, 'F');
+            startX += w + 1;
+        }
+        doc.text(orderID, 52.5, 130, { align: 'center' });
+
+        doc.save(`LABEL_MAGOS_${name.replace(/\s+/g, '_')}.pdf`);
     }
 </script>
 </body>
