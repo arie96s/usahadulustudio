@@ -1058,29 +1058,29 @@
         const response = await fetch('_data/magos_products.json');
         const data = await response.json();
         
-        const processedItems = data.items.map(item => {
-            // Transformasi images_list dari Admin menjadi array images yang bisa dibaca slider & related
-            const gallery = item.images_list ? item.images_list.map(imgObj => imgObj.url) : [item.img];
+        // Cek apakah sudah ada data di storage untuk menjaga status stok
+        const savedData = localStorage.getItem('magos_products_data');
+        let currentProducts = savedData ? JSON.parse(savedData) : [];
+
+        products = data.items.map(newItem => {
+            const gallery = newItem.images_list ? newItem.images_list.map(imgObj => imgObj.url) : [newItem.img];
+            // Cari produk yang sama di storage untuk mempertahankan sisa stok
+            const existing = currentProducts.find(p => p.id === newItem.id);
             
             return {
-                ...item,
-                images: gallery, 
-                status: item.status || "NORMAL",
-                sizeChart: item.size_chart_custom || "assets/img/size-guide.jpg"
+                ...newItem,
+                images: gallery,
+                // Jika produk baru (belum ada di storage), gunakan stok asli, jika ada gunakan yang lama
+                stock: existing ? existing.stock : newItem.stock,
+                status: newItem.status || "NORMAL"
             };
         });
 
-        if (typeof displayProducts === "function") {
-            products = processedItems; 
-            
-            // --- PERBAIKAN VITAL: PAKSA SINKRONISASI KE STORAGE ---
-            // Ini akan menimpa data stok dummy (0) dengan data asli dari Admin
-            localStorage.setItem('magos_products_data', JSON.stringify(products)); 
-            
-            displayProducts('all', 1); 
-        }
+        localStorage.setItem('magos_products_data', JSON.stringify(products));
+        displayProducts(currentFilter, currentPage);
     } catch (error) {
         console.error("MAGOS System Error:", error);
+        generateProducts(); // Fallback ke dummy jika fetch gagal
     }
 }
 

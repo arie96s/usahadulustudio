@@ -7,10 +7,67 @@
   <link rel="icon" type="image/svg+xml" href="magos/assets/img/magos-icon.svg">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="magos/css/magos.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
   <style>
+    /* Container Quantity Lingkaran */
+.qty-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.qty-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid #333;
+    background: transparent;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-weight: 900;
+    transition: 0.3s;
+}
+
+.qty-btn:hover {
+    background: #fff;
+    color: #000;
+}
+
+.qty-number {
+    width: 40px;
+    height: 40px;
+    border: 1px solid #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: monospace;
+    font-weight: 900;
+    font-size: 14px;
+    color: #fff;
+    background: #000;
+}
     /* 1. Page Wrapper & Layout */
     .cart-page-wrapper { max-width: 1000px; margin: 120px auto; padding: 0 40px; }
     
+    /* NEW: Progressive Free Shipping Bar */
+    .free-shipping-container {
+        background: #0a0a0a;
+        border: 1px solid #222;
+        padding: 20px;
+        border-radius: 16px;
+        margin-bottom: 30px;
+    }
+    .fs-text { font-size: 11px; font-weight: 800; color: #fff; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
+    .fs-bar-bg { width: 100%; height: 6px; background: #111; border-radius: 10px; overflow: hidden; position: relative; }
+    .fs-bar-fill { height: 100%; background: #fff; width: 0%; transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1); box-shadow: 0 0 10px rgba(255,255,255,0.3); }
+    .fs-success-msg { color: #25D366; font-weight: 900; display: none; }
+
     /* 2. Industrial Header Table */
     .cart-table-header { 
         display: grid; 
@@ -44,12 +101,12 @@
         border: 1px solid #222; 
     }
 
-    /* 5. Typography: Title & Price Berdempetan */
+    /* 5. Typography */
     .cart-item-details h4 { 
         font-size: 16px; 
         font-weight: 900; 
         color: #fff; 
-        margin-bottom: 2px; /* Merapatkan ke harga */
+        margin-bottom: 2px; 
         text-transform: uppercase;
         letter-spacing: 0.5px;
     }
@@ -58,8 +115,22 @@
         font-weight: 700; 
         font-size: 14px; 
         color: #888; 
-        margin-bottom: 12px; 
+        margin-bottom: 5px; 
     }
+
+    /* NEW: FOMO Alert */
+    .fomo-alert { 
+        font-size: 10px; 
+        color: #ff4444; 
+        font-weight: 900; 
+        text-transform: uppercase; 
+        letter-spacing: 1px; 
+        margin-bottom: 8px; 
+        display: block; 
+        animation: flash 1.5s infinite; 
+    }
+    @keyframes flash { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
     .item-size-badge { 
         font-size: 9px; 
         color: #555; 
@@ -94,6 +165,11 @@
     .total-label { font-size: 11px; color: #666; font-weight: 900; letter-spacing: 2px; }
     .total-value { font-size: 38px; font-weight: 900; color: #fff; margin: 10px 0 35px 0; display: block; letter-spacing: -1px; }
 
+    /* NEW: Trust Signals */
+    .trust-signals { margin-top: 25px; display: flex; justify-content: flex-end; gap: 20px; align-items: center; opacity: 0.6; }
+    .trust-item { font-size: 18px; color: #888; display: flex; align-items: center; gap: 8px; }
+    .trust-item span { font-size: 9px; font-weight: 800; letter-spacing: 1px; color: #444; }
+
     /* 7. Empty State Decor */
     .empty-state { padding: 100px 0; text-align: center; }
     .empty-text { font-size: 12px; letter-spacing: 5px; color: #333; font-weight: 900; }
@@ -104,6 +180,7 @@
         .cart-item-row { grid-template-columns: 1fr; gap: 25px; text-align: center; padding: 40px 0; }
         .cart-item-info { flex-direction: column; gap: 15px; }
         .cart-summary-box { padding: 30px; text-align: center; }
+        .trust-signals { justify-content: center; }
     }
   </style>
 </head>
@@ -124,23 +201,35 @@
         <div class="line-spacer"></div>
     </div>
 
+    <div id="freeShippingBar" class="free-shipping-container">
+        <div class="fs-text" id="fsMessage">BELANJA <span id="fsRemainder">Rp 0</span> LAGI UNTUK GRATIS ONGKIR</div>
+        <div class="fs-bar-bg"><div id="fsFill" class="fs-bar-fill"></div></div>
+    </div>
+
     <div id="cartContent">
         <div class="cart-table-header">
             <span>PRODUCT DETAILS</span><span>QUANTITY</span><span>ACTION</span>
         </div>
-        <div id="cartItemsList">
-            </div>
+        <div id="cartItemsList"></div>
 
         <div class="cart-summary-box">
             <span class="total-label">SUBTOTAL DUE</span>
             <span class="total-value" id="cartGrandTotal">Rp 0</span>
             <button class="btn primary hover-target" onclick="window.location.href='checkout.html'" style="width: 320px; max-width: 100%; height: 55px; border-radius: 12px;">PROCEED TO CHECKOUT</button>
+            
+            <div class="trust-signals">
+                <div class="trust-item"><i class="fa-solid fa-shield-halved"></i> <span>SECURE SSL</span></div>
+                <div class="trust-item"><i class="fa-brands fa-cc-visa"></i> <i class="fa-solid fa-qrcode"></i> <span>PAYMENT READY</span></div>
+            </div>
         </div>
     </div>
 </main>
 
 <script src="magos/js/magos.js"></script>
 <script>
+    // Konfigurasi Threshold Gratis Ongkir (Misal: Rp 500.000)
+    const FREE_SHIPPING_THRESHOLD = 500000;
+
     /**
      * Render Halaman Keranjang
      */
@@ -148,53 +237,138 @@
         const list = document.getElementById('cartItemsList');
         const container = document.getElementById('cartContent');
         const totalDisplay = document.getElementById('cartGrandTotal');
+        const fsBar = document.getElementById('freeShippingBar');
         
-        // Ambil data keranjang terbaru dari localStorage jika variabel global kosong
-        if (typeof cart === 'undefined' || cart.length === 0) {
-            const savedCart = localStorage.getItem('magos_cart');
-            cart = savedCart ? JSON.parse(savedCart) : [];
-        }
+        const savedCart = localStorage.getItem('magos_cart');
+        cart = savedCart ? JSON.parse(savedCart) : [];
         
-        if (!list) return;
-        let total = 0;
+        if (!list || !container) return;
         
         if (cart.length === 0) {
+            fsBar.style.display = 'none'; // Sembunyikan bar jika kosong
             container.innerHTML = `
-                <div class="empty-state">
-                    <p class="empty-text">YOUR CART IS EMPTY</p>
-                    <a href="magos.html" class="btn ghost hover-target" style="margin-top:30px; text-decoration:none; display:inline-block; border-radius:50px; font-size:10px;">RETURN TO SHOP</a>
+                <div class="empty-state" style="padding: 100px 0; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                    <div class="cart-motion-container" style="margin-bottom: 30px; position: relative; width: 100px; height: 100px;">
+                        <svg viewBox="0 0 24 24" width="100" height="100" stroke="currentColor" stroke-width="1" fill="none" stroke-linecap="round" stroke-linejoin="round" class="magos-cart-svg">
+                            <circle cx="9" cy="21" r="1"></circle>
+                            <circle cx="20" cy="21" r="1"></circle>
+                            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                        </svg>
+                    </div>
+                    <a href="magos.html" class="btn ghost hover-target" 
+                       style="text-decoration:none; display:inline-block; border-radius:50px; font-size:10px; padding: 12px 30px;">
+                       RETURN TO ARCHIVE
+                    </a>
+                    <style>
+                        .magos-cart-svg { color: #fff; stroke-dasharray: 100; stroke-dashoffset: 100; animation: drawCart 2.5s forwards, floatCart 3s infinite 2.5s; opacity: 0.4; }
+                        @keyframes drawCart { to { stroke-dashoffset: 0; opacity: 1; } }
+                        @keyframes floatCart { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+                    </style>
                 </div>`;
             return;
         }
 
-        list.innerHTML = '';
+        fsBar.style.display = 'block';
+        let total = 0;
+        list.innerHTML = ''; 
+        
         cart.forEach((item) => {
-            const itemTotal = item.price * (item.qty || 1);
+            const itemQty = item.qty || 1;
+            const itemTotal = item.price * itemQty;
             total += itemTotal;
             
-            list.innerHTML += `
-                <div class="cart-item-row">
-                    <div class="cart-item-info">
-                        <img src="${item.images[0]}" alt="${item.name}">
-                        <div class="cart-item-details">
-                            <h4>${item.name}</h4>
-                            <div class="item-price-tag">${formatMoney(item.price)}</div>
-                            <span class="item-size-badge">SIZE: ${item.size}</span>
-                        </div>
-                    </div>
-                    <div style="font-family:monospace; font-weight:900; color: #fff; font-size:14px;">
-                        [ ${item.qty || 1} ]
-                    </div>
-                    <div>
-                        <span class="ci-remove-capsule hover-target" onclick="removeFromCart(${item.cartId}); location.reload();">REMOVE</span>
-                    </div>
-                </div>`;
+            const displayImg = (item.images && item.images.length > 0) ? item.images[0] : 'magos/assets/img/default.jpg';
+            
+            // NEW: FOMO Stock Logic (Simulasi stok rendah < 5)
+            // Anda bisa mengganti data stok ini dari database produk asli jika tersedia
+            const fomoTag = (Math.random() < 0.3) ? `<span class="fomo-alert">Hanya tersisa 2 stok terakhir!</span>` : '';
+
+            // Ganti baris quantity yang lama dengan ini:
+list.innerHTML += `
+    <div class="cart-item-row" data-id="${item.cartId}">
+        <div class="cart-item-info">
+            <img src="${displayImg}" alt="${item.name}">
+            <div class="cart-item-details">
+                <h4>${item.name}</h4>
+                <div class="item-price-tag">${formatMoney(item.price)}</div>
+                ${fomoTag}
+                <span class="item-size-badge">SIZE: ${item.size}</span>
+            </div>
+        </div>
+        
+        <div class="qty-wrapper">
+            <button class="qty-btn hover-target" onclick="updateQty(${item.cartId}, -1)">-</button>
+            <div class="qty-number">${itemQty}</div>
+            <button class="qty-btn hover-target" onclick="updateQty(${item.cartId}, 1)">+</button>
+        </div>
+
+        <div>
+            <span class="ci-remove-capsule hover-target" 
+                  onclick="handleRemoveFromCart(${item.cartId})">
+                  REMOVE
+            </span>
+        </div>
+    </div>`;
         });
-        totalDisplay.innerText = formatMoney(total);
+
+        if (totalDisplay) {
+            totalDisplay.innerText = formatMoney(total);
+        }
+
+        updateFreeShippingBar(total);
+    }
+
+    /**
+     * NEW: Update Indikator Gratis Ongkir
+     */
+    function updateFreeShippingBar(total) {
+        const fill = document.getElementById('fsFill');
+        const message = document.getElementById('fsMessage');
+        const percentage = Math.min((total / FREE_SHIPPING_THRESHOLD) * 100, 100);
+        
+        if(fill) fill.style.width = percentage + '%';
+        
+        if (total >= FREE_SHIPPING_THRESHOLD) {
+            message.innerHTML = `<span class="fs-success-msg" style="display:block;">SELAMAT! ANDA MENDAPATKAN GRATIS ONGKIR</span>`;
+        } else {
+            const remainder = FREE_SHIPPING_THRESHOLD - total;
+            message.innerHTML = `BELANJA <span style="color:#fff;">${formatMoney(remainder)}</span> LAGI UNTUK GRATIS ONGKIR`;
+        }
+    }
+
+    function handleRemoveFromCart(cartId) {
+        if (typeof removeFromCart === 'function') {
+            removeFromCart(cartId); 
+            renderCartPage();       
+        }
     }
     
-    // Inisialisasi saat halaman dimuat
     window.addEventListener('load', renderCartPage);
+    /**
+ * Fungsi untuk menambah atau mengurangi jumlah item di keranjang
+ */
+function updateQty(cartId, change) {
+    // Ambil data terbaru
+    let savedCart = JSON.parse(localStorage.getItem('magos_cart') || "[]");
+    
+    // Cari item yang sesuai
+    const itemIndex = savedCart.findIndex(i => i.cartId === cartId);
+    
+    if (itemIndex !== -1) {
+        // Update qty (minimal 1)
+        savedCart[itemIndex].qty = (savedCart[itemIndex].qty || 1) + change;
+        
+        if (savedCart[itemIndex].qty < 1) {
+            savedCart[itemIndex].qty = 1;
+        }
+
+        // Simpan kembali ke localStorage
+        localStorage.setItem('magos_cart', JSON.stringify(savedCart));
+        
+        // Render ulang halaman untuk update harga & tampilan
+        renderCartPage();
+    }
+}
 </script>
 </body>
 </html>

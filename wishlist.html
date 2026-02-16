@@ -8,24 +8,23 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="magos/css/magos.css">
   <style>
-    /* Sinkronisasi Grid Wishlist */
+    /* Wishlist Grid Layout */
     #wishlistGrid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
         gap: 30px;
     }
 
-    /* Memperbaiki posisi kartu dan tombol REMOVE agar tidak tumpang tindih */
+    /* Product Card Styling */
     #wishlistGrid .prod {
         position: relative;
         display: flex;
         flex-direction: column;
-        height: 100%;
         background: #080808;
         border: 1px dashed #333;
         padding: 15px;
         border-radius: 12px;
-        transition: all 0.3s ease;
+        transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
     }
 
     #wishlistGrid .prod:hover {
@@ -33,29 +32,62 @@
         transform: translateY(-5px);
     }
 
-    /* Tombol REMOVE diposisikan absolut agar rapi */
+    /* NEW: Price Drop Badge */
+    .price-drop-badge {
+        position: absolute;
+        top: 15px;
+        left: 15px;
+        z-index: 5;
+        background: #fff;
+        color: #000;
+        font-size: 8px;
+        font-weight: 900;
+        padding: 4px 10px;
+        border-radius: 4px;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+    }
+
+    /* NEW: Social Proof Text */
+    .social-proof {
+        font-size: 9px;
+        color: #555;
+        font-weight: 700;
+        margin-top: 10px;
+        display: block;
+        letter-spacing: 0.5px;
+    }
+
+    /* Absolute Remove Button */
     .wl-remove-btn {
         position: absolute;
         top: 25px;
         right: 25px;
         z-index: 10;
-        background: #ff4444;
-        color: #fff;
+        background: rgba(255, 68, 68, 0.1);
+        color: #ff4444;
         font-size: 9px;
         font-weight: 900;
         padding: 6px 12px;
         border-radius: 50px;
         cursor: pointer;
         text-transform: uppercase;
-        border: none;
+        border: 1px solid #ff4444;
         letter-spacing: 1px;
         transition: 0.3s;
     }
 
     .wl-remove-btn:hover {
-        background: #fff;
-        color: #ff4444;
+        background: #ff4444;
+        color: #fff;
         transform: scale(1.1);
+    }
+
+    /* NEW: Animation for Removal */
+    .removing {
+        transform: scale(0.8) !important;
+        opacity: 0 !important;
+        filter: blur(10px);
     }
 
     #wishlistGrid .meta {
@@ -63,7 +95,8 @@
         cursor: pointer;
     }
 
-    /* Perbaikan agar gambar tidak hilang saat hover */
+    /* Hover Image Logic */
+    .prod .img-back { position: absolute; top: 0; left: 0; opacity: 0; transition: 0.5s; }
     .prod:hover .img-front { opacity: 0; }
     .prod:hover .img-back { opacity: 1; transform: scale(1.05); }
 
@@ -81,7 +114,7 @@
 
 <header>
   <div class="header-left">
-      <a href="magos.html" class="logo">
+      <a href="magos.html" class="logo hover-target">
           <img src="magos/assets/img/magos-icon.svg" alt="MAGOS" class="logo-header">
       </a>
   </div>
@@ -91,10 +124,15 @@
 </header>
 
 <main style="padding-top: 120px;">
-    <div class="section-header" style="padding: 0 5%;">
-        <h2 class="section-title">SAVED ITEMS</h2>
-        <div class="line-spacer"></div>
+    <div class="section-header" style="padding: 0 5%; display: flex; justify-content: space-between; align-items: flex-end;">
+        <div>
+            <h2 class="section-title">SAVED ITEMS</h2>
+        </div>
+        <button id="moveAllBtn" onclick="moveAllToCart()" class="btn primary hover-target" style="font-size: 9px; border-radius: 50px; padding: 12px 25px; margin-bottom: 10px; display: none;">
+            MOVE ALL TO CART + 5% OFF
+        </button>
     </div>
+    <div class="line-spacer" style="margin: 0 5%;"></div>
 
     <div class="grid" id="wishlistGrid" style="padding: 40px 5%;">
         </div>
@@ -103,53 +141,195 @@
 <script src="magos/js/magos.js"></script>
 <script>
     /**
-     * Fungsi untuk merender daftar wishlist secara dinamis
+     * Merender daftar wishlist secara dinamis
      */
     function renderWishlistPage() {
         const grid = document.getElementById('wishlistGrid');
+        const moveBtn = document.getElementById('moveAllBtn');
         if (!grid) return;
 
-        // Tampilan jika wishlist kosong
+        const savedWishlist = localStorage.getItem('magos_wishlist');
+        wishlist = savedWishlist ? JSON.parse(savedWishlist) : [];
+
+        // Tampilan jika kosong
         if (!wishlist || wishlist.length === 0) {
+            if(moveBtn) moveBtn.style.display = 'none';
             grid.innerHTML = `
-                <div class="empty-state" style="grid-column: 1/-1; padding: 100px 0;">
-                    <p class="empty-text" style="color:#444; letter-spacing:3px;">WISHLIST IS EMPTY</p>
-                    <a href="magos.html" class="btn ghost hover-target" style="margin-top:30px; text-decoration:none; display:inline-block;">BROWSE COLLECTION</a>
+                <div class="empty-state" style="grid-column: 1/-1; padding: 100px 0; text-align: center; display: flex; flex-direction: column; align-items: center;">
+                    <div class="heart-container" style="margin-bottom: 20px;">
+                        <svg viewBox="0 0 24 24" width="80" height="80" stroke="currentColor" stroke-width="1" fill="none" stroke-linecap="round" stroke-linejoin="round" class="heart-pulse">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                        </svg>
+                    </div>
+                    <p style="font-size: 11px; letter-spacing: 2px; color: #555; margin-bottom: 20px;">YOUR WISHLIST IS CURRENTLY EMPTY</p>
+                    <a href="magos.html" class="btn ghost hover-target" style="text-decoration:none; display:inline-block; border-radius: 50px; font-size: 10px;">BROWSE LATEST COLLECTION</a>
+                    
+                    <style>
+                        .heart-pulse {
+                            color: #333;
+                            animation: pulse 1.5s ease-in-out infinite;
+                        }
+                        @keyframes pulse {
+                            0% { transform: scale(1); opacity: 0.6; }
+                            50% { transform: scale(1.15); opacity: 1; filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.2)); }
+                            100% { transform: scale(1); opacity: 0.6; }
+                        }
+                    </style>
                 </div>`;
             return;
         }
+
+        // Tampilkan tombol Move All jika ada isi
+        if(moveBtn) moveBtn.style.display = 'block';
 
         grid.innerHTML = '';
         wishlist.forEach(p => {
             const el = document.createElement('div');
             el.className = 'prod hover-target';
+            el.id = `wish-prod-${p.id}`;
             
-            // Perbaikan Vital: Menyediakan img-front dan img-back agar gambar tidak hilang saat hover
+            const img1 = (p.images && p.images[0]) ? p.images[0] : 'magos/assets/img/default.jpg';
+            const img2 = (p.images && p.images[1]) ? p.images[1] : img1;
+
+            // Simulasi data untuk fitur psikologi
+            const hasPriceDrop = Math.random() < 0.3; // 30% peluang muncul badge drop
+            const savedBy = Math.floor(Math.random() * (200 - 50 + 1)) + 50; // Random 50-200 orang
+
             el.innerHTML = `
+                ${hasPriceDrop ? '<div class="price-drop-badge">PRICE DROP</div>' : ''}
                 <div class="prod-img-wrapper" onclick="window.location.href='magos.html?pid=${p.id}'">
-                    <img src="${p.images[0]}" class="img-front">
-                    <img src="${p.images[0]}" class="img-back">
+                    <img src="${img1}" class="img-front">
+                    <img src="${img2}" class="img-back">
                 </div>
                 <button class="wl-remove-btn hover-target" onclick="removeFromWishlistPage(${p.id})">REMOVE</button>
                 <div class="meta" onclick="window.location.href='magos.html?pid=${p.id}'">
-                    <h4 style="font-size: 14px; text-transform: uppercase;">${p.name}</h4>
-                    <p style="font-family: monospace; color: #888;">${formatMoney(p.price)}</p>
+                    <h4 style="font-size: 14px; text-transform: uppercase; font-weight:900;">${p.name}</h4>
+                    <p style="font-family: monospace; color: #888; font-weight:700;">${formatMoney(p.price)}</p>
+                    <span class="social-proof">Already saved by ${savedBy} others</span>
                 </div>
             `;
             grid.appendChild(el);
         });
     }
 
-    /**
-     * Menghapus item dari wishlist dan langsung merender ulang halaman
-     */
-    function removeFromWishlistPage(id) {
-        toggleWishlistItem(id); // Memanggil fungsi global dari magos.js
-        renderWishlistPage();
+    function moveAllToCart() {
+    // 1. Ambil data wishlist dan data gudang terbaru
+    const savedWishlist = JSON.parse(localStorage.getItem('magos_wishlist') || "[]");
+    const productData = JSON.parse(localStorage.getItem('magos_products_data') || "[]");
+    
+    if (savedWishlist.length === 0) return;
+
+    // Jika data gudang belum terload, paksa ambil dari variabel global 'products' jika ada
+    const activeDatabase = (productData.length > 0) ? productData : (typeof products !== 'undefined' ? products : []);
+
+    if (activeDatabase.length === 0) {
+        alert("Sistem Gudang Error: Data produk belum dimuat. Mohon kembali ke halaman utama sebentar.");
+        return;
     }
 
-    // Pastikan data dimuat saat window siap
+    let itemsAdded = 0;
+    let outOfStockItems = [];
+
+    savedWishlist.forEach(p => {
+        // 2. Cari produk di database gudang
+        const warehouseItem = activeDatabase.find(item => item.id === p.id);
+        
+        // Cek apakah ada ukuran yang tersedia (tidak hanya terpaku pada 'M')
+        let availableSize = null;
+        if (warehouseItem && warehouseItem.stock) {
+            // Cari ukuran pertama yang stoknya > 0
+            const sizes = ['S', 'M', 'L', 'XL', 'XXL'];
+            availableSize = sizes.find(s => warehouseItem.stock[s] > 0);
+        }
+
+        if (availableSize) {
+            if (typeof addToCart === 'function') {
+                addToCart(p.id, availableSize); // Pindah dengan ukuran yang tersedia
+                itemsAdded++;
+            }
+        } else {
+            outOfStockItems.push(p.name);
+        }
+    });
+
+    // 3. Finalisasi & Diskon
+    if (itemsAdded > 0) {
+        localStorage.setItem('magos_applied_discount', 50000); 
+        localStorage.setItem('magos_wishlist', JSON.stringify([]));
+        
+        let msg = `${itemsAdded} item berhasil dipindah + Diskon 5% diterapkan.`;
+        if (outOfStockItems.length > 0) {
+            msg += `\n\nProduk habis: ${outOfStockItems.join(', ')}`;
+        }
+        alert(msg);
+        window.location.href = 'cart.html';
+    } else {
+        alert("Maaf, semua item di wishlist Anda saat ini sedang Sold Out di gudang.");
+    }
+}
+
+    /**
+     * Handler untuk menghapus item dengan Micro-Animation
+     */
+    function removeFromWishlistPage(id) {
+        const itemEl = document.getElementById(`wish-prod-${id}`);
+        if (itemEl) {
+            itemEl.classList.add('removing');
+            
+            // Tunggu animasi selesai baru render ulang
+            setTimeout(() => {
+                if (typeof toggleWishlistItem === 'function') {
+                    toggleWishlistItem(id);
+                    renderWishlistPage();
+                }
+            }, 400);
+        }
+    }
+
     window.addEventListener('load', renderWishlistPage);
+    function moveAllToCart() {
+    // 1. Ambil data wishlist dan data produk (gudang) terbaru
+    const savedWishlist = JSON.parse(localStorage.getItem('magos_wishlist') || "[]");
+    const productData = JSON.parse(localStorage.getItem('magos_products_data') || "[]");
+    
+    if (savedWishlist.length === 0) return;
+
+    let itemsAdded = 0;
+    let outOfStockItems = [];
+
+    savedWishlist.forEach(p => {
+        // 2. Cek apakah produk masih tersedia di gudang (default size M)
+        const warehouseItem = productData.find(item => item.id === p.id);
+        const currentStock = (warehouseItem && warehouseItem.stock) ? warehouseItem.stock['M'] : 0;
+
+        if (currentStock > 0) {
+            if (typeof addToCart === 'function') {
+                addToCart(p.id, 'M');
+                itemsAdded++;
+            }
+        } else {
+            outOfStockItems.push(p.name);
+        }
+    });
+
+    // 3. Logika Warning & Diskon
+    if (itemsAdded > 0) {
+        // Set diskon bundling 5% (simulasi potong Rp 50.000)
+        localStorage.setItem('magos_applied_discount', 50000); 
+        
+        // Kosongkan wishlist hanya untuk item yang berhasil pindah
+        localStorage.setItem('magos_wishlist', JSON.stringify([]));
+        
+        let msg = `SICC! ${itemsAdded} item berhasil dipindah ke cart + Diskon 5% diterapkan.`;
+        if (outOfStockItems.length > 0) {
+            msg += `\n\nNote: [${outOfStockItems.join(', ')}] gagal ditambah karena stok habis.`;
+        }
+        alert(msg);
+        window.location.href = 'cart.html';
+    } else {
+        alert("Gagal memindahkan: Semua item di wishlist kamu sedang habis stok (Sold Out).");
+    }
+}
 </script>
 </body>
 </html>
