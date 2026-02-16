@@ -8,6 +8,44 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="magos/css/magos.css">
   <style>
+    /* --- MAGOS INDUSTRIAL TOAST --- */
+.magos-toast {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: #000;
+    color: #fff;
+    border: 1px dashed #444;
+    padding: 20px 30px;
+    border-radius: 12px;
+    z-index: 11000;
+    font-family: 'Inter', sans-serif;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.8);
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 300px;
+    animation: toastSlideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.magos-toast.error { border-color: #ff4444; }
+.magos-toast.success { border-color: #25D366; }
+
+.toast-header { font-size: 9px; letter-spacing: 3px; color: #666; font-weight: 900; }
+.toast-msg { font-size: 13px; font-weight: 700; letter-spacing: 0.5px; }
+
+@keyframes toastSlideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+.toast-fade-out {
+    animation: toastFadeOut 0.5s ease forwards;
+}
+
+@keyframes toastFadeOut {
+    to { transform: translateY(20px); opacity: 0; visibility: hidden; }
+}
     /* Wishlist Grid Layout */
     #wishlistGrid {
         display: grid;
@@ -213,59 +251,60 @@
     }
 
     function moveAllToCart() {
-    // 1. Ambil data wishlist dan data gudang terbaru
+    // 1. Ambil data wishlist dan data gudang terbaru dari LocalStorage
     const savedWishlist = JSON.parse(localStorage.getItem('magos_wishlist') || "[]");
     const productData = JSON.parse(localStorage.getItem('magos_products_data') || "[]");
     
     if (savedWishlist.length === 0) return;
 
-    // Jika data gudang belum terload, paksa ambil dari variabel global 'products' jika ada
+    // Pastikan database produk tersedia
     const activeDatabase = (productData.length > 0) ? productData : (typeof products !== 'undefined' ? products : []);
 
     if (activeDatabase.length === 0) {
-        alert("Sistem Gudang Error: Data produk belum dimuat. Mohon kembali ke halaman utama sebentar.");
+        alert("SISTEM_ERROR: DATA GUDANG TIDAK DITEMUKAN.");
         return;
     }
 
     let itemsAdded = 0;
     let outOfStockItems = [];
 
-    savedWishlist.forEach(p => {
-        // 2. Cari produk di database gudang
-        const warehouseItem = activeDatabase.find(item => item.id === p.id);
+    savedWishlist.forEach(itemInWishlist => {
+        // 2. Cari data ASLI produk di database gudang berdasarkan ID
+        const warehouseItem = activeDatabase.find(item => item.id === itemInWishlist.id);
         
-        // Cek apakah ada ukuran yang tersedia (tidak hanya terpaku pada 'M')
-        let availableSize = null;
         if (warehouseItem && warehouseItem.stock) {
-            // Cari ukuran pertama yang stoknya > 0
+            // 3. Cari ukuran pertama yang stoknya > 0
             const sizes = ['S', 'M', 'L', 'XL', 'XXL'];
-            availableSize = sizes.find(s => warehouseItem.stock[s] > 0);
-        }
+            let availableSize = sizes.find(s => warehouseItem.stock[s] > 0);
 
-        if (availableSize) {
-            if (typeof addToCart === 'function') {
-                addToCart(p.id, availableSize); // Pindah dengan ukuran yang tersedia
-                itemsAdded++;
+            if (availableSize) {
+                // PENTING: Kirim 'warehouseItem' (Object), bukan cuma ID.
+                // Ini agar fungsi addToCart() di magos.js bisa berjalan normal.
+                if (typeof addToCart === 'function') {
+                    addToCart(warehouseItem, availableSize); 
+                    itemsAdded++;
+                }
+            } else {
+                outOfStockItems.push(warehouseItem.name);
             }
-        } else {
-            outOfStockItems.push(p.name);
         }
     });
 
-    // 3. Finalisasi & Diskon
-    if (itemsAdded > 0) {
-        localStorage.setItem('magos_applied_discount', 50000); 
-        localStorage.setItem('magos_wishlist', JSON.stringify([]));
-        
-        let msg = `${itemsAdded} item berhasil dipindah + Diskon 5% diterapkan.`;
-        if (outOfStockItems.length > 0) {
-            msg += `\n\nProduk habis: ${outOfStockItems.join(', ')}`;
-        }
-        alert(msg);
+    // 4. Finalisasi Sesi & Notifikasi
+    // Ganti bagian alert di akhir fungsi moveAllToCart() dengan ini:
+if (itemsAdded > 0) {
+    localStorage.setItem('magos_applied_discount', 50000);
+    localStorage.setItem('magos_wishlist', JSON.stringify([]));
+    
+    showMagosToast(`${itemsAdded} items moved to archive. Discount active.`, 'success');
+    
+    // Beri jeda 2 detik agar user sempat melihat pesan sebelum pindah halaman
+    setTimeout(() => {
         window.location.href = 'cart.html';
-    } else {
-        alert("Maaf, semua item di wishlist Anda saat ini sedang Sold Out di gudang.");
-    }
+    }, 2000);
+} else {
+    showMagosToast("Process failed: items are sold out.", 'error');
+}
 }
 
     /**
@@ -329,6 +368,29 @@
     } else {
         alert("Gagal memindahkan: Semua item di wishlist kamu sedang habis stok (Sold Out).");
     }
+}
+function showMagosToast(message, type = 'success') {
+    // Hapus toast lama jika masih ada
+    const oldToast = document.querySelector('.magos-toast');
+    if (oldToast) oldToast.remove();
+
+    const toast = document.createElement('div');
+    toast.className = `magos-toast ${type}`;
+    
+    const headerText = type === 'success' ? 'SYSTEM_SIGNAL_OK' : 'SYSTEM_SIGNAL_ERROR';
+    
+    toast.innerHTML = `
+        <span class="toast-header">${headerText}</span>
+        <span class="toast-msg">${message.toUpperCase()}</span>
+    `;
+
+    document.body.appendChild(toast);
+
+    // Otomatis hilang setelah 4 detik
+    setTimeout(() => {
+        toast.classList.add('toast-fade-out');
+        setTimeout(() => toast.remove(), 500);
+    }, 4000);
 }
 </script>
 </body>
