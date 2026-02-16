@@ -365,20 +365,33 @@ function toggleSizeChart() {
     if (!modal || !currentProduct) return;
 
     // 1. Sinkronisasi Gambar Size Chart
-    // Jika produk memiliki sizeChart khusus, gunakan itu. Jika tidak, pakai default.
-    const defaultChart = 'assets/img/size-guide.jpg';
-    chartImg.src = currentProduct.sizeChart || defaultChart;
+    // PERBAIKAN: Gunakan 'size_chart_custom' sesuai dengan magos_products.json
+    // Pastikan path default mengarah ke folder yang benar (img/ atau assets/img/)
+    const defaultChart = 'magos/assets/img/size-guide.jpg'; 
+    
+    // Kita cek properti size_chart_custom dari database
+    const customChart = currentProduct.size_chart_custom;
+
+    // Jika ada customChart dan tidak kosong, gunakan itu. 
+    // Jika tidak, gunakan defaultChart.
+    chartImg.src = (customChart && customChart !== "") ? customChart : defaultChart;
+
+    // Tambahkan error handler jika gambar gagal dimuat
+    chartImg.onerror = function() {
+        this.src = defaultChart;
+    };
 
     // 2. Reset UI Kalkulator
-    // Membersihkan hasil pencarian ukuran sebelumnya agar tidak berantakan
     if (calcResult) {
         calcResult.style.display = 'none';
-        calcResult.innerText = '';
+        calcResult.innerHTML = ''; // Gunakan innerHTML jika sebelumnya diisi element
     }
     
     // 3. Reset Input
-    if (document.getElementById('calcHeight')) document.getElementById('calcHeight').value = '';
-    if (document.getElementById('calcWeight')) document.getElementById('calcWeight').value = '';
+    const heightInput = document.getElementById('calcHeight');
+    const weightInput = document.getElementById('calcWeight');
+    if (heightInput) heightInput.value = '';
+    if (weightInput) weightInput.value = '';
 
     // 4. Tampilkan Modal
     modal.classList.add('active');
