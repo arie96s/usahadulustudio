@@ -534,22 +534,28 @@ function updateCartUI() {
     }
 }
 
-function removeFromCart(id) {
-    // Cari item berdasarkan cartId (timestamp)
-    const itemToRemove = cart.find(item => item.cartId === id);
-    if (itemToRemove) {
-        // Kembalikan stok
-        const productInDb = products.find(p => p.id === itemToRemove.id);
+function removeFromCart(cartId) {
+    // Cari item berdasarkan cartId unik
+    const itemIndex = cart.findIndex(item => item.cartId === cartId);
+    
+    if (itemIndex > -1) {
+        const item = cart[itemIndex];
+        // Kembalikan stok ke gudang
+        const productInDb = products.find(p => p.id === item.id);
         if (productInDb) {
-            productInDb.stock[itemToRemove.size] += (itemToRemove.qty || 1);
+            productInDb.stock[item.size] += (item.qty || 1);
             localStorage.setItem('magos_products_data', JSON.stringify(products));
         }
-        // Filter array
-        cart = cart.filter(item => item.cartId !== id);
+        
+        // Hapus dari array
+        cart.splice(itemIndex, 1);
         saveCart();
         updateCartUI();
-        // Jika di halaman cart.html, refresh halaman
-        if(window.location.pathname.includes('cart.html')) location.reload();
+        
+        // Refresh jika di halaman cart.html
+        if(window.location.pathname.includes('cart.html')) {
+            renderCartPage(); 
+        }
     }
 }
 
@@ -1142,10 +1148,14 @@ if (window.location.pathname.includes('checkout.html')) {
 }
 
 function openProductModalById(id) {
-    // Cari produk berdasarkan ID (karena data ID di sistem kamu bisa angka/string)
     const product = products.find(p => String(p.id) === String(id));
     if (product) {
-        openProductModal(product); // Panggil fungsi utama yang sudah ada di baris 153
+        // Beri jeda sedikit agar modal lama benar-benar bersih
+        const modal = document.getElementById('productModal');
+        modal.classList.remove('active');
+        setTimeout(() => {
+            openProductModal(product);
+        }, 300);
     }
 }
 
