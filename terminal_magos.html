@@ -4,246 +4,85 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MAGOS | CONTROL TERMINAL</title>
-    <link rel="stylesheet" href="magos/css/magos.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
-    
+
     <style>
-/* --- MAGOS TERMINAL MOBILE OPTIMIZED --- */
-:root { --m-green: #25D366; --m-border: #222; }
-
-body { 
-    background: #000; 
-    color: #fff; 
-    font-family: 'Inter', sans-serif; 
-    margin: 0; 
-    padding: 0;
-}
-
-.terminal-wrapper { 
-    max-width: 1000px; 
-    margin: 40px auto; 
-    padding: 20px; 
-}
-
-/* Judul responsif */
-h1 { 
-    font-size: 18px; 
-    letter-spacing: 3px; 
-    font-weight: 900; 
-    margin-bottom: 30px; 
-    border-left: 4px solid #fff; 
-    padding-left: 15px; 
-}
-
-/* Grid System: 2 kolom di Desktop, 1 kolom di Mobile */
-.terminal-grid { 
-    display: grid; 
-    grid-template-columns: 1.5fr 1fr; 
-    gap: 20px; 
-}
-
-.panel { 
-    background: #080808; 
-    border: 1px dashed var(--m-border); 
-    padding: 25px; 
-    border-radius: 20px; 
-    height: fit-content;
-}
-
-/* Input Styling */
-label { 
-    font-size: 9px; 
-    color: #555; 
-    font-weight: 900; 
-    letter-spacing: 2px; 
-    text-transform: uppercase; 
-    display: block; 
-    margin-bottom: 8px; 
-}
-
-input, select, textarea { 
-    width: 100%; 
-    background: #000; 
-    border: 1px solid #1a1a1a; 
-    padding: 14px; 
-    color: #fff; 
-    border-radius: 8px; 
-    font-family: 'JetBrains Mono', monospace; 
-    font-size: 14px; /* Font 14px mencegah zoom otomatis di iOS */
-    margin-bottom: 15px;
-    box-sizing: border-box;
-}
-
-/* Button System */
-.btn-group { 
-    display: flex; 
-    flex-direction: column; 
-    gap: 12px; 
-}
-
-.btn-main { 
-    padding: 20px; 
-    border-radius: 12px; 
-    font-weight: 900; 
-    font-size: 11px; 
-    text-transform: uppercase; 
-    cursor: pointer; 
-    border: none; 
-    transition: 0.3s;
-    width: 100%;
-}
-
-.btn-invoice { background: #fff; color: #000; }
-.btn-label { background: transparent; color: #fff; border: 1px solid #333; }
-
-/* Media Query untuk Mobile */
-@media (max-width: 768px) {
-    .terminal-wrapper { 
-        margin: 20px auto; 
-        padding: 15px; 
-    }
-    
-    .terminal-grid { 
-        grid-template-columns: 1fr; /* Paksa jadi 1 kolom */
-    }
-
-    .panel { 
-        padding: 20px; 
-    }
-
-    /* Input grid pada mobile jadi menumpuk */
-    .mobile-stack {
-        grid-template-columns: 1fr !important;
-        gap: 0 !important;
-    }
-
-    #liveTotal {
-        font-size: 20px !important;
-        text-align: center;
-    }
-    
-    h1 { font-size: 16px; letter-spacing: 2px; }
-}
-
         :root { --m-green: #25D366; --m-border: #222; }
-        body { background: #000; color: #fff; font-family: 'Inter', sans-serif; overflow-x: hidden; }
-        .terminal-wrapper { max-width: 1000px; margin: 60px auto; padding: 20px; }
+        body { background: #000; color: #fff; font-family: 'Inter', sans-serif; margin: 0; padding: 0; }
+        .terminal-wrapper { max-width: 1000px; margin: 40px auto; padding: 20px; }
         
         /* Layout Grid */
-        .terminal-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 30px; }
-        .panel { background: #080808; border: 1px dashed var(--m-border); padding: 30px; border-radius: 20px; }
+        .terminal-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; }
+        .panel { background: #080808; border: 1px dashed var(--m-border); padding: 25px; border-radius: 20px; }
         
-        /* Typography */
-        h1 { font-size: 20px; letter-spacing: 5px; font-weight: 900; margin-bottom: 30px; border-left: 4px solid #fff; padding-left: 15px; }
+        h1 { font-size: 18px; letter-spacing: 3px; font-weight: 900; margin-bottom: 30px; border-left: 4px solid #fff; padding-left: 15px; }
         label { font-size: 9px; color: #555; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; display: block; margin-bottom: 8px; }
         
-        /* Inputs */
         input, select, textarea { 
-            width: 100%; background: #000; border: 1px solid #1a1a1a; padding: 12px; 
-            color: #fff; border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 13px; margin-bottom: 20px;
+            width: 100%; background: #000; border: 1px solid #1a1a1a; padding: 14px; 
+            color: #fff; border-radius: 8px; font-family: monospace; font-size: 14px; margin-bottom: 15px;
         }
-        input:focus { border-color: #fff; outline: none; }
 
-        /* Actions */
-        .btn-group { display: flex; flex-direction: column; gap: 10px; }
+        .btn-group { display: flex; flex-direction: column; gap: 12px; }
         .btn-main { 
-            padding: 18px; border-radius: 12px; font-weight: 900; font-size: 11px; 
+            padding: 20px; border-radius: 12px; font-weight: 900; font-size: 11px; 
             text-transform: uppercase; cursor: pointer; border: none; transition: 0.3s;
-            display: flex; align-items: center; justify-content: center; gap: 10px;
         }
         .btn-invoice { background: #fff; color: #000; }
         .btn-label { background: transparent; color: #fff; border: 1px solid #333; }
-        .btn-main:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255,255,255,0.1); }
-        
-        /* Live Preview Minimalist */
-        .live-preview { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #444; }
-        .status-dot { width: 8px; height: 8px; background: var(--m-green); border-radius: 50%; display: inline-block; margin-right: 5px; }
+
+        /* Mobile Optimization */
+        @media (max-width: 768px) {
+            .terminal-grid { grid-template-columns: 1fr; }
+            .mobile-row { grid-template-columns: 1fr !important; }
+            #liveTotal { font-size: 20px !important; text-align: center; }
+        }
     </style>
 </head>
 <body>
 
 <div class="terminal-wrapper">
-    <h1><span class="status-dot"></span>ORDER_CONTROL_CENTER</h1>
-
+    <h1>CONTROL_CENTER</h1>
     <div class="terminal-grid">
         <div class="panel">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;" class="mobile-row">
                 <div>
-                    <label>TRANSACTION_ID</label>
-                    <input type="text" id="orderID" placeholder="#MG-XXXX" value="#MG-">
+                    <label>ORDER_ID</label>
+                    <input type="text" id="orderID" value="#MG-">
                 </div>
                 <div>
-                    <label>DATE_STAMP</label>
+                    <label>DATE</label>
                     <input type="text" id="orderDate" readonly>
                 </div>
             </div>
-
-            <label>CUSTOMER_IDENTITY (FULL NAME)</label>
-            <input type="text" id="custName" placeholder="NAME OF RECIPIENT">
-
-            <label>SIGNAL_CONTACT (WHATSAPP)</label>
+            <label>CUSTOMER_NAME</label>
+            <input type="text" id="custName" placeholder="NAMA PENERIMA">
+            <label>PHONE_SIGNAL</label>
             <input type="text" id="custPhone" placeholder="628XXXXXXXX">
-
-            <label>SHIPPING_COORDINATES (FULL ADDRESS)</label>
-            <textarea id="custAddr" rows="4" placeholder="STREET NAME, CITY, PROVINCE, POSTAL CODE..."></textarea>
-            
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                <div>
-                    <label>COURIER_SERVICE</label>
-                    <select id="orderCourier">
-                        <option value="JNE REG">JNE REG</option>
-                        <option value="J&T EXPRESS">J&T EXPRESS</option>
-                        <option value="DHL INT">DHL INT</option>
-                    </select>
-                </div>
-                <div>
-                    <label>PAYMENT_METHOD</label>
-                    <select id="orderPay">
-                        <option value="BANK TRANSFER">BANK TRANSFER</option>
-                        <option value="QRIS">QRIS</option>
-                        <option value="PAYPAL">PAYPAL</option>
-                    </select>
-                </div>
-            </div>
+            <label>ADDRESS</label>
+            <textarea id="custAddr" rows="3" placeholder="ALAMAT LENGKAP..."></textarea>
         </div>
 
-        <div class="panel" style="display: flex; flex-direction: column;">
-            <label>ARCHIVE_ITEM_SELECTION</label>
-            <select id="orderProduct" onchange="updateLiveTotal()">
-                </select>
-
-            <label>ITEM_SIZE</label>
+        <div class="panel">
+            <label>SELECT_PRODUCT</label>
+            <select id="orderProduct" onchange="updateValuation()">
+                <option value="" disabled selected>PILIH PRODUK</option>
+            </select>
+            <label>SIZE</label>
             <select id="orderSize">
-                <option value="S">S</option>
-                <option value="M">M</option>
-                <option value="L">L</option>
-                <option value="XL">XL</option>
-                <option value="XXL">XXL</option>
+                <option value="S">S</option><option value="M">M</option>
+                <option value="L">L</option><option value="XL">XL</option>
                 <option value="ALL SIZE">ALL SIZE</option>
             </select>
-
-            <div style="margin: 20px 0; padding: 20px; background: #000; border: 1px solid #111; border-radius: 12px;">
-                <label>ESTIMATED_VALUATION</label>
-                <div id="liveTotal" style="font-size: 24px; font-weight: 900; color: var(--m-green); font-family: 'JetBrains Mono';">Rp 0</div>
+            <div style="padding: 20px; background: #000; border: 1px solid #111; margin-bottom: 20px; border-radius: 12px;">
+                <label>VALUATION</label>
+                <div id="liveTotal" style="font-size: 24px; font-weight: 900; color: var(--m-green);">Rp 0</div>
             </div>
-
             <div class="btn-group">
-                <button class="btn-main btn-invoice" onclick="processInvoice()">
-                    GENERATE_INVOICE_PDF
-                </button>
-                <button class="btn-main btn-label" onclick="processLabel()">
-                    PRINT_SHIPPING_LABEL (A6)
-                </button>
-                <button class="btn-main" style="background: transparent; color: #444;" onclick="resetTerminal()">
-                    CLEAR_TERMINAL
-                </button>
-            </div>
-
-            <div class="live-preview" style="margin-top: 30px;">
-                <p>> SYSTEM_READY</p>
-                <p id="logMsg">> WAITING_FOR_INPUT...</p>
+                <button class="btn-main btn-invoice" onclick="generateInvoicePDF()">GENERATE_INVOICE</button>
+                <button class="btn-main btn-label" onclick="printShippingLabel()">SHIPPING_LABEL</button>
             </div>
         </div>
     </div>
@@ -251,123 +90,95 @@ input, select, textarea {
 
 <div style="display:none;">
     <span id="resID"></span><span id="resName"></span><span id="resAddr"></span>
-    <span id="resPhone"></span><span id="sumSubtotal"></span>
-    <span id="sumShippingCost">0</span><span id="resTotal"></span>
+    <span id="resPhone"></span><span id="sumSubtotal"></span><span id="resTotal"></span>
+    <span id="sumShippingCost">Rp 0</span>
 </div>
 
-<script src="magos/js/magos.js"></script>
 <script>
-    // Inisialisasi Terminal
     window.onload = () => {
         document.getElementById('orderDate').value = new Date().toLocaleDateString('id-ID');
-        loadProductDatabase();
+        loadDatabase();
     };
 
-    function loadProductDatabase() {
-        const productData = JSON.parse(localStorage.getItem('magos_products_data') || "[]");
+    function loadDatabase() {
+        const data = JSON.parse(localStorage.getItem('magos_products_data') || "[]");
         const select = document.getElementById('orderProduct');
-        
-        if(productData.length === 0) {
-            document.getElementById('logMsg').innerText = "> ERR: DATABASE_NOT_FOUND";
-            return;
-        }
-
-        productData.forEach(p => {
+        data.forEach(p => {
             const opt = document.createElement('option');
             opt.value = p.id;
-            opt.text = `${p.id} | ${p.name}`;
             opt.dataset.price = p.price;
+            opt.text = `${p.id} | ${p.name}`;
             select.appendChild(opt);
         });
-        updateLiveTotal();
     }
 
-    function updateLiveTotal() {
+    function updateValuation() {
         const select = document.getElementById('orderProduct');
         const price = parseInt(select.options[select.selectedIndex]?.dataset.price || 0);
         document.getElementById('liveTotal').innerText = "Rp " + price.toLocaleString('id-ID');
     }
 
-    function syncToSystem() {
-        const name = document.getElementById('custName').value.toUpperCase();
-        const price = parseInt(document.getElementById('orderProduct').options[document.getElementById('orderProduct').selectedIndex].dataset.price);
-        
-        document.getElementById('resID').innerText = document.getElementById('orderID').value;
-        document.getElementById('resName').innerText = name;
-        document.getElementById('resAddr').innerText = document.getElementById('custAddr').value.toUpperCase();
-        document.getElementById('resPhone').innerText = document.getElementById('custPhone').value;
-        document.getElementById('sumSubtotal').innerText = "Rp " + price.toLocaleString('id-ID');
-        document.getElementById('resTotal').innerText = "Rp " + price.toLocaleString('id-ID');
-
-        // Mock Cart untuk Generator
-        const mockCart = [{
-            name: document.getElementById('orderProduct').options[document.getElementById('orderProduct').selectedIndex].text.split(' | ')[1],
-            size: document.getElementById('orderSize').value,
-            price: price,
-            qty: 1
-        }];
-        localStorage.setItem('magos_cart', JSON.stringify(mockCart));
-    }
-
-    function processInvoice() {
-        if(!document.getElementById('custName').value) return alert("ERR: NAME_EMPTY");
-        syncToSystem();
-        if(typeof generateInvoicePDF === 'function') {
-            generateInvoicePDF();
-            document.getElementById('logMsg').innerText = "> INVOICE_GENERATED_SUCCESSFULLY";
-        }
-    }
-
-    function processLabel() {
+    // FUNGSI INVOICE CUSTOM MAGOS
+    function generateInvoicePDF() {
         const { jsPDF } = window.jspdf;
-        const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: [105, 148] }); // A6 Size
-        
+        const doc = new jsPDF();
+        const select = document.getElementById('orderProduct');
+        const price = parseInt(select.options[select.selectedIndex]?.dataset.price || 0);
         const name = document.getElementById('custName').value.toUpperCase();
-        const addr = document.getElementById('custAddr').value.toUpperCase();
-        const phone = document.getElementById('custPhone').value;
-        const courier = document.getElementById('orderCourier').value;
-        const item = document.getElementById('orderProduct').options[document.getElementById('orderProduct').selectedIndex].text.split(' | ')[1];
 
-        // Frame
-        doc.setLineWidth(0.5);
-        doc.rect(5, 5, 95, 138);
-        doc.line(5, 30, 100, 30);
+        if(!name) return alert("INPUT_IDENTITY_REQUIRED");
+
+        // Header Style
+        doc.setFillColor(10, 10, 10);
+        doc.rect(0, 0, 210, 40, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(22);
+        doc.text("MAGOS ARCHIVE", 15, 25);
         
-        // Header
-        doc.setFont("helvetica", "bold");
+        doc.setFontSize(8);
+        doc.text("ORDER_ID: " + document.getElementById('orderID').value, 150, 20);
+        doc.text("DATE: " + document.getElementById('orderDate').value, 150, 25);
+
+        // Content
+        doc.setTextColor(0, 0, 0);
+        doc.setFontSize(10);
+        doc.text("SHIP_TO:", 15, 55);
+        doc.setFontSize(14);
+        doc.text(name, 15, 65);
+        doc.setFontSize(9);
+        doc.text(document.getElementById('custAddr').value.toUpperCase(), 15, 72, { maxWidth: 100 });
+
+        // Table
+        doc.autoTable({
+            startY: 90,
+            head: [['DESCRIPTION', 'SIZE', 'PRICE', 'QTY', 'TOTAL']],
+            body: [[select.options[select.selectedIndex].text.split('|')[1], document.getElementById('orderSize').value, "Rp " + price.toLocaleString('id-ID'), "1", "Rp " + price.toLocaleString('id-ID')]],
+            theme: 'grid',
+            headStyles: { fillColor: [0, 0, 0] }
+        });
+
+        doc.save(`INVOICE_${name.replace(/\s+/g, '_')}.pdf`);
+    }
+
+    // FUNGSI SHIPPING LABEL A6
+    function printShippingLabel() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: [105, 148] });
+        const name = document.getElementById('custName').value.toUpperCase();
+
+        doc.rect(5, 5, 95, 138);
         doc.setFontSize(14);
         doc.text("MAGOS ARCHIVE", 10, 15);
+        doc.line(5, 25, 100, 25);
+        
         doc.setFontSize(8);
-        doc.text("ID: " + document.getElementById('orderID').value, 10, 22);
-        doc.text(courier, 90, 22, { align: 'right' });
-
-        // Recipient
-        doc.setFontSize(7);
-        doc.text("RECIPIENT:", 10, 38);
+        doc.text("RECIPIENT:", 10, 35);
         doc.setFontSize(12);
         doc.text(name, 10, 45);
         doc.setFontSize(9);
-        doc.text(phone, 10, 52);
-        doc.setFontSize(8);
-        doc.text(addr, 10, 60, { maxWidth: 85 });
-
-        // Item Detail
-        doc.line(5, 100, 100, 100);
-        doc.setFontSize(7);
-        doc.text("ITEM_CONTENT:", 10, 108);
-        doc.setFontSize(9);
-        doc.text(item + " [" + document.getElementById('orderSize').value + "]", 10, 115);
-
-        // Footer Branding
-        doc.setFontSize(6);
-        doc.text("THANK YOU FOR SUPPORTING THE ARCHIVE.", 52.5, 135, { align: 'center' });
-
+        doc.text(document.getElementById('custAddr').value.toUpperCase(), 10, 52, { maxWidth: 85 });
+        
         doc.save(`LABEL_${name.replace(/\s+/g, '_')}.pdf`);
-        document.getElementById('logMsg').innerText = "> LABEL_PRINT_READY";
-    }
-
-    function resetTerminal() {
-        if(confirm("CONFIRM_SYSTEM_PURGE?")) location.reload();
     }
 </script>
 </body>
