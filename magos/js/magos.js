@@ -573,6 +573,7 @@ function toggleWishlist() {
     document.getElementById('cartBackdrop')?.classList.toggle('active');
     document.getElementById('cartDrawer')?.classList.remove('active');
 }
+// Di dalam magos.js
 function toggleWishlistItem(id) {
     const idx = wishlist.findIndex(item => item.id === id);
     if (idx > -1) { 
@@ -583,7 +584,7 @@ function toggleWishlistItem(id) {
     }
     saveWishlist();
 
-    // Fix: Hanya jalankan jika elemennya ada (mencegah error di wishlist.html)
+    // PERBAIKAN: Gunakan Optional Chaining agar tidak error jika ID tidak ada
     const btnHeart = document.getElementById('realWishlistBtn');
     if(btnHeart) {
         btnHeart.classList.toggle('active');
