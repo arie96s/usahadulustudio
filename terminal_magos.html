@@ -46,13 +46,13 @@
 <div class="terminal-wrapper">
     <h1>CONTROL_CENTER</h1>
     
-    <button class="btn-main btn-sync" onclick="fetchLatestOrder()">FETCH_LATEST_ORDER_DATA</button>
+    <button class="btn-main btn-sync" onclick="fetchLatestOrder()">FETCH LATEST ORDER DATA</button>
 
     <div class="terminal-grid">
         <div class="panel">
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                 <div>
-                    <label>ORDER_ID</label>
+                    <label>ORDER ID</label>
                     <input type="text" id="orderID" value="#MG-">
                 </div>
                 <div>
@@ -60,11 +60,11 @@
                     <input type="text" id="orderDate" readonly>
                 </div>
             </div>
-            <label>CUSTOMER_NAME</label>
+            <label>CUSTOMER NAME</label>
             <input type="text" id="custName" placeholder="NAMA PENERIMA">
-            <label>PHONE_SIGNAL</label>
+            <label>PHONE SIGNAL</label>
             <input type="text" id="custPhone" placeholder="628XXXXXXXX">
-            <label>ADDRESS_COORDINATES</label>
+            <label>ADDRESS COORDINATES</label>
             <textarea id="custAddr" rows="3" placeholder="ALAMAT LENGKAP..."></textarea>
             <label>COURIER_SERVICE</label>
             <select id="orderCourier">
@@ -75,7 +75,7 @@
         </div>
 
         <div class="panel">
-            <label>SELECT_PRODUCT</label>
+            <label>SELECT PRODUCT</label>
             <select id="orderProduct" onchange="updateValuation()">
                 <option value="" disabled selected>PILIH PRODUK</option>
             </select>
@@ -90,9 +90,9 @@
                 <div id="liveTotal" style="font-size: 24px; font-weight: 900; color: var(--m-green);">Rp 0</div>
             </div>
             <div class="btn-group">
-                <button class="btn-main btn-invoice" onclick="generateInvoicePDF()">GENERATE_INVOICE</button>
-                <button class="btn-main btn-label" onclick="printShippingLabel()">DHL_STYLE_LABEL</button>
-                <button class="btn-main" style="background:transparent; color:#444;" onclick="location.reload()">RESET_TERMINAL</button>
+                <button class="btn-main btn-invoice" onclick="generateInvoicePDF()">GENERATE INVOICE</button>
+                <button class="btn-main btn-label" onclick="printShippingLabel()">DHL STYLE LABEL</button>
+                <button class="btn-main" style="background:transparent; color:#444;" onclick="location.reload()">RESET TERMINAL</button>
             </div>
         </div>
     </div>
@@ -147,7 +147,7 @@
         const price = parseInt(select.options[select.selectedIndex]?.dataset.price || 0);
         const name = document.getElementById('custName').value;
 
-        if(!name) return alert("ERR: IDENTITY_REQUIRED");
+        if(!name) return alert("ERR: IDENTITY REQUIRED");
 
         doc.setFillColor(5, 5, 5);
         doc.rect(0, 0, 210, 40, 'F');
@@ -156,7 +156,7 @@
         doc.text("MAGOS ARCHIVE", 15, 25);
         
         doc.setFontSize(8);
-        doc.text("ORDER_ID: " + document.getElementById('orderID').value, 150, 20);
+        doc.text("ORDER ID: " + document.getElementById('orderID').value, 150, 20);
         doc.text("DATE: " + document.getElementById('orderDate').value, 150, 25);
 
         doc.setTextColor(0, 0, 0);
