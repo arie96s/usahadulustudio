@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MAGOS | CONTROL TERMINAL</title>
     
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
 
@@ -13,7 +14,6 @@
         body { background: #000; color: #fff; font-family: 'Inter', sans-serif; margin: 0; padding: 0; }
         .terminal-wrapper { max-width: 1000px; margin: 40px auto; padding: 20px; }
         
-        /* Layout Grid */
         .terminal-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; }
         .panel { background: #080808; border: 1px dashed var(--m-border); padding: 25px; border-radius: 20px; }
         
@@ -22,7 +22,7 @@
         
         input, select, textarea { 
             width: 100%; background: #000; border: 1px solid #1a1a1a; padding: 14px; 
-            color: #fff; border-radius: 8px; font-family: monospace; font-size: 14px; margin-bottom: 15px; box-sizing: border-box;
+            color: #fff; border-radius: 8px; font-family: monospace; font-size: 13px; margin-bottom: 15px; box-sizing: border-box;
         }
 
         .btn-group { display: flex; flex-direction: column; gap: 12px; }
@@ -32,19 +32,18 @@
         }
         .btn-invoice { background: #fff; color: #000; }
         .btn-label { background: transparent; color: #fff; border: 1px solid #333; }
-        .btn-sync { background: var(--m-green); color: #000; margin-bottom: 20px; }
+        .btn-sync { background: var(--m-green); color: #000; margin-bottom: 20px; width: 100%; }
+        .btn-danger { background: #cc0000; color: #fff; margin-top: 10px; }
 
-        /* Mobile Optimization */
         @media (max-width: 768px) {
             .terminal-grid { grid-template-columns: 1fr; }
-            #liveTotal { font-size: 20px !important; text-align: ; }
         }
     </style>
 </head>
 <body>
 
 <div class="terminal-wrapper">
-    <h1>CONTROL CENTER</h1>
+    <h1>MAGOS CONTROL CENTER</h1>
     
     <button class="btn-main btn-sync" onclick="fetchLatestOrder()">FETCH LATEST ORDER DATA</button>
 
@@ -53,20 +52,24 @@
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                 <div>
                     <label>ORDER ID</label>
-                    <input type="text" id="orderID" value="#MG-">
+                    <input type="text" id="orderID" placeholder="#MG-XXXX">
                 </div>
                 <div>
                     <label>DATE</label>
                     <input type="text" id="orderDate" readonly>
                 </div>
             </div>
+            
             <label>CUSTOMER NAME</label>
             <input type="text" id="custName" placeholder="NAMA PENERIMA">
-            <label>PHONE SIGNAL</label>
+            
+            <label>PHONE SIGNAL (WHATSAPP)</label>
             <input type="text" id="custPhone" placeholder="628XXXXXXXX">
+            
             <label>ADDRESS COORDINATES</label>
             <textarea id="custAddr" rows="3" placeholder="ALAMAT LENGKAP..."></textarea>
-            <label>COURIER_SERVICE</label>
+            
+            <label>COURIER SERVICE</label>
             <select id="orderCourier">
                 <option value="JNE REG">JNE REG</option>
                 <option value="J&T EXPRESS">J&T EXPRESS</option>
@@ -75,23 +78,27 @@
         </div>
 
         <div class="panel">
-            <label>SELECT PRODUCT</label>
+            <label>ACTIVE PRODUCT DETECTED</label>
             <select id="orderProduct" onchange="updateValuation()">
                 <option value="" disabled selected>PILIH PRODUK</option>
             </select>
+            
             <label>SIZE</label>
             <select id="orderSize">
                 <option value="S">S</option><option value="M">M</option>
                 <option value="L">L</option><option value="XL">XL</option>
                 <option value="XXL">XXL</option><option value="ALL SIZE">ALL SIZE</option>
             </select>
+            
             <div style="padding: 20px; background: #000; border: 1px solid #111; margin-bottom: 20px; border-radius: 12px;">
-                <label>VALUATION</label>
+                <label>TRANSACTION VALUATION</label>
                 <div id="liveTotal" style="font-size: 24px; font-weight: 900; color: var(--m-green);">Rp 0</div>
             </div>
+
             <div class="btn-group">
                 <button class="btn-main btn-invoice" onclick="generateInvoicePDF()">GENERATE INVOICE</button>
-                <button class="btn-main btn-label" onclick="printShippingLabel()">DHL STYLE LABEL</button>
+                <button class="btn-main btn-label" onclick="printShippingLabel()">GENERATE SHIPPING LABEL</button>
+                <button class="btn-main btn-danger" onclick="clearQueue()">ARCHIVE & CLEAR QUEUE</button>
                 <button class="btn-main" style="background:transparent; color:#444;" onclick="location.reload()">RESET TERMINAL</button>
             </div>
         </div>
@@ -102,29 +109,13 @@
     window.onload = () => {
         document.getElementById('orderDate').value = new Date().toLocaleDateString('id-ID');
         loadDatabase();
-        fetchLatestOrder(); // Otomatis cek data saat dibuka
+        setTimeout(fetchLatestOrder, 500); // Delay sedikit agar database terisi
     };
-
-    // Sinkronisasi data dari checkout.html
-    function fetchLatestOrder() {
-        const logs = JSON.parse(localStorage.getItem('magos_warehouse_logs') || "[]");
-        const pendingData = JSON.parse(localStorage.getItem('magos_pending_checkout') || "{}");
-
-        if (pendingData.name) {
-            document.getElementById('custName').value = pendingData.name.toUpperCase();
-            document.getElementById('custPhone').value = pendingData.phone || "";
-            document.getElementById('custAddr').value = `${pendingData.addr || ""}, ${pendingData.city || ""}, ${pendingData.prov || ""}`.toUpperCase();
-            
-            if (logs.length > 0) {
-                const matchID = logs[0].msg.match(/#MG-[A-Z0-9]+/);
-                if (matchID) document.getElementById('orderID').value = matchID[0];
-            }
-        }
-    }
 
     function loadDatabase() {
         const data = JSON.parse(localStorage.getItem('magos_products_data') || "[]");
         const select = document.getElementById('orderProduct');
+        select.innerHTML = '<option value="" disabled selected>PILIH PRODUK</option>';
         data.forEach(p => {
             const opt = document.createElement('option');
             opt.value = p.id;
@@ -134,41 +125,93 @@
         });
     }
 
+    // FUNGSI SINKRONISASI OTOMATIS
+    function fetchLatestOrder() {
+        const pendingData = JSON.parse(localStorage.getItem('magos_pending_checkout') || "{}");
+
+        if (pendingData.orderID) {
+            // Mapping Identitas
+            document.getElementById('orderID').value = pendingData.orderID;
+            document.getElementById('custName').value = (pendingData.name || "").toUpperCase();
+            document.getElementById('custPhone').value = pendingData.phone || "";
+            document.getElementById('custAddr').value = `${pendingData.addr || ""}, ${pendingData.city || ""}, ${pendingData.prov || ""}`.toUpperCase();
+            
+            // Mapping Kurir Otomatis
+            const courierSelect = document.getElementById('orderCourier');
+            const courierVal = pendingData.courier || "";
+            if (courierVal.includes("JNE")) courierSelect.value = "JNE REG";
+            else if (courierVal.includes("J&T")) courierSelect.value = "J&T EXPRESS";
+            else if (courierVal.includes("DHL")) courierSelect.value = "DHL INT";
+
+            // Mapping Produk Pertama (Otomatisasi)
+            if (pendingData.items && pendingData.items.length > 0) {
+                const firstItem = pendingData.items[0];
+                const productSelect = document.getElementById('orderProduct');
+                
+                for (let i = 0; i < productSelect.options.length; i++) {
+                    if (productSelect.options[i].value === firstItem.id) {
+                        productSelect.selectedIndex = i;
+                        break;
+                    }
+                }
+                document.getElementById('orderSize').value = firstItem.size || "ALL SIZE";
+                updateValuation();
+            }
+            console.log("Terminal: Data Synced Successfully.");
+        } else {
+            console.log("Terminal: No pending order found.");
+        }
+    }
+
     function updateValuation() {
         const select = document.getElementById('orderProduct');
         const price = parseInt(select.options[select.selectedIndex]?.dataset.price || 0);
         document.getElementById('liveTotal').innerText = "Rp " + price.toLocaleString('id-ID');
     }
 
+    function clearQueue() {
+        if(confirm("Arsip pesanan ini dan bersihkan antrian?")) {
+            localStorage.removeItem('magos_pending_checkout');
+            location.reload();
+        }
+    }
+
     function generateInvoicePDF() {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
         const select = document.getElementById('orderProduct');
-        const price = parseInt(select.options[select.selectedIndex]?.dataset.price || 0);
+        if (select.selectedIndex <= 0) return alert("Pilih produk terlebih dahulu!");
+        
+        const price = parseInt(select.options[select.selectedIndex].dataset.price || 0);
         const name = document.getElementById('custName').value;
+        const orderID = document.getElementById('orderID').value;
 
-        if(!name) return alert("ERR: IDENTITY REQUIRED");
-
-        doc.setFillColor(5, 5, 5);
+        // Header
+        doc.setFillColor(0, 0, 0);
         doc.rect(0, 0, 210, 40, 'F');
         doc.setTextColor(255, 255, 255);
         doc.setFontSize(22);
         doc.text("MAGOS ARCHIVE", 15, 25);
         
         doc.setFontSize(8);
-        doc.text("ORDER ID: " + document.getElementById('orderID').value, 150, 20);
+        doc.text("ORDER ID: " + orderID, 150, 20);
         doc.text("DATE: " + document.getElementById('orderDate').value, 150, 25);
 
+        // Body
         doc.setTextColor(0, 0, 0);
+        doc.setFontSize(10);
+        doc.text("BILL TO: " + name.toUpperCase(), 15, 60);
+        doc.text("PHONE: " + document.getElementById('custPhone').value, 15, 65);
+
         doc.autoTable({
-            startY: 90,
-            head: [['ITEM', 'SIZE', 'PRICE', 'QTY', 'TOTAL']],
+            startY: 80,
+            head: [['ITEM DESCRIPTION', 'SIZE', 'UNIT PRICE', 'QTY', 'TOTAL']],
             body: [[select.options[select.selectedIndex].text.split('|')[1], document.getElementById('orderSize').value, "Rp " + price.toLocaleString('id-ID'), "1", "Rp " + price.toLocaleString('id-ID')]],
             theme: 'grid',
             headStyles: { fillColor: [0, 0, 0] }
         });
 
-        doc.save(`INVOICE_MAGOS_${name.replace(/\s+/g, '_')}.pdf`);
+        doc.save(`INVOICE_${orderID}_${name.replace(/\s+/g, '_')}.pdf`);
     }
 
     function printShippingLabel() {
@@ -177,35 +220,39 @@
         const name = document.getElementById('custName').value.toUpperCase();
         const addr = document.getElementById('custAddr').value;
         const orderID = document.getElementById('orderID').value;
+        const courier = document.getElementById('orderCourier').value;
 
-        // DHL Style Branding
+        // Branding Label
         doc.setFillColor(0, 0, 0);
         doc.rect(0, 0, 105, 25, 'F');
         doc.setTextColor(255, 255, 255);
-        doc.setFontSize(18);
+        doc.setFontSize(16);
         doc.text("MAGOS LOGISTICS", 8, 15);
-        doc.setFontSize(24);
-        doc.text("DUM", 80, 17); // Area Code Simulation
+        doc.setFontSize(20);
+        doc.text("DUM", 80, 17); 
 
         doc.setTextColor(0, 0, 0);
         doc.setFontSize(8);
-        doc.text("SHIP TO:", 8, 35);
-        doc.setFontSize(14);
-        doc.text(name, 8, 45);
+        doc.text("COURIER: " + courier, 8, 32);
+        doc.setFontSize(7);
+        doc.text("SHIP TO:", 8, 40);
+        doc.setFontSize(12);
+        doc.text(name, 8, 48);
         doc.setFontSize(9);
-        doc.text(addr, 8, 52, { maxWidth: 90 });
+        doc.text(addr, 8, 55, { maxWidth: 90 });
 
         // Barcode Simulation
         doc.setFillColor(0, 0, 0);
         let startX = 15;
-        for(let i=0; i<30; i++) {
-            let w = Math.random() * 2;
+        for(let i=0; i<25; i++) {
+            let w = Math.random() * 2 + 0.5;
             doc.rect(startX, 110, w, 15, 'F');
-            startX += w + 1;
+            startX += w + 0.8;
         }
-        doc.text(orderID, 52.5, 130, { align: 'center' });
+        doc.setFontSize(10);
+        doc.text(orderID, 52.5, 132, { align: 'center' });
 
-        doc.save(`LABEL_MAGOS_${name.replace(/\s+/g, '_')}.pdf`);
+        doc.save(`LABEL_${orderID}_${name.replace(/\s+/g, '_')}.pdf`);
     }
 </script>
 </body>

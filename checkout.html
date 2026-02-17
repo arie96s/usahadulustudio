@@ -339,23 +339,41 @@
         const email = document.getElementById('coEmail').value;
         const addr = document.getElementById('coAddress').value;
         const city = document.getElementById('coCity').value;
+        const prov = document.getElementById('coProv').value; // Mengambil data Provinsi
         const courierText = document.getElementById('coCourier').options[document.getElementById('coCourier').selectedIndex].text.toUpperCase();
         const totalText = document.getElementById('sumGrandTotal').innerText;
         
         // Buat satu Order ID yang unik
         const orderID = "#MG-" + Math.random().toString(36).substr(2, 4).toUpperCase();
 
-        // --- TAHAP 0: Catat ke Transaction Log Warehouse ---
-        // Ambil data keranjang sebelum dihapus untuk dicatat di log
+        // Ambil data keranjang sebelum dihapus
         const cart = JSON.parse(localStorage.getItem('magos_cart') || "[]");
+
+        // --- TAHAP BARU: Sinkronisasi ke Terminal Control ---
+        const checkoutData = {
+            orderID: orderID,
+            name: name,
+            phone: phone,
+            email: email,
+            addr: addr,
+            city: city,
+            prov: prov,
+            courier: courierText,
+            total: totalText,
+            items: cart // Menyimpan detail item untuk otomatisasi di terminal
+        };
+        // Simpan data untuk dibaca oleh terminal_magos.html
+        localStorage.setItem('magos_pending_checkout', JSON.stringify(checkoutData));
+
+        // --- TAHAP 0: Catat ke Transaction Log Warehouse ---
         let warehouseLogs = JSON.parse(localStorage.getItem('magos_warehouse_logs') || "[]");
         const timeStamp = new Date().toLocaleTimeString();
 
         cart.forEach(item => {
             warehouseLogs.unshift({ 
                 time: timeStamp, 
-                msg: `SALE: ${item.name} [${item.size}] x${item.qty} - ${name.toUpperCase()}`, 
-                type: 'sale' // Memberikan warna hijau di warehouse.html
+                msg: `SALE: ${orderID} | ${item.name} [${item.size}] x${item.qty} - ${name.toUpperCase()}`, 
+                type: 'sale' 
             });
         });
 
@@ -378,7 +396,7 @@
         document.getElementById('resEmailPDF').innerText = email;
 
         // --- TAHAP 3: Eksekusi Pengurangan Stok ---
-        deductStock(); // Mengurangi stok di magos_products_data
+        deductStock(); 
 
         // --- TAHAP 4: Finalisasi Sesi ---
         goToStep(3);
