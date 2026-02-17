@@ -111,13 +111,23 @@
           line-height: 1.4;
       }
 
-      /* Grid System yang Aman */
+      /* --- MAGOS REFINED GRID SYSTEM --- */
 .album-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 400px)); /* Ukuran sedang & stabil */
-    gap: 50px;
-    justify-content: center;
+    /* Menggunakan auto-fill agar jika hanya 1 album, ukurannya tetap terjaga (max 400px) */
+    grid-template-columns: repeat(auto-fill, minmax(300px, 400px)); 
+    gap: 60px 40px; /* Jarak antar baris lebih lebar */
+    justify-content: flex-start; /* Tetap di kiri jika hanya sedikit item */
     margin-top: 40px;
+}
+
+/* Judul Galeri di Kiri Atas */
+.section-header {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* Paksa ke sudut kiri */
+    text-align: left;
+    margin-bottom: 60px;
 }
 
 .album-card {
@@ -125,6 +135,17 @@
     transform: translateY(30px);
     transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s ease;
     cursor: pointer;
+    padding: 15px; /* Memberikan ruang untuk frame luar */
+    border: 1px solid transparent; /* Frame transparan awal */
+    border-radius: 32px;
+    transition: all 0.4s ease;
+}
+
+/* Frame garis tipis saat di-hover */
+.album-card:hover {
+    transform: translateY(-10px);
+    border: 1px solid rgba(255, 255, 255, 0.1); /* Garis tipis pembungkus */
+    background: rgba(255, 255, 255, 0.02);
 }
 
 .album-card.reveal {
@@ -132,14 +153,10 @@
     transform: translateY(0);
 }
 
-.album-card:hover {
-    transform: translateY(-10px);
-}
-
 .album-cover-wrapper {
     width: 100%;
     aspect-ratio: 1 / 1;
-    border-radius: 24px; /* Sudut rounded MAGOS */
+    border-radius: 24px;
     overflow: hidden;
     background: #0b0b0b;
     border: 1px solid #1a1a1a;
@@ -162,7 +179,12 @@
 
 .album-card:hover .album-cover-img {
     filter: grayscale(0%);
-    transform: scale(1.1);
+    transform: scale(1.05);
+}
+
+/* Info & Pembatas Garis Putus-putus */
+.album-info {
+    padding-top: 10px;
 }
 
 .album-title {
@@ -171,23 +193,31 @@
     letter-spacing: 1px;
     text-transform: uppercase;
     color: #fff;
-    margin-bottom: 5px;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+    /* Efek garis putus-putus */
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.2); 
+    display: block;
 }
 
 .album-desc {
     font-size: 10px;
-    color: #444;
+    color: #555;
     text-transform: uppercase;
     line-height: 1.6;
+    letter-spacing: 0.5px;
 }
 
-      /* Responsive Adjustment */
-      @media (max-width: 768px) {
-          .album-grid { 
-              grid-template-columns: repeat(2, 1fr); /* 2 kolom di HP */
-              gap: 15px; 
-          }
-      }
+/* Responsive */
+@media (max-width: 768px) {
+    .album-grid { 
+        grid-template-columns: 1fr; /* 1 kolom di HP agar lebih fokus */
+        gap: 30px; 
+    }
+    .gallery-container {
+        padding: 0 20px;
+    }
+}
   </style>
 </head>
 <body>
@@ -272,6 +302,7 @@ document.addEventListener('mousemove', (e) => {
 async function renderGallery() {
     const grid = document.getElementById('mainAlbumGrid');
     try {
+        // Mengambil data dari path yang sesuai dengan struktur folder Anda
         const response = await fetch('../_data/magos_gallery.json');
         const data = await response.json();
         const albums = data.volumes;
@@ -280,58 +311,46 @@ async function renderGallery() {
         
         albums.forEach((album, index) => {
             const el = document.createElement('div');
+            // Menghapus dataset category karena filter tidak lagi digunakan
             el.className = 'album-card hover-target';
-            el.dataset.category = album.category || 'all'; // Pastikan di JSON ada field category
             
             el.onclick = () => { 
                 window.location.href = `gallery_issue/gallery_issue.html?id=${album.id}`; 
             };
             
+            // Struktur HTML disesuaikan: span untuk judul agar border-bottom (garis putus-putus) rapi
             el.innerHTML = `
                 <div class="album-cover-wrapper">
                     <img src="../${album.cover}" class="album-cover-img" loading="lazy">
                 </div>
                 <div class="album-info">
-                    <h3 class="album-title">${album.title}</h3>
+                    <span class="album-title">${album.title}</span>
                     <p class="album-desc">${album.desc}</p>
                 </div>
             `;
             grid.appendChild(el);
 
-            // FITUR 1: Animasi Stagger (Muncul satu per satu)
+            // FITUR 1: Animasi Stagger (Muncul satu per satu dengan delay)
             setTimeout(() => {
                 el.classList.add('reveal');
             }, 100 * index);
 
-            // FITUR 2: Hover Interaction untuk Cursor
-            el.addEventListener('mouseenter', () => cursor.classList.add('cursor-view-mode'));
-            el.addEventListener('mouseleave', () => cursor.classList.remove('cursor-view-mode'));
+            // FITUR 2: Hover Interaction untuk Cursor custom
+            // Pastikan elemen 'cursor' sudah didefinisikan di luar fungsi ini
+            el.addEventListener('mouseenter', () => {
+                if (typeof cursor !== 'undefined') cursor.classList.add('cursor-view-mode');
+            });
+            el.addEventListener('mouseleave', () => {
+                if (typeof cursor !== 'undefined') cursor.classList.remove('cursor-view-mode');
+            });
         });
     } catch (error) {
         console.error("Gagal memuat galeri:", error);
+        grid.innerHTML = '<p style="color: #444; font-size: 10px;">ERROR_LOAD_DATABASE</p>';
     }
 }
 
-// FITUR 3: Filter System
-function filterGallery(category) {
-    const cards = document.querySelectorAll('.album-card');
-    const buttons = document.querySelectorAll('.filter-btn');
-    
-    // Update active button
-    buttons.forEach(btn => btn.classList.remove('active'));
-    event.target.classList.add('active');
-
-    cards.forEach(card => {
-        if (category === 'all' || card.dataset.category === category) {
-            card.style.display = 'block';
-            setTimeout(() => card.style.opacity = '1', 10);
-        } else {
-            card.style.opacity = '0';
-            setTimeout(() => card.style.display = 'none', 400);
-        }
-    });
-}
-
+// Event listener untuk menjalankan fungsi saat halaman dimuat
 window.addEventListener('load', renderGallery);
     </script>
 </body>
