@@ -39,7 +39,7 @@
 
     .stock-pill { display: inline-flex; flex-direction: column; align-items: center; background: #000; border: 1px solid #222; padding: 5px 10px; border-radius: 6px; margin-right: 5px; }
     .stock-pill .sz { font-size: 9px; color: #555; font-weight: 900; }
-    .stock-pill .qt.low { color: var(--danger); }
+    .stock-pill .qt.low { color: var(--danger); font-weight: 900; }
 
     /* Log System */
     .log-container { background: #050505; border: 1px solid var(--border); border-radius: 12px; padding: 20px; max-height: 300px; overflow-y: auto; }
@@ -47,9 +47,11 @@
     .log-time { color: #444; }
     .log-msg.sale { color: var(--magos-green); }
     .log-msg.manual { color: #aaa; }
+    .log-msg.sync { color: #50a9ff; }
 
-    .btn-action { background: #fff; color: #000; border: none; padding: 8px 15px; border-radius: 6px; font-size: 10px; font-weight: 900; cursor: pointer; }
+    .btn-action { background: #fff; color: #000; border: none; padding: 8px 15px; border-radius: 6px; font-size: 10px; font-weight: 900; cursor: pointer; transition: 0.3s; }
     .btn-action:hover { background: var(--magos-green); }
+    .btn-sync { background: var(--magos-green); color: #000; }
   </style>
 </head>
 <body>
@@ -59,14 +61,14 @@
 <div class="container">
     <div class="header">
         <div class="logo-area">
-    <img src="magos/assets/img/logo-header.svg" alt="MAGOS" class="logo-main" style="filter: none;">
-    
-    <div style="border-left: 1px solid #222; padding-left: 20px;">
-        <div class="system-status"><div class="pulse-dot"></div> SYSTEM ONLINE</div>
-        <h1 style="font-size: 14px; color: #666; margin-top: 5px;">WAREHOUSE PRO V2</h1>
-    </div>
-</div>
+            <img src="magos/assets/img/logo-header.svg" alt="MAGOS" class="logo-main" style="filter: none;">
+            <div style="border-left: 1px solid #222; padding-left: 20px;">
+                <div class="system-status"><div class="pulse-dot"></div> SYSTEM ONLINE</div>
+                <h1 style="font-size: 14px; color: #666; margin-top: 5px;">WAREHOUSE PRO V2</h1>
+            </div>
+        </div>
         <div style="display: flex; gap: 10px;">
+            <button class="btn-action btn-sync hover-target" onclick="syncWithCMS()"><i class="fa-solid fa-rotate"></i> SYNC CMS</button>
             <button class="btn-action hover-target" onclick="copyStockReport()"><i class="fa-solid fa-copy"></i> COPY REPORT</button>
             <button class="btn-action hover-target" onclick="resetStock()" style="background:#ff4444; color:#fff;">HARD RESET</button>
         </div>
@@ -86,8 +88,8 @@
             <h2 id="totalSKU">0</h2>
         </div>
         <div class="stat-card">
-            <p>Top Movement</p>
-            <h2 id="topSize">SIZE: M</h2>
+            <p>Warehouse Status</p>
+            <h2 id="syncStatus" style="font-size: 14px; color: var(--magos-green);">SYNCED</h2>
         </div>
     </div>
 
@@ -116,9 +118,40 @@
 
 <script src="magos/js/magos.js"></script>
 <script>
+    // Fungsi Utama: Ambil data dari CMS JSON
+    async function syncWithCMS() {
+        try {
+            document.getElementById('syncStatus').innerText = "SYNCING...";
+            document.getElementById('syncStatus').style.color = "#ffaa00";
+
+            const response = await fetch('_data/magos_products.json');
+            if (!response.ok) throw new Error("Gagal load database CMS");
+            
+            const cmsData = await response.json();
+            
+            // Simpan data CMS ke localStorage agar dibaca oleh magos.html
+            localStorage.setItem('magos_products_data', JSON.stringify(cmsData.items));
+            
+            addLog("CMS_DATABASE_SYNC_SUCCESS", "sync");
+            loadWarehouse();
+            
+            document.getElementById('syncStatus').innerText = "SYNCED";
+            document.getElementById('syncStatus').style.color = "var(--magos-green)";
+            
+        } catch (error) {
+            console.error(error);
+            document.getElementById('syncStatus').innerText = "SYNC_ERROR";
+            document.getElementById('syncStatus').style.color = "var(--danger)";
+            alert("Gagal sinkronisasi: " + error.message);
+        }
+    }
+
     function loadWarehouse() {
         const productData = JSON.parse(localStorage.getItem('magos_products_data'));
-        if(!productData) return;
+        if(!productData) {
+            syncWithCMS(); // Jika lokal kosong, paksa tarik dari CMS
+            return;
+        }
 
         const tbody = document.getElementById('stockTableBody');
         tbody.innerHTML = '';
@@ -193,19 +226,19 @@
         const data = JSON.parse(localStorage.getItem('magos_products_data'));
         let report = "MAGOS STOCK REPORT\n===================\n";
         data.forEach(p => {
-            report += `${p.name} | S:${p.stock.S} M:${p.stock.M} L:${p.stock.L} XL:${p.stock.XL}\n`;
+            report += `${p.name} | S:${p.stock.S} M:${p.stock.M} L:${p.stock.L} XL:${p.stock.XL} XXL:${p.stock.XXL}\n`;
         });
         navigator.clipboard.writeText(report);
         alert("Report copied to clipboard!");
     }
 
     function resetStock() {
-        if(confirm("DANGEROUS: Restore factory default stocks?")) {
-            localStorage.removeItem('magos_products_data');
-            location.reload();
+        if(confirm("DANGEROUS: Force Re-sync with CMS (Discard manual local edits)?")) {
+            syncWithCMS();
         }
     }
 
+    // Load saat pertama kali buka
     window.onload = loadWarehouse;
 </script>
 
