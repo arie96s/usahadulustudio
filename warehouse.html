@@ -13,6 +13,7 @@
         --magos-green: #25D366; 
         --border: #222; 
         --danger: #ff4444;
+        --terminal-bg: #050505;
     }
     body { background: #000; color: #fff; padding: 40px 20px; font-family: 'Inter', sans-serif; cursor: none; }
     .container { max-width: 1200px; margin: 0 auto; filter: blur(10px); pointer-events: none; transition: 0.5s; }
@@ -34,19 +35,28 @@
     }
     .status-text { font-size: 10px; font-weight: 900; letter-spacing: 2px; color: #444; margin-bottom: 20px; }
 
-    /* Layout Warehouse */
-    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; border-bottom: 1px solid var(--border); padding-bottom: 20px; }
+    /* Layout Warehouse Header Fix */
+    .header { 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: flex-end; 
+        margin-bottom: 40px; 
+        border-bottom: 1px solid var(--border); 
+        padding-bottom: 20px; 
+    }
     .logo-area { display: flex; align-items: center; gap: 20px; }
     .logo-main { height: 60px; filter: none; }
     .system-status { display: flex; align-items: center; gap: 8px; font-size: 10px; color: var(--magos-green); font-weight: 900; }
     .pulse-dot { width: 8px; height: 8px; background: var(--magos-green); border-radius: 50%; animation: pulse 1.5s infinite; }
     @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
 
+    /* Dashboard Stats */
     .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 40px; }
     .stat-card { background: #0b0b0b; border: 1px solid var(--border); padding: 20px; border-radius: 12px; }
     .stat-card p { font-size: 9px; color: #666; text-transform: uppercase; margin-bottom: 5px; font-weight: 700; }
     .stat-card h2 { font-size: 22px; font-weight: 900; }
 
+    /* Main Table */
     .table-container { background: #0b0b0b; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 30px; }
     table { width: 100%; border-collapse: collapse; }
     th { background: #111; text-align: left; padding: 15px; font-size: 10px; text-transform: uppercase; color: #444; }
@@ -56,13 +66,45 @@
     .stock-pill .sz { font-size: 9px; color: #555; font-weight: 900; }
     .stock-pill .qt.low { color: var(--danger); font-weight: 900; }
 
-    .log-container { background: #050505; border: 1px solid var(--border); border-radius: 12px; padding: 20px; max-height: 300px; overflow-y: auto; }
-    .log-item { display: flex; justify-content: space-between; font-size: 11px; padding: 8px 0; border-bottom: 1px solid #111; font-family: monospace; }
-    .log-time { color: #444; }
-    .log-msg.sync { color: #50a9ff; }
+    /* Terminal Log System */
+    .log-container { 
+        background: var(--terminal-bg); 
+        border: 1px solid var(--border); 
+        border-radius: 12px; 
+        padding: 20px; 
+        max-height: 300px; 
+        overflow-y: auto; 
+        font-family: 'Courier New', Courier, monospace;
+        position: relative;
+    }
+    .log-container::before {
+        content: "TERMINAL_OUTPUT";
+        position: absolute; top: 5px; right: 15px;
+        font-size: 8px; color: #222; font-weight: 900;
+    }
+    .log-item { 
+        display: flex; 
+        gap: 15px;
+        font-size: 11px; 
+        padding: 5px 0; 
+        border-bottom: 1px solid #0a0a0a; 
+    }
+    .log-time { color: #333; min-width: 80px; }
+    .log-msg { color: #888; }
+    .log-msg.sync { color: #50a9ff; font-weight: bold; }
+    .log-msg.manual { color: var(--magos-green); }
 
-    .btn-action { background: #fff; color: #000; border: none; padding: 8px 15px; border-radius: 6px; font-size: 10px; font-weight: 900; cursor: pointer; transition: 0.3s; }
-    .btn-action:hover { background: var(--magos-green); }
+    /* Buttons Fix */
+    .nav-actions { display: flex; gap: 15px; align-items: center; }
+    .btn-action { 
+        background: #fff; color: #000; border: none; 
+        padding: 10px 18px; border-radius: 8px; 
+        font-size: 9px; font-weight: 900; 
+        cursor: pointer; transition: 0.3s;
+        display: flex; align-items: center; gap: 8px;
+        text-transform: uppercase;
+    }
+    .btn-action:hover { background: var(--magos-green); transform: translateY(-2px); }
   </style>
 </head>
 <body>
@@ -72,7 +114,7 @@
         <img src="magos/assets/img/magos-icon.svg" style="width: 40px; margin-bottom: 20px;">
         <div class="status-text">WAREHOUSE ACCESS RESTRICTED</div>
         <input type="password" id="pinEntry" class="pin-input" maxlength="4" placeholder="••••">
-        <button class="btn-action hover-target" onclick="checkPin()" style="width: 100%;">AUTHORIZE ACCESS</button>
+        <button class="btn-action hover-target" onclick="checkPin()" style="width: 100%; justify-content: center;">AUTHORIZE ACCESS</button>
         <p id="errorMsg" style="color: var(--danger); font-size: 9px; margin-top: 15px; display: none;">INVALID_AUTHORIZATION_CODE</p>
     </div>
 </div>
@@ -83,18 +125,27 @@
     <div class="header">
         <div class="logo-area">
             <img src="magos/assets/img/logo-header.svg" alt="MAGOS" class="logo-main">
-            <div style="border-left: 1px solid #222; padding-left: 20px;">
+            <div style="border-left: 1px solid #222; padding-left: 20px; margin-left: 5px;">
                 <div class="system-status"><div class="pulse-dot"></div> SYSTEM ONLINE</div>
-                <h1 style="font-size: 14px; color: #666; margin-top: 5px;">WAREHOUSE PRO V2</h1>
+                <h1 style="font-size: 14px; color: #666; margin-top: 5px; letter-spacing: 1px;">WAREHOUSE PRO V2</h1>
             </div>
         </div>
-        <div style="display: flex; gap: 10px;">
-            <button class="btn-action hover-target" onclick="syncWithCMS()" style="background: var(--magos-green);"><i class="fa-solid fa-rotate"></i> SYNC CMS</button>
-            <button class="btn-action hover-target" onclick="copyStockReport()"><i class="fa-solid fa-copy"></i> COPY REPORT</button>
-            <button class="btn-action hover-target" onclick="resetStock()" style="background:#ff4444; color:#fff;"><i class="fa-solid fa-triangle-exclamation"></i> HARD RESET</button>
-            <button class="btn-action hover-target" onclick="logout()" style="background:#333; color:#fff;"><i class="fa-solid fa-lock"></i> LOCK</button>
+        <div class="nav-actions">
+            <button class="btn-action hover-target" onclick="syncWithCMS()" style="background: var(--magos-green);">
+                <i class="fa-solid fa-rotate"></i> SYNC CMS
+            </button>
+            <button class="btn-action hover-target" onclick="copyStockReport()">
+                <i class="fa-solid fa-copy"></i> COPY REPORT
+            </button>
+            <button class="btn-action hover-target" onclick="resetStock()" style="background:#ff4444; color:#fff;">
+                <i class="fa-solid fa-triangle-exclamation"></i> HARD RESET
+            </button>
+            <button class="btn-action hover-target" onclick="logout()" style="background:#333; color:#fff;">
+                <i class="fa-solid fa-lock"></i> LOCK
+            </button>
         </div>
     </div>
+
     <div class="stats-grid">
         <div class="stat-card">
             <p>Inventory Value</p>
@@ -129,8 +180,8 @@
     </div>
 
     <div style="margin-bottom: 10px; display:flex; justify-content:space-between; align-items:center;">
-        <h3 style="font-size: 12px; letter-spacing: 2px; color: #444;">TRANSACTION LOGS</h3>
-        <button class="hover-target" onclick="clearLogs()" style="background:none; border:none; color:#333; font-size:10px; cursor:pointer;">CLEAR LOGS</button>
+        <h3 style="font-size: 10px; font-weight: 900; letter-spacing: 2px; color: #333;">[ SYSTEM_LOGS ]</h3>
+        <button class="hover-target" onclick="clearLogs()" style="background:none; border:none; color:#222; font-size:9px; cursor:pointer; font-weight:900;">TERMINATE_LOGS</button>
     </div>
     <div class="log-container" id="logItems"></div>
 </div>
@@ -138,7 +189,7 @@
 <script src="magos/js/magos.js"></script>
 <script>
     // --- SECURITY CONFIG ---
-    const MASTER_PIN = "1996"; // GANTI PIN KAMU DI SINI
+    const MASTER_PIN = "1996"; 
 
     function checkPin() {
         const input = document.getElementById('pinEntry').value;
@@ -159,7 +210,6 @@
         location.reload();
     }
 
-    // Auto-check session
     window.onload = () => {
         if(sessionStorage.getItem('warehouse_auth') === 'true') {
             document.getElementById('securityOverlay').style.display = 'none';
