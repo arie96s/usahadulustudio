@@ -1122,6 +1122,15 @@ window.addEventListener('load', () => {
             el.style.filter = "grayscale(100%)"; // Membuat petak produk jadi hitam putih
             el.style.opacity = "0.6"; // Sedikit transparan
             el.style.pointerEvents = "auto"; // Tetap bisa diklik untuk lihat detail
+            
+            // Tambahkan badge SOLDOUT jika belum ada
+            if (!el.querySelector('.status-badge')) {
+                const badge = document.createElement('div');
+                badge.className = 'status-badge';
+                badge.innerText = 'SOLD OUT';
+                badge.style = "position: absolute; top: 15px; left: 15px; background: #ff0000; color: #fff; padding: 6px 15px; font-weight: 900; font-size: 11px; z-index: 5;";
+                el.appendChild(badge);
+            }
         }
     });
 }
