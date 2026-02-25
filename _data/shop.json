@@ -1,15 +1,15 @@
 {
   "items": [
     {
-      "link_usd": "#",
-      "badge": "NEW",
-      "img": "img/magos-monster-1.png",
-      "link_idr": "#",
       "title": "MONSTERA",
-      "link_redbubble": "https://www.redbubble.com/shop/ap/178061098",
-      "type": "AI",
       "category": "vector",
-      "priceRaw": 49
+      "type": "AI",
+      "img": "img/magos-monster-1.png",
+      "badge": "NEW",
+      "priceRaw": 28,
+      "link_idr": "#",
+      "link_usd": "#",
+      "link_teepublic": "https://www.teepublic.com/user/magosmarket"
     }
   ]
 }
