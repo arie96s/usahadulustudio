@@ -399,8 +399,8 @@ window.renderShop = function(filter, page = 1) {
         // PERBAIKAN: Langsung menggunakan p.priceRaw karena data sudah dalam format USD (Dolar)
         let displayPrice = "$ " + p.priceRaw.toFixed(2); 
         
-        let buyLink = p.link_redbubble || "#"; 
-        let btnText = siteData.currentLang === 'id' ? "BELI DI REDBUBBLE" : "BUY ON REDBUBBLE";
+        let buyLink = p.link_teepublic || "#"; 
+        let btnText = siteData.currentLang === 'id' ? "BELI DI TEEPUBLIC" : "BUY ON TEEPUBLIC";
 
         const card = document.createElement('div');
         card.className = 'product-card hover-target';

@@ -292,7 +292,7 @@ en: {
     card_3_desc: "Established in Dumai, crafting for the globe. Combining hard work ethics with aesthetics."
     },
 
-    // --- DATA SHOP ASSETS (REDBUBBLE EXCLUSIVE) ---
+    // --- DATA SHOP ASSETS (TEEPUBLIC EXCLUSIVE) ---
     shop: [
         {
             id: 101,
@@ -301,7 +301,7 @@ en: {
             type: 'Adobe Illustrator / EPS',
             priceRaw: 14.99, // Harga dalam USD
             img: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=600&q=80',
-            link_redbubble: 'https://www.redbubble.com/shop/ap/YOUR_PRODUCT_ID_1', // Ganti dengan link Redbubble Anda
+            link_teepublic: 'https://www.teepublic.com/user/magosmarket',
             badge: 'BEST SELLER'
         },
         {
@@ -311,7 +311,7 @@ en: {
             type: 'Photoshop PSD (4K)',
             priceRaw: 9.99, // Harga dalam USD
             img: 'https://images.unsplash.com/photo-1571120038865-c35012e1284a?auto=format&fit=crop&w=600&q=80',
-            link_redbubble: 'https://www.redbubble.com/shop/ap/YOUR_PRODUCT_ID_2',
+            link_teepublic: 'https://www.teepublic.com/user/magosmarket',
             badge: null
         },
         {
@@ -321,7 +321,7 @@ en: {
             type: 'SVG / PNG / AI',
             priceRaw: 12.50, // Harga dalam USD
             img: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80',
-            link_redbubble: 'https://www.redbubble.com/shop/ap/YOUR_PRODUCT_ID_3',
+            link_teepublic: 'https://www.teepublic.com/user/magosmarket',
             badge: 'NEW'
         },
         {
@@ -331,7 +331,7 @@ en: {
             type: 'Canva Template',
             priceRaw: 7.99, // Harga dalam USD
             img: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?auto=format&fit=crop&w=600&q=80',
-            link_redbubble: 'https://www.redbubble.com/shop/ap/YOUR_PRODUCT_ID_4',
+            link_teepublic: 'https://www.teepublic.com/user/magosmarket',
             badge: null
         },
         {
@@ -341,7 +341,7 @@ en: {
             type: 'Photoshop PSD',
             priceRaw: 11.00, // Harga dalam USD
             img: 'https://images.unsplash.com/photo-1556906781-9a412961c28c?auto=format&fit=crop&w=600&q=80',
-            link_redbubble: 'https://www.redbubble.com/shop/ap/YOUR_PRODUCT_ID_5',
+            link_teepublic: 'https://www.teepublic.com/user/magosmarket',
             badge: 'POPULAR'
         },
         {
@@ -351,7 +351,7 @@ en: {
             type: 'TTF / OTF',
             priceRaw: 19.99, // Harga dalam USD
             img: 'https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?auto=format&fit=crop&w=600&q=80',
-            link_redbubble: 'https://www.redbubble.com/shop/ap/YOUR_PRODUCT_ID_6',
+            link_teepublic: 'https://www.teepublic.com/user/magosmarket',
             badge: null
         }   
     ],
