@@ -42,7 +42,7 @@ collections:
   - name: "database"
     label: "Database Website"
     files:
-      # --- SHOP (SINKRONISASI REDBUBBLE & USD) ---
+      # --- SHOP (SINKRONISASI TEEPUBLIC & USD) ---
       - file: "_data/shop.json"
         label: "Produk Shop"
         name: "shop"
@@ -55,10 +55,9 @@ collections:
               - {label: "Kategori", name: "category", widget: "select", options: ["template", "mockup", "vector"]}
               - {label: "Tipe File", name: "type", widget: "string", hint: "Contoh: PSD, AI, EPS"}
               - {label: "Harga (USD)", name: "priceRaw", widget: "number", value_type: "float"}
-              - {label: "Gambar Produk", name: "img", widget: "image"}
-              - {label: "Link Redbubble", name: "link_redbubble", widget: "string", default: "https://www.redbubble.com/people/arie96s/shop"}
+              - {label: "Gambar Produk (Thumbnail)", name: "img", widget: "image"}
+              - {label: "Link TeePublic", name: "link_teepublic", widget: "string", default: "https://www.teepublic.com/user/magosmarket"}
               - {label: "Badge", name: "badge", widget: "select", options: ["NEW", "BEST SELLER", "NONE"], required: false}
-              
       # --- PORTFOLIO ---
       - file: "_data/portfolio.json"
         label: "Portfolio Item"
