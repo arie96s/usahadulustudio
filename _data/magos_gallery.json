@@ -5,17 +5,13 @@
       "id": 1,
       "title": "VOL.1: VINCE TE IPSUM",
       "desc": "2026",
+      "process": "EKSPERIMEN VISUAL YANG MENGGABUNGKAN TEKNIK DARK ART DENGAN KOMPOSISI INDUSTRIAL, TERINSPIRASI DARI ARSITEKTUR PABRIK TERBENGKALAI DAN DISTORSI ANALOG.",
+      "specs": "DEVICE: M1_CHIP | OPTICS: IPHONE 15 | SOFTWARE: ADOBE SUITE | OUTPUT: RAW_DATA",
       "cover": "img/vol-1-vince-te-ipsum.png",
       "images": [
-        {
-          "url": "img/50434.png"
-        },
-        {
-          "url": "img/front-1-magos-logo.jpg"
-        },
-        {
-          "url": "img/magos-keychain-2.png"
-        }
+        { "url": "img/50434.png" },
+        { "url": "img/front-1-magos-logo.jpg" },
+        { "url": "img/magos-keychain-2.png" }
       ]
     }
   ]
