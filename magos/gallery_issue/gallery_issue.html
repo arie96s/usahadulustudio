@@ -20,13 +20,26 @@
       .issue-img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%); transition: 0.5s; }
       .issue-item:hover .issue-img { filter: grayscale(0%); }
 
-      /* Popup Zoom */
-      .img-popup { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); display: none; justify-content: center; align-items: center; z-index: 20000; padding: 20px; }
+      /* --- Fitur Baru: Popup Zoom & Navigasi --- */
+      .img-popup { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); display: none; justify-content: center; align-items: center; z-index: 20000; padding: 20px; user-select: none; }
       .img-popup.active { display: flex; }
-      .img-popup img { max-width: 90%; max-height: 80vh; border-radius: 10px; }
-      .close-popup { position: absolute; top: 30px; right: 30px; color: #fff; font-size: 40px; cursor: pointer; }
+      .img-popup img { max-width: 90%; max-height: 85vh; border-radius: 4px; box-shadow: 0 0 30px rgba(0,0,0,0.5); object-fit: contain; }
       
-      @media (max-width: 768px) { .issue-grid { grid-template-columns: repeat(2, 1fr); } }
+      .close-popup { position: absolute; top: 30px; right: 30px; color: #fff; font-size: 40px; cursor: pointer; z-index: 20002; opacity: 0.5; transition: 0.3s; }
+      .close-popup:hover { opacity: 1; }
+
+      .nav-btn { position: absolute; top: 50%; transform: translateY(-50%); color: #fff; font-size: 40px; cursor: pointer; padding: 40px 20px; z-index: 20001; opacity: 0.3; transition: 0.3s; }
+      .nav-btn:hover { opacity: 1; background: rgba(255,255,255,0.05); }
+      .prev-btn { left: 10px; }
+      .next-btn { right: 10px; }
+
+      .img-counter { position: absolute; bottom: 30px; color: #555; font-family: 'Inter', sans-serif; font-size: 12px; letter-spacing: 2px; }
+      
+      @media (max-width: 768px) { 
+          .issue-grid { grid-template-columns: repeat(2, 1fr); } 
+          .nav-btn { font-size: 30px; padding: 20px 10px; }
+          .img-popup img { max-width: 100%; }
+      }
   </style>
 </head>
 <body>
@@ -50,13 +63,19 @@
             <h1 class="issue-title" id="issueTitle">LOADING...</h1>
             <p class="issue-description" id="issueDesc">Sedang mengambil data dari arsip...</p>
         </div>
-        <div class="issue-grid" id="issueGrid">
-            </div>
+        <div class="issue-grid" id="issueGrid"></div>
     </main>
 
-    <div class="img-popup" id="imgPopup" onclick="this.classList.remove('active')">
-        <span class="close-popup">&times;</span>
-        <img id="popupImg" src="">
+    <div class="img-popup" id="imgPopup">
+        <span class="close-popup" onclick="closePopup()">&times;</span>
+        
+        <div class="nav-btn prev-btn" onclick="changeImage(-1)">&#10094;</div>
+        
+        <img id="popupImg" src="" onclick="event.stopPropagation()">
+        
+        <div class="nav-btn next-btn" onclick="changeImage(1)">&#10095;</div>
+
+        <div class="img-counter" id="imgCounter">0 / 0</div>
     </div>
 
     <footer class="industrial-footer">
@@ -97,47 +116,81 @@
     <script src="../js/magos.js"></script>
 
     <script>
-        function openPopup(url) {
-            const popup = document.getElementById('imgPopup');
-            const popupImg = document.getElementById('popupImg');
-            popupImg.src = url;
-            popup.classList.add('active');
+        let currentImages = [];
+        let currentIndex = 0;
+
+        function openPopup(index) {
+            currentIndex = index;
+            updatePopupContent();
+            document.getElementById('imgPopup').classList.add('active');
+            document.body.style.overflow = 'hidden'; // Disable scroll
         }
+
+        function closePopup() {
+            document.getElementById('imgPopup').classList.remove('active');
+            document.body.style.overflow = 'auto'; // Enable scroll
+        }
+
+        function changeImage(step) {
+            currentIndex += step;
+            if (currentIndex >= currentImages.length) currentIndex = 0;
+            if (currentIndex < 0) currentIndex = currentImages.length - 1;
+            updatePopupContent();
+        }
+
+        function updatePopupContent() {
+            const popupImg = document.getElementById('popupImg');
+            const counter = document.getElementById('imgCounter');
+            
+            popupImg.src = currentImages[currentIndex];
+            counter.innerText = `${currentIndex + 1} / ${currentImages.length}`;
+        }
+
+        // Tutup jika klik area hitam (overlay)
+        document.getElementById('imgPopup').addEventListener('click', function(e) {
+            if (e.target === this) closePopup();
+        });
+
+        // Kontrol Keyboard
+        document.addEventListener('keydown', (e) => {
+            const popup = document.getElementById('imgPopup');
+            if (!popup.classList.contains('active')) return;
+            
+            if (e.key === "ArrowLeft") changeImage(-1);
+            if (e.key === "ArrowRight") changeImage(1);
+            if (e.key === "Escape") closePopup();
+        });
 
         async function loadIssueData() {
-    try {
-        const params = new URLSearchParams(window.location.search);
-        const id = params.get('id');
-        
-        // WAJIB ../../ karena file ini ada di magos/gallery_issue/
-        const response = await fetch('../../_data/magos_gallery.json'); 
-        
-        const data = await response.json();
-        const issue = data.volumes.find(v => v.id == id);
-        
-        if (issue) {
-            document.getElementById('issueTitle').innerText = issue.title;
-            document.getElementById('issueDesc').innerText = issue.desc;
-            document.title = `${issue.title} | MAGOS ARCHIVE`;
+            try {
+                const params = new URLSearchParams(window.location.search);
+                const id = params.get('id');
+                const response = await fetch('../../_data/magos_gallery.json'); 
+                const data = await response.json();
+                const issue = data.volumes.find(v => v.id == id);
+                
+                if (issue) {
+                    document.getElementById('issueTitle').innerText = issue.title;
+                    document.getElementById('issueDesc').innerText = issue.desc;
+                    document.title = `${issue.title} | MAGOS ARCHIVE`;
 
-            const grid = document.getElementById('issueGrid');
-            grid.innerHTML = issue.images.map(img => {
-                // Gunakan ../../ untuk mengakses folder img di root
-                const fullPath = `../../${img.url}`; 
-                return `
-                    <div class="issue-item hover-target" onclick="openPopup('${fullPath}')">
-                        <img src="${fullPath}" class="issue-img" loading="lazy">
-                    </div>
-                `;
-            }).join('');
-        } else {
-            document.getElementById('issueTitle').innerText = "ISSUE TIDAK DITEMUKAN";
+                    // Mapping URL ke array global
+                    currentImages = issue.images.map(img => `../../${img.url}`);
+
+                    const grid = document.getElementById('issueGrid');
+                    grid.innerHTML = currentImages.map((url, index) => `
+                        <div class="issue-item hover-target" onclick="openPopup(${index})">
+                            <img src="${url}" class="issue-img" loading="lazy">
+                        </div>
+                    `).join('');
+                } else {
+                    document.getElementById('issueTitle').innerText = "ISSUE TIDAK DITEMUKAN";
+                }
+            } catch (e) {
+                console.error("Gagal load data:", e);
+                document.getElementById('issueTitle').innerText = "ERROR LOADING";
+            }
         }
-    } catch (e) {
-        console.error("Gagal load data:", e);
-        document.getElementById('issueTitle').innerText = "ERROR LOADING";
-    }
-}
 
         window.addEventListener('load', loadIssueData);
     </script>
