@@ -14,16 +14,21 @@
       .issue-title { font-size: 42px; font-weight: 900; letter-spacing: -2px; text-transform: uppercase; margin: 0; line-height: 1; color: #fff; }
       .issue-description { font-size: 12px; color: #888; margin-top: 15px; max-width: 600px; line-height: 1.6; letter-spacing: 0.5px; }
       
+      /* Fitur Narasi & Specs */
+      .issue-meta-box { margin-top: 40px; display: grid; grid-template-columns: 1.5fr 1fr; gap: 50px; border-top: 1px solid #1a1a1a; padding-top: 30px; max-width: 900px; }
+      .meta-label { display: block; font-size: 10px; font-weight: 900; color: #444; letter-spacing: 2px; margin-bottom: 12px; text-transform: uppercase; }
+      .meta-text { font-size: 13px; color: #aaa; line-height: 1.7; margin: 0; text-transform: uppercase; }
+
       .issue-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 15px; margin-top: 40px; }
       .issue-item { position: relative; border-radius: 12px; overflow: hidden; aspect-ratio: 1/1; cursor: pointer; border: 1px solid #1a1a1a; transition: all 0.4s ease; }
       .issue-item:hover { transform: scale(1.05); border-color: #fff; z-index: 10; }
       .issue-img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%); transition: 0.5s; }
       .issue-item:hover .issue-img { filter: grayscale(0%); }
 
-      /* --- Fitur Baru: Popup Zoom & Navigasi --- */
+      /* Popup & Navigasi */
       .img-popup { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); display: none; justify-content: center; align-items: center; z-index: 20000; padding: 20px; user-select: none; }
       .img-popup.active { display: flex; }
-      .img-popup img { max-width: 90%; max-height: 85vh; border-radius: 4px; box-shadow: 0 0 30px rgba(0,0,0,0.5); object-fit: contain; }
+      .img-popup img { max-width: 90%; max-height: 85vh; border-radius: 4px; object-fit: contain; }
       
       .close-popup { position: absolute; top: 30px; right: 30px; color: #fff; font-size: 40px; cursor: pointer; z-index: 20002; opacity: 0.5; transition: 0.3s; }
       .close-popup:hover { opacity: 1; }
@@ -33,12 +38,12 @@
       .prev-btn { left: 10px; }
       .next-btn { right: 10px; }
 
-      .img-counter { position: absolute; bottom: 30px; color: #555; font-family: 'Inter', sans-serif; font-size: 12px; letter-spacing: 2px; }
+      .img-counter { position: absolute; bottom: 30px; color: #555; font-size: 12px; letter-spacing: 2px; }
       
       @media (max-width: 768px) { 
           .issue-grid { grid-template-columns: repeat(2, 1fr); } 
+          .issue-meta-box { grid-template-columns: 1fr; gap: 25px; }
           .nav-btn { font-size: 30px; padding: 20px 10px; }
-          .img-popup img { max-width: 100%; }
       }
   </style>
 </head>
@@ -46,9 +51,7 @@
     <div id="cursor"></div>
 
     <header>
-        <a href="../../magos.html">
-            <img src="../assets/img/magos-icon.svg" alt="MAGOS" class="logo-header">
-        </a>
+        <a href="../../magos.html"><img src="../assets/img/magos-icon.svg" alt="MAGOS" class="logo-header"></a>
         <nav>
             <a href="../gallery.html" class="hover-target">BACK TO GALLERY</a>
             <a href="../../magos.html" class="hover-target">STUDIO</a>
@@ -61,20 +64,27 @@
     <main class="issue-container">
         <div class="issue-header">
             <h1 class="issue-title" id="issueTitle">LOADING...</h1>
-            <p class="issue-description" id="issueDesc">Sedang mengambil data dari arsip...</p>
+            <p class="issue-description" id="issueDesc">ARCHIVE_LOADING...</p>
+            
+            <div class="issue-meta-box">
+                <div class="meta-section">
+                    <span class="meta-label">THE PROCESS</span>
+                    <p id="issueProcess" class="meta-text">-</p>
+                </div>
+                <div class="meta-section">
+                    <span class="meta-label">COMPOSITION / SPECS</span>
+                    <p id="issueSpecs" class="meta-text">-</p>
+                </div>
+            </div>
         </div>
         <div class="issue-grid" id="issueGrid"></div>
     </main>
 
     <div class="img-popup" id="imgPopup">
         <span class="close-popup" onclick="closePopup()">&times;</span>
-        
         <div class="nav-btn prev-btn" onclick="changeImage(-1)">&#10094;</div>
-        
         <img id="popupImg" src="" onclick="event.stopPropagation()">
-        
         <div class="nav-btn next-btn" onclick="changeImage(1)">&#10095;</div>
-
         <div class="img-counter" id="imgCounter">0 / 0</div>
     </div>
 
@@ -105,7 +115,6 @@
                 <h4 class="f-head">CONNECT</h4>
                 <ul class="f-social">
                     <li><a href="#">INSTAGRAM ↗</a></li>
-                    <li><a href="#">SOCIAL MEDIA <span class="arrow">↗</span></a></li>
                     <li><a href="mailto:contact@magos.com">EMAIL ↗</a></li>
                 </ul>
                 <p class="f-copyright">©2026 | USAHADULU STUDIO</p>
@@ -114,7 +123,6 @@
     </footer>
 
     <script src="../js/magos.js"></script>
-
     <script>
         let currentImages = [];
         let currentIndex = 0;
@@ -123,12 +131,12 @@
             currentIndex = index;
             updatePopupContent();
             document.getElementById('imgPopup').classList.add('active');
-            document.body.style.overflow = 'hidden'; // Disable scroll
+            document.body.style.overflow = 'hidden';
         }
 
         function closePopup() {
             document.getElementById('imgPopup').classList.remove('active');
-            document.body.style.overflow = 'auto'; // Enable scroll
+            document.body.style.overflow = 'auto';
         }
 
         function changeImage(step) {
@@ -141,21 +149,17 @@
         function updatePopupContent() {
             const popupImg = document.getElementById('popupImg');
             const counter = document.getElementById('imgCounter');
-            
             popupImg.src = currentImages[currentIndex];
             counter.innerText = `${currentIndex + 1} / ${currentImages.length}`;
         }
 
-        // Tutup jika klik area hitam (overlay)
         document.getElementById('imgPopup').addEventListener('click', function(e) {
             if (e.target === this) closePopup();
         });
 
-        // Kontrol Keyboard
         document.addEventListener('keydown', (e) => {
             const popup = document.getElementById('imgPopup');
             if (!popup.classList.contains('active')) return;
-            
             if (e.key === "ArrowLeft") changeImage(-1);
             if (e.key === "ArrowRight") changeImage(1);
             if (e.key === "Escape") closePopup();
@@ -172,26 +176,22 @@
                 if (issue) {
                     document.getElementById('issueTitle').innerText = issue.title;
                     document.getElementById('issueDesc').innerText = issue.desc;
+                    document.getElementById('issueProcess').innerText = issue.process || "NO PROCESS RECORDED";
+                    document.getElementById('issueSpecs').innerText = issue.specs || "NO SPECS RECORDED";
                     document.title = `${issue.title} | MAGOS ARCHIVE`;
 
-                    // Mapping URL ke array global
                     currentImages = issue.images.map(img => `../../${img.url}`);
-
                     const grid = document.getElementById('issueGrid');
                     grid.innerHTML = currentImages.map((url, index) => `
                         <div class="issue-item hover-target" onclick="openPopup(${index})">
                             <img src="${url}" class="issue-img" loading="lazy">
                         </div>
                     `).join('');
-                } else {
-                    document.getElementById('issueTitle').innerText = "ISSUE TIDAK DITEMUKAN";
                 }
             } catch (e) {
-                console.error("Gagal load data:", e);
-                document.getElementById('issueTitle').innerText = "ERROR LOADING";
+                console.error("Error:", e);
             }
         }
-
         window.addEventListener('load', loadIssueData);
     </script>
 </body>
