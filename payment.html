@@ -12,16 +12,171 @@
 
     <link rel="stylesheet" href="css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* --- PROFESSIONAL PAYMENT STYLING --- */
+        .payment-methods-accordion {
+            margin-top: 30px;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            overflow: hidden;
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .method-item {
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .method-header {
+            padding: 22px 25px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            font-size: 14px;
+        }
+
+        .method-header:hover {
+            background: rgba(255,255,255,0.08);
+        }
+
+        .method-header i.fa-chevron-down {
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 12px;
+            opacity: 0.5;
+        }
+
+        .method-header.active {
+            background: rgba(255,255,255,0.05);
+            color: #fff;
+        }
+
+        .method-header.active i.fa-chevron-down {
+            transform: rotate(180deg);
+            opacity: 1;
+        }
+
+        .method-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        .method-content.active {
+            max-height: 1000px;
+            padding: 30px 25px;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* --- QRIS GLOW ANIMATION --- */
+        .qr-wrapper {
+            text-align: center;
+        }
+
+        .qr-wrapper img {
+            width: 100%;
+            max-width: 240px;
+            border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 10px;
+            background: #fff;
+            box-shadow: 0 0 0 0 rgba(255,255,255,0);
+            animation: qr-glow 2.5s infinite;
+        }
+
+        @keyframes qr-glow {
+            0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.3); }
+            50% { box-shadow: 0 0 25px 10px rgba(255, 255, 255, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.3); }
+        }
+
+        /* --- BANK CARD STYLING --- */
+        .bank-card {
+            background: rgba(255,255,255,0.05);
+            padding: 25px;
+            border-radius: 15px;
+            text-align: left;
+            position: relative;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .bank-name {
+            font-size: 10px;
+            font-weight: 900;
+            opacity: 0.5;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .acc-number {
+            font-size: 20px;
+            font-weight: 900;
+            letter-spacing: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .copy-btn {
+            background: #fff;
+            color: #000;
+            border: none;
+            padding: 6px 15px;
+            border-radius: 50px;
+            font-size: 10px;
+            font-weight: 900;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .copy-btn:hover { transform: scale(1.05); background: #eee; }
+        .copy-btn:active { transform: scale(0.95); }
+
+        .confirm-btn {
+            width: 100%;
+            margin-top: 25px;
+            padding: 20px;
+            background: #fff;
+            color: #000;
+            border: none;
+            border-radius: 15px;
+            font-weight: 900;
+            font-size: 14px;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: 0.4s;
+            text-transform: uppercase;
+        }
+
+        .confirm-btn:hover {
+            background: #000;
+            color: #fff;
+            box-shadow: 0 0 20px rgba(255,255,255,0.2);
+        }
+
+        .confirm-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
 </head>
 <body>
     <div id="preloader"><img src="img/logo_ambigram.png" class="loader-logo"></div>
     <div id="cursor"></div>
     
     <a href="#" id="waFloatBtn" target="_blank" class="float-wa hover-target">
-    <div class="comic-bubble" id="waBubble"></div>
-
-    <img src="img/wa_sticker.png" alt="Chat WhatsApp" class="wa-sticker-img" id="waImg">
-</a>
+        <div class="comic-bubble" id="waBubble"></div>
+        <img src="img/wa_sticker.png" alt="Chat WhatsApp" class="wa-sticker-img" id="waImg">
+    </a>
 
     <header id="mainHeader">
         <div class="header-left">
@@ -38,15 +193,12 @@
             <li class="menu-item"><a href="services.html" class="menu-title hover-target" data-i18n="nav_services">SERVICES</a></li>
             <li class="menu-item"><a href="portfolio.html" class="menu-title hover-target" data-i18n="nav_portfolio">PORTFOLIO</a></li>
             <li class="menu-item"><a href="testimonial.html" class="menu-title hover-target" data-i18n="nav_testimonials">CLIENTS & REVIEWS</a></li>
-    <li class="menu-item">
-    <a href="magos.html" class="menu-title hover-target" style="color: #ccc; font-size: 20px;">
-        
-        <span data-i18n="nav_collection">OUR COLLECTION</span>
-        
-        <span style="font-size: 10px; border: 1px solid #fff; padding: 2px 6px; vertical-align: middle; border-radius: 50px; margin-left: 8px;">WEB</span>
-    </a>
-</li>
-
+            <li class="menu-item">
+                <a href="magos.html" class="menu-title hover-target" style="color: #ccc; font-size: 20px;">
+                    <span data-i18n="nav_collection">OUR COLLECTION</span>
+                    <span style="font-size: 10px; border: 1px solid #fff; padding: 2px 6px; vertical-align: middle; border-radius: 50px; margin-left: 8px;">WEB</span>
+                </a>
+            </li>
             <li class="menu-item">
                 <a href="shop.html" class="menu-title hover-target" style="color: #ccc; font-size: 20px;">
                     <span data-i18n="nav_shop">ASSET STORE</span> 
@@ -59,15 +211,54 @@
     </div>
 
     <div class="page-content">
-        <h1 class="page-title" data-i18n="payment_title">CHECKOUT & PAYMENT</h1>
+        <h1 class="page-title" data-i18n="payment_title" style="margin-bottom: 10px;">CHECKOUT & PAYMENT</h1>
+        <p style="text-align:center; font-size: 10px; opacity: 0.5; margin-bottom: 30px; letter-spacing: 1px;">SECURE 256-BIT ENCRYPTED GATEWAY</p>
         
         <div style="max-width: 600px; margin: 0 auto;" id="paymentGatewayContainer">
+            
+            <div class="payment-methods-accordion">
+                <div class="method-item">
+                    <div class="method-header" onclick="toggleAccordion('qris-box')">
+                        <span><i class="fa-solid fa-qrcode" style="margin-right:15px;"></i> QRIS / DIGITAL WALLET</span>
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </div>
+                    <div id="qris-box" class="method-content">
+                        <div class="qr-wrapper">
+                            <p style="font-size: 11px; opacity: 0.6; margin-bottom: 20px;">SCAN QRIS USAHADULU VIA DANA, OVO, GOPAY, DLL.</p>
+                            <img src="IMG_7359.jpg" alt="QRIS USAHADULU">
+                            <p style="font-size: 12px; font-weight: 900; margin-top: 20px;">A/N USAHADULU STUDIO</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="method-item">
+                    <div class="method-header" onclick="toggleAccordion('bank-box')">
+                        <span><i class="fa-solid fa-building-columns" style="margin-right:15px;"></i> BANK TRANSFER</span>
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </div>
+                    <div id="bank-box" class="method-content">
+                        <div class="bank-card">
+                            <span class="bank-name">BANK CENTRAL ASIA (BCA)</span>
+                            <div class="acc-number">
+                                <span id="norek">1234567890</span>
+                                <button class="copy-btn" onclick="copyNorek()">COPY</button>
+                            </div>
+                            <p style="font-size: 12px; margin-top: 10px; opacity: 0.8;">A/N USAHADULU STUDIO</p>
+                        </div>
+                    </div>
+                </div>
             </div>
+
+            <button id="confirmBtn" class="confirm-btn hover-target" onclick="processFinal()">
+                KONFIRMASI PEMBAYARAN
+            </button>
+            <p style="text-align:center; font-size: 9px; opacity: 0.4; margin-top: 20px;">
+                <i class="fa-solid fa-shield-halved"></i> PEMBAYARAN ANDA TERLINDUNGI OLEH ENKRIPSI USAHADULU STUDIO
+            </p>
+        </div>
     </div>
 
-    <div id="lightboxModal" class="modal"></div>
-
-     <footer>
+    <footer>
     <div class="footer-container">
         <div class="footer-left">
             <ul class="footer-menu">
@@ -104,16 +295,55 @@
 
     <script src="js/data.js"></script>
     <script src="js/main.js"></script>
+    
     <script>
-        const slides = document.querySelectorAll('.hero-slide');
-        let currentSlide = 0;
-        setInterval(() => {
-            if(slides.length > 0) {
-                slides[currentSlide].classList.remove('active');
-                currentSlide = (currentSlide + 1) % slides.length;
-                slides[currentSlide].classList.add('active');
-            }
-        }, 4000);
+        // LOGIKA ACCORDION
+        function toggleAccordion(id) {
+            const headers = document.querySelectorAll('.method-header');
+            const contents = document.querySelectorAll('.method-content');
+            const target = document.getElementById(id);
+            const clickedHeader = target.previousElementSibling;
+
+            // Tutup semua yang lain
+            contents.forEach(content => {
+                if(content.id !== id) content.classList.remove('active');
+            });
+            headers.forEach(header => {
+                if(header !== clickedHeader) header.classList.remove('active');
+            });
+
+            // Toggle target
+            target.classList.toggle('active');
+            clickedHeader.classList.toggle('active');
+        }
+
+        // FUNGSI COPY NOMOR REKENING
+        function copyNorek() {
+            const norek = document.getElementById('norek').innerText;
+            navigator.clipboard.writeText(norek).then(() => {
+                const btn = document.querySelector('.copy-btn');
+                btn.innerText = "COPIED!";
+                btn.style.background = "#25D366";
+                btn.style.color = "#fff";
+                setTimeout(() => {
+                    btn.innerText = "COPY";
+                    btn.style.background = "#fff";
+                    btn.style.color = "#000";
+                }, 2000);
+            });
+        }
+
+        // FUNGSI PROSES FINAL
+        function processFinal() {
+            const btn = document.getElementById('confirmBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> VERIFYING...';
+            
+            setTimeout(() => {
+                alert("SISTEM: Pembayaran Anda sedang divalidasi. Mohon simpan bukti transfer dan tunggu notifikasi selanjutnya.");
+                window.location.href = 'index.html';
+            }, 2500);
+        }
     </script>
 </body>
 </html>
