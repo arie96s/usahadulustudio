@@ -14,6 +14,56 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
   
   <style>
+    /* Styling Accordion */
+.payment-methods-accordion {
+    margin-top: 20px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+
+.method-item {
+    border-bottom: 1px solid var(--border);
+}
+
+.method-header {
+    padding: 15px 20px;
+    background: rgba(255,255,255,0.02);
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: 0.3s;
+}
+
+.method-header:hover {
+    background: rgba(255,255,255,0.08);
+}
+
+.method-content {
+    max-height: 0;
+    overflow: hidden;
+    /* Menggunakan cubic-bezier agar gerakan buka-tutup lebih elegan/premium */
+    transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s ease;
+    background: rgba(255, 255, 255, 0.03); /* Sedikit lebih terang agar kontras dengan bg utama */
+    text-align: center;
+    padding: 0 20px; /* Padding horizontal tetap ada meski tertutup */
+}
+
+.method-content.active {
+    max-height: 1000px; /* Nilai aman yang lebih besar agar konten panjang (seperti instruksi bank) tidak terpotong */
+    padding-top: 20px;
+    padding-bottom: 30px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05); /* Garis pemisah tipis saat terbuka */
+}
+
+.method-header i.fa-chevron-down {
+    transition: transform 0.3s;
+}
+
+.method-header.active i.fa-chevron-down {
+    transform: rotate(180deg);
+}
     :root { 
         --accent: #fff; 
         --bg-dark: #000; 
@@ -137,18 +187,35 @@
                 <div class="checkout-box step-section" id="step-2">
                     <h3 style="margin-bottom:25px; font-size:14px; text-transform:uppercase;">02. Metode Pembayaran</h3>
                     
-                    <div style="background:#111; padding:20px; border-radius:12px; border:1px solid #222; margin-bottom:20px; text-align:center;">
-                        <p style="font-size:11px; color:#666; margin-bottom:15px;">1. Metode QRIS</p>
-                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=MAGOS_ARCHIVE_PAYMENT" 
-                             alt="QRIS MAGOS" style="width:180px; border-radius:8px; margin-bottom:15px; border:5px solid #fff;">
-                        
-                        <div style="text-align:left; margin-top:20px; border-top:1px solid #222; padding-top:15px;">
-                            <p style="font-size:10px; color:#666;">TRANSFER BANK:</p>
-                            <p style="font-size:14px; font-weight:900; letter-spacing:1px; margin:5px 0;">BANK BCA</p>
-                            <p style="font-size:18px; font-weight:900; color:var(--magos-green);">123-456-7890</p>
-                            <p style="font-size:11px; color:#fff;">A/N MAGOS Archieve</p>
-                        </div>
-                    </div>
+                    <div class="payment-methods-accordion">
+    <div class="method-item">
+        <div class="method-header" onclick="toggleAccordion('qris-detail')">
+            <span><i class="fa-solid fa-qrcode"></i> QRIS </span>
+            <i class="fa-solid fa-chevron-down"></i>
+        </div>
+        <div id="qris-detail" class="method-content">
+            <div class="qr-container">
+                <p>Scan kode QR di bawah ini untuk membayar:</p>
+                <img src="magos/assets/img/QRIS-MAGOS.PNG" alt="QRIS MAGOS" style="width: 100%; max-width: 250px; border-radius: 10px; margin: 15px 0;">
+                <p style="font-size: 12px; opacity: 0.7;">Pastikan nominal sesuai dengan total tagihan.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="method-item">
+        <div class="method-header" onclick="toggleAccordion('transfer-detail')">
+            <span><i class="fa-solid fa-bank"></i> TRANSFER BANK</span>
+            <i class="fa-solid fa-chevron-down"></i>
+        </div>
+        <div id="transfer-detail" class="method-content">
+            <div class="bank-info" style="padding: 15px; text-align: left;">
+                <p><strong>BANK BCA</strong></p>
+                <p>Nomor Rekening: <span style="color: var(--magos-green);">6145150268</span></p>
+                <p>A/N: FAJRI SALAM</p>
+            </div>
+        </div>
+    </div>
+</div>
 
                     <p style="font-size:10px; color:#666; margin-bottom:20px; line-height:1.5;">
                         *Selesaikan pembayaran sebelum waktu habis. Foto bukti transfer untuk dikonfirmasi di tahap berikutnya.
@@ -237,237 +304,261 @@
 
     <script src="magos/js/magos.js"></script>
     <script>
-        let timeLeft = 600; 
-        let timerInterval;
+    let timeLeft = 600; 
+    let timerInterval;
 
-        window.onload = () => {
+    window.onload = () => {
+        // Fitur Proteksi Sold Out: Cek stok sebelum render
+        if (validateCartStock()) {
             renderCheckoutProducts();
             updateSummary();
-        };
+            checkPreSaleStatus();
+        }
+    };
 
-        function renderCheckoutProducts() {
-            const cart = JSON.parse(localStorage.getItem('magos_cart') || "[]");
-            const container = document.getElementById('checkoutProductList');
-            container.innerHTML = '';
-            if(cart.length === 0) {
-                container.innerHTML = '<p style="font-size:11px; color:#444;">Keranjang kosong.</p>';
+    // FUNGSI BARU: Validasi stok untuk mencegah produk Sold Out masuk ke checkout
+    function validateCartStock() {
+        let cart = JSON.parse(localStorage.getItem('magos_cart') || "[]");
+        const initialCount = cart.length;
+        
+        // Filter: Hanya ambil produk yang statusnya BUKAN SOLDOUT
+        cart = cart.filter(item => item.status !== 'SOLDOUT');
+
+        if (cart.length !== initialCount) {
+            alert("SISTEM: Beberapa produk di keranjang Anda telah SOLD OUT dan telah dihapus otomatis.");
+            localStorage.setItem('magos_cart', JSON.stringify(cart));
+            
+            // Jika setelah dihapus keranjang jadi kosong, kembalikan ke katalog
+            if (cart.length === 0) {
+                alert("Keranjang kosong. Kembali ke halaman utama.");
+                window.location.href = 'index.html'; 
+                return false;
+            }
+        }
+        return true;
+    }
+
+    function renderCheckoutProducts() {
+        const cart = JSON.parse(localStorage.getItem('magos_cart') || "[]");
+        const container = document.getElementById('checkoutProductList');
+        container.innerHTML = '';
+        if(cart.length === 0) {
+            container.innerHTML = '<p style="font-size:11px; color:#444;">Keranjang kosong.</p>';
+            return;
+        }
+        cart.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'summary-item';
+            div.style.color = "#eee";
+            div.innerHTML = `<span>${item.name} (x${item.qty})</span><span>${formatMoney(item.price * item.qty)}</span>`;
+            container.appendChild(div);
+        });
+    }
+
+    function updateSummary() {
+        const cart = JSON.parse(localStorage.getItem('magos_cart') || "[]");
+        let subtotal = cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
+        
+        const courier = document.getElementById('coCourier').value;
+        const shippingRates = { 
+            'jne': 30000, 
+            'jnt': 35000, 
+            'dhl': 550000 
+        };
+        
+        let shipping = shippingRates[courier] || 0;
+        let discount = parseFloat(localStorage.getItem('magos_applied_discount') || 0);
+        let grandTotal = (subtotal + shipping) - discount;
+
+        document.getElementById('sumSubtotal').innerText = formatMoney(subtotal);
+        document.getElementById('sumShippingCost').innerText = formatMoney(shipping);
+        document.getElementById('sumGrandTotal').innerText = formatMoney(grandTotal);
+
+        const rowDisc = document.getElementById('rowDiscount');
+        if(discount > 0) {
+            rowDisc.style.display = 'flex';
+            document.getElementById('sumDiscount').innerText = "- " + formatMoney(discount);
+        } else {
+            rowDisc.style.display = 'none';
+        }
+    }
+
+    function formatMoney(num) {
+        return "Rp " + num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+
+    function goToStep(n) {
+        if(n === 2) {
+            // Validasi tambahan sebelum lanjut ke pembayaran: Pastikan tidak ada yang sold out tiba-tiba
+            if(!validateCartStock()) return;
+
+            if(!document.getElementById('coName').value || !document.getElementById('coAddress').value || !document.getElementById('coEmail').value) {
+                alert("Mohon lengkapi data pengiriman dan email.");
                 return;
             }
-            cart.forEach(item => {
-                const div = document.createElement('div');
-                div.className = 'summary-item';
-                div.style.color = "#eee";
-                div.innerHTML = `<span>${item.name} (x${item.qty})</span><span>${formatMoney(item.price * item.qty)}</span>`;
-                container.appendChild(div);
-            });
         }
-
-        function updateSummary() {
-    const cart = JSON.parse(localStorage.getItem('magos_cart') || "[]");
-    let subtotal = cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
-    
-    // Ambil value dari dropdown kurir
-    const courier = document.getElementById('coCourier').value;
-    
-    // Daftar harga ongkir (sesuaikan dengan magos.js)
-    const shippingRates = { 
-        'jne': 30000, 
-        'jnt': 35000, 
-        'dhl': 550000 
-    };
-    
-    let shipping = shippingRates[courier] || 0;
-    let discount = parseFloat(localStorage.getItem('magos_applied_discount') || 0);
-    let grandTotal = (subtotal + shipping) - discount;
-
-    // Update tampilan layar
-    document.getElementById('sumSubtotal').innerText = formatMoney(subtotal);
-    document.getElementById('sumShippingCost').innerText = formatMoney(shipping); // ID Baru
-    document.getElementById('sumGrandTotal').innerText = formatMoney(grandTotal);
-
-    // Tampilkan baris diskon jika ada
-    const rowDisc = document.getElementById('rowDiscount');
-    if(discount > 0) {
-        rowDisc.style.display = 'flex';
-        document.getElementById('sumDiscount').innerText = "- " + formatMoney(discount);
-    } else {
-        rowDisc.style.display = 'none';
+        document.querySelectorAll('.step-section').forEach(s => s.classList.remove('active'));
+        document.getElementById(`step-${n}`).classList.add('active');
+        document.querySelectorAll('.step-dot').forEach((d, idx) => {
+            if(idx < n) d.classList.add('active');
+            else d.classList.remove('active');
+        });
+        window.scrollTo(0,0);
     }
-}
 
-        function formatMoney(num) {
-            return "Rp " + num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    function processPayment() {
+        document.getElementById('timerPop').style.display = 'flex';
+        clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            let m = Math.floor(timeLeft/60); 
+            let s = timeLeft%60;
+            document.getElementById('timer-clock').innerText = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+            if(timeLeft <= 0) { clearInterval(timerInterval); location.reload(); }
+            timeLeft--;
+        }, 1000);
+    }
+
+    function finishPay() {
+        try {
+            clearInterval(timerInterval);
+            document.getElementById('timerPop').style.display = 'none';
+            
+            const name = document.getElementById('coName').value;
+            const phone = document.getElementById('coPhone').value;
+            const email = document.getElementById('coEmail').value;
+            const addr = document.getElementById('coAddress').value;
+            const city = document.getElementById('coCity').value;
+            const prov = document.getElementById('coProv').value; 
+            const courierText = document.getElementById('coCourier').options[document.getElementById('coCourier').selectedIndex].text.toUpperCase();
+            const totalText = document.getElementById('sumGrandTotal').innerText;
+            
+            const orderID = "#MG-" + Math.random().toString(36).substr(2, 4).toUpperCase();
+            const cart = JSON.parse(localStorage.getItem('magos_cart') || "[]");
+
+            const checkoutData = {
+                orderID: orderID,
+                name: name,
+                phone: phone,
+                email: email,
+                addr: addr,
+                city: city,
+                prov: prov,
+                courier: courierText,
+                total: totalText,
+                items: cart 
+            };
+            localStorage.setItem('magos_pending_checkout', JSON.stringify(checkoutData));
+
+            let warehouseLogs = JSON.parse(localStorage.getItem('magos_warehouse_logs') || "[]");
+            const timeStamp = new Date().toLocaleTimeString();
+
+            cart.forEach(item => {
+                warehouseLogs.unshift({ 
+                    time: timeStamp, 
+                    msg: `SALE: ${orderID} | ${item.name} [${item.size}] x${item.qty} - ${name.toUpperCase()}`, 
+                    type: 'sale' 
+                });
+            });
+
+            localStorage.setItem('magos_warehouse_logs', JSON.stringify(warehouseLogs.slice(0, 50)));
+
+            document.getElementById('resID').innerText = orderID;
+            document.getElementById('resName').innerText = name.toUpperCase();
+            document.getElementById('resPhone').innerText = phone;
+            document.getElementById('resAddr').innerText = addr.toUpperCase() + ", " + city.toUpperCase();
+            document.getElementById('resCour').innerText = courierText;
+            document.getElementById('resTotal').innerText = totalText;
+
+            document.getElementById('resIDPDF').innerText = orderID;
+            document.getElementById('resNamePDF').innerText = name;
+            document.getElementById('resPhonePDF').innerText = phone;
+            document.getElementById('resAddrPDF').innerText = addr + ", " + city;
+            document.getElementById('resEmailPDF').innerText = email;
+
+            deductStock(); 
+            goToStep(3);
+            
+            localStorage.removeItem('magos_cart');
+            localStorage.removeItem('magos_applied_discount');
+
+        } catch (e) {
+            console.error("Terjadi kesalahan pada sistem pembayaran:", e);
+            goToStep(3); 
+        }
+    }
+
+    function deductStock() {
+        const cart = JSON.parse(localStorage.getItem('magos_cart') || "[]");
+        const productData = JSON.parse(localStorage.getItem('magos_products_data') || "[]");
+
+        if (!productData || productData.length === 0) {
+            console.warn("Sistem Gudang: Data produk tidak ditemukan.");
+            return;
         }
 
-        function goToStep(n) {
-            if(n === 2) {
-                if(!document.getElementById('coName').value || !document.getElementById('coAddress').value || !document.getElementById('coEmail').value) {
-                    alert("Mohon lengkapi data pengiriman dan email.");
-                    return;
+        cart.forEach(cartItem => {
+            const warehouseItem = productData.find(p => p.id === cartItem.id);
+            if (warehouseItem) {
+                if (warehouseItem.stock && warehouseItem.stock[cartItem.size] !== undefined) {
+                    warehouseItem.stock[cartItem.size] -= cartItem.qty;
+                    if (warehouseItem.stock[cartItem.size] < 0) {
+                        warehouseItem.stock[cartItem.size] = 0;
+                    }
                 }
             }
-            document.querySelectorAll('.step-section').forEach(s => s.classList.remove('active'));
-            document.getElementById(`step-${n}`).classList.add('active');
-            document.querySelectorAll('.step-dot').forEach((d, idx) => {
-                if(idx < n) d.classList.add('active');
-                else d.classList.remove('active');
-            });
-            window.scrollTo(0,0);
-        }
-
-        function processPayment() {
-            document.getElementById('timerPop').style.display = 'flex';
-            clearInterval(timerInterval);
-            timerInterval = setInterval(() => {
-                let m = Math.floor(timeLeft/60); 
-                let s = timeLeft%60;
-                document.getElementById('timer-clock').innerText = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
-                if(timeLeft <= 0) { clearInterval(timerInterval); location.reload(); }
-                timeLeft--;
-            }, 1000);
-        }
-
-        function finishPay() {
-    try {
-        // Hentikan timer pembayaran
-        clearInterval(timerInterval);
-        document.getElementById('timerPop').style.display = 'none';
-        
-        // Ambil data dari input form pengiriman
-        const name = document.getElementById('coName').value;
-        const phone = document.getElementById('coPhone').value;
-        const email = document.getElementById('coEmail').value;
-        const addr = document.getElementById('coAddress').value;
-        const city = document.getElementById('coCity').value;
-        const prov = document.getElementById('coProv').value; // Mengambil data Provinsi
-        const courierText = document.getElementById('coCourier').options[document.getElementById('coCourier').selectedIndex].text.toUpperCase();
-        const totalText = document.getElementById('sumGrandTotal').innerText;
-        
-        // Buat satu Order ID yang unik
-        const orderID = "#MG-" + Math.random().toString(36).substr(2, 4).toUpperCase();
-
-        // Ambil data keranjang sebelum dihapus
-        const cart = JSON.parse(localStorage.getItem('magos_cart') || "[]");
-
-        // --- TAHAP BARU: Sinkronisasi ke Terminal Control ---
-        const checkoutData = {
-            orderID: orderID,
-            name: name,
-            phone: phone,
-            email: email,
-            addr: addr,
-            city: city,
-            prov: prov,
-            courier: courierText,
-            total: totalText,
-            items: cart // Menyimpan detail item untuk otomatisasi di terminal
-        };
-        // Simpan data untuk dibaca oleh terminal_magos.html
-        localStorage.setItem('magos_pending_checkout', JSON.stringify(checkoutData));
-
-        // --- TAHAP 0: Catat ke Transaction Log Warehouse ---
-        let warehouseLogs = JSON.parse(localStorage.getItem('magos_warehouse_logs') || "[]");
-        const timeStamp = new Date().toLocaleTimeString();
-
-        cart.forEach(item => {
-            warehouseLogs.unshift({ 
-                time: timeStamp, 
-                msg: `SALE: ${orderID} | ${item.name} [${item.size}] x${item.qty} - ${name.toUpperCase()}`, 
-                type: 'sale' 
-            });
         });
 
-        // Simpan log terbaru ke localStorage (maksimal 50 entri)
-        localStorage.setItem('magos_warehouse_logs', JSON.stringify(warehouseLogs.slice(0, 50)));
-
-        // --- TAHAP 1: Isi Data Tampilan Visual (Step 3) ---
-        document.getElementById('resID').innerText = orderID;
-        document.getElementById('resName').innerText = name.toUpperCase();
-        document.getElementById('resPhone').innerText = phone;
-        document.getElementById('resAddr').innerText = addr.toUpperCase() + ", " + city.toUpperCase();
-        document.getElementById('resCour').innerText = courierText;
-        document.getElementById('resTotal').innerText = totalText;
-
-        // --- TAHAP 2: Isi Data Tersembunyi untuk Keperluan PDF ---
-        document.getElementById('resIDPDF').innerText = orderID;
-        document.getElementById('resNamePDF').innerText = name;
-        document.getElementById('resPhonePDF').innerText = phone;
-        document.getElementById('resAddrPDF').innerText = addr + ", " + city;
-        document.getElementById('resEmailPDF').innerText = email;
-
-        // --- TAHAP 3: Eksekusi Pengurangan Stok ---
-        deductStock(); 
-
-        // --- TAHAP 4: Finalisasi Sesi ---
-        goToStep(3);
-        
-        // Bersihkan keranjang dan diskon
-        localStorage.removeItem('magos_cart');
-        localStorage.removeItem('magos_applied_discount');
-
-    } catch (e) {
-        console.error("Terjadi kesalahan pada sistem pembayaran:", e);
-        goToStep(3); 
-    }
-}
-
-function deductStock() {
-    // Ambil data keranjang dan data gudang dari localStorage
-    const cart = JSON.parse(localStorage.getItem('magos_cart') || "[]");
-    const productData = JSON.parse(localStorage.getItem('magos_products_data') || "[]");
-
-    // Jika gudang kosong atau tidak ditemukan, hentikan proses
-    if (!productData || productData.length === 0) {
-        console.warn("Sistem Gudang: Data produk tidak ditemukan.");
-        return;
+        localStorage.setItem('magos_products_data', JSON.stringify(productData));
+        console.log("Sistem Gudang: Stok berhasil diperbarui.");
     }
 
-    // Iterasi setiap item di keranjang untuk mengurangi stok di gudang
-    cart.forEach(cartItem => {
-        const warehouseItem = productData.find(p => p.id === cartItem.id);
-        if (warehouseItem) {
-            // Pastikan ukuran (size) tersedia di data stok produk tersebut
-            if (warehouseItem.stock && warehouseItem.stock[cartItem.size] !== undefined) {
-                // Kurangi stok sesuai jumlah yang dibeli (qty)
-                warehouseItem.stock[cartItem.size] -= cartItem.qty;
-                
-                // Pengamanan: Jangan biarkan stok menjadi angka negatif
-                if (warehouseItem.stock[cartItem.size] < 0) {
-                    warehouseItem.stock[cartItem.size] = 0;
-                }
+    function sendWA() {
+        const id = document.getElementById('resID').innerText;
+        const name = document.getElementById('resName').innerText;
+        const total = document.getElementById('resTotal').innerText;
+        const msg = `Halo MAGOS Archive,%0A%0AKONFIRMASI PEMBAYARAN:%0AID ORDER: ${id}%0ANAMA: ${name}%0ATOTAL: ${total}%0A%0ASaya telah melakukan pembayaran via QRIS/Transfer. Mohon verifikasi pesanan saya.`;
+        window.open(`https://wa.me/6282283687565?text=${msg}`, '_blank');
+    }
+
+    function checkPreSaleStatus() {
+        const cartItems = JSON.parse(localStorage.getItem('magos_cart') || "[]");
+        const hasPreSale = cartItems.some(item => item.status === 'PRESALE');
+        const noteContainer = document.getElementById('checkoutNote');
+
+        if (hasPreSale && noteContainer) {
+            noteContainer.innerHTML = `
+                <div style="background: rgba(255,255,255,0.05); border: 1px dashed #fff; padding: 15px; margin-bottom: 20px; border-radius: 12px;">
+                    <p style="font-size: 10px; color: #fff; font-weight: 900; letter-spacing: 1.5px;">
+                        <span class="blink-red">●</span> STATUS: PRE-SALE DETECTED
+                        <br><span style="color:#888; font-weight:400;">ESTIMASI PENGIRIMAN 7-14 HARI SETELAH DROP SELESAI.</span>
+                    </p>
+                </div>
+            `;
+            noteContainer.style.display = 'block';
+        }
+    }
+
+    function toggleAccordion(id) {
+        const contents = document.querySelectorAll('.method-content');
+        const headers = document.querySelectorAll('.method-header');
+        const target = document.getElementById(id);
+        const clickedHeader = target.previousElementSibling;
+
+        contents.forEach(content => {
+            if (content.id !== id) {
+                content.classList.remove('active');
             }
-        }
-    });
+        });
+        
+        headers.forEach(header => {
+            if (header !== clickedHeader) {
+                header.classList.remove('active');
+            }
+        });
 
-    // Simpan kembali data stok terbaru ke localStorage (Gudang Utama)
-    localStorage.setItem('magos_products_data', JSON.stringify(productData));
-    console.log("Sistem Gudang: Stok berhasil diperbarui.");
-}
-
-        function sendWA() {
-            const id = document.getElementById('resID').innerText;
-            const name = document.getElementById('resName').innerText;
-            const total = document.getElementById('resTotal').innerText;
-            const msg = `Halo MAGOS Archive,%0A%0AKONFIRMASI PEMBAYARAN:%0AID ORDER: ${id}%0ANAMA: ${name}%0ATOTAL: ${total}%0A%0ASaya telah melakukan pembayaran via QRIS/Transfer. Mohon verifikasi pesanan saya.`;
-            window.open(`https://wa.me/6282283687565?text=${msg}`, '_blank');
-        }
-        function checkPreSaleStatus() {
-    const cartItems = JSON.parse(localStorage.getItem('magos_cart') || "[]");
-    const hasPreSale = cartItems.some(item => item.status === 'PRESALE');
-    const noteContainer = document.getElementById('checkoutNote');
-
-    if (hasPreSale && noteContainer) {
-        noteContainer.innerHTML = `
-            <div style="background: rgba(255,255,255,0.05); border: 1px dashed #fff; padding: 15px; margin-bottom: 20px; border-radius: 12px;">
-                <p style="font-size: 10px; color: #fff; font-weight: 900; letter-spacing: 1.5px;">
-                    <span class="blink-red">●</span> STATUS: PRE-SALE DETECTED
-                    <br><span style="color:#888; font-weight:400;">ESTIMASI PENGIRIMAN 7-14 HARI SETELAH DROP SELESAI.</span>
-                </p>
-            </div>
-        `;
-        noteContainer.style.display = 'block';
+        target.classList.toggle('active');
+        clickedHeader.classList.toggle('active');
     }
-}
-    </script>
+</script>
 </body>
 </html>
